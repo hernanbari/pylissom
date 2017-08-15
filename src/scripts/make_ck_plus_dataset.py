@@ -15,10 +15,10 @@ import numpy as np
 class CKPlusCondenser(object):
     def __init__(self, original_dataset_path, condensed_dataset_path):
         if os.path.exists(condensed_dataset_path):
-            print 'Condensed Dataset detected.'
-            print 'Removing it.'
+            print('Condensed Dataset detected.')
+            print('Removing it.')
             shutil.rmtree(condensed_dataset_path)
-        print 'Copying original dataset to new condensed dataset path.'
+        print('Copying original dataset to new condensed dataset path.')
         shutil.copytree(original_dataset_path, condensed_dataset_path)
 
         self.image_path = os.path.join(condensed_dataset_path,
@@ -27,29 +27,29 @@ class CKPlusCondenser(object):
                                        'Emotion_labels')
 
     def run(self):
-        print '\nCondensing CK+ Dataset: '
+        print('\nCondensing CK+ Dataset: ')
         self.condense_dataset()
-        print '\nCondensed CK+ Dataset Statistics: '
+        print('\nCondensed CK+ Dataset Statistics: ')
         self.compute_dataset_statistics()
 
     def condense_dataset(self):
         # Get list of folders with no label file
         no_label_list = self.find_empty_folders(self.label_path)
-        print '%d empty sequences to be removed.' % len(no_label_list)
+        print('%d empty sequences to be removed.' % len(no_label_list))
 
         # Remove image sequence if label folder exists but is empty
-        print '\nRemoving image sequence folders that have no label.'
+        print('\nRemoving image sequence folders that have no label.')
         self.remove_image_sequences(self.image_path,
                                     self.label_path,
                                     no_label_list)
 
         # Remove empty folders in label directory
-        print '\nRemoving empty label folders.'
+        print('\nRemoving empty label folders.')
         self.remove_folders_in_list(no_label_list)
 
         # Keep only the first and last three images in each sequence
-        print '\nKeeping only the ' \
-            'last four images in each sequence.'
+        print('\nKeeping only the '
+              'last four images in each sequence.')
         self.reduce_all_image_sequences(self.image_path)
 
     def find_empty_folders(self, label_path):
@@ -95,7 +95,7 @@ class CKPlusCondenser(object):
                     seq_path = os.path.join(image_path, subj, seq)
                     mismatched_image_paths.append(seq_path)
 
-        print 'There are %d mismatched files.' % len(mismatched_image_paths)
+        print('There are %d mismatched files.' % len(mismatched_image_paths))
         return mismatched_image_paths
 
     def remove_folders_in_list(self, folder_list):
@@ -107,7 +107,7 @@ class CKPlusCondenser(object):
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
             else:
-                print 'Folder %s does not exist' % (folder_path)
+                print('Folder %s does not exist' % (folder_path))
             time.sleep(0.1)
 
             parent_path, ext = os.path.split(folder_path)
@@ -126,7 +126,7 @@ class CKPlusCondenser(object):
         subj_folder_list = sorted(os.listdir(image_path))
         for subj_folder in subj_folder_list:
             subj_path = os.path.join(image_path, subj_folder)
-            print 'Processing: ', subj_path
+            print('Processing: ', subj_path)
             seq_folder_list = sorted(os.listdir(subj_path))
             for seq_folder in seq_folder_list:
                 seq_path = os.path.join(subj_path, seq_folder)
@@ -143,7 +143,7 @@ class CKPlusCondenser(object):
                 os.remove(os.path.join(path, f))
 
         if len(file_list) < 4:
-            print 'Folder contains < 4 files. No reduction needed.'
+            print('Folder contains < 4 files. No reduction needed.')
             return
 
         remove_list = file_list[0:-3] # la primera y las ultimas 3 si hago:[1:-3], las ult 4 son [0,-4]
@@ -171,27 +171,27 @@ class CKPlusCondenser(object):
 
     def compute_dataset_statistics(self):
         num_subjects, num_sequences = self.count_num_sequences(self.image_path)
-        print 'Total Number of Image Sequences: %d' % num_sequences
+        print('Total Number of Image Sequences: %d' % num_sequences)
 
         _, num_label_sequences = self.count_num_sequences(self.label_path)
-        print 'Total Number of Label Sequences: %d' % num_label_sequences
+        print('Total Number of Label Sequences: %d' % num_label_sequences)
 
         # Number of sequences that have corresponding labels in Emotion_labels
         glob_label_path = os.path.join(self.label_path, '*/*/*.txt')
         num_label_files = len(glob.glob(glob_label_path))
-        print 'Number of sequences with correponding label ' \
-            '.txt file: %d' % num_label_files
+        print('Number of sequences with correponding label '
+              '.txt file: %d' % num_label_files)
 
-        print 'Total Number of Subjects: %d' % num_subjects
+        print('Total Number of Subjects: %d' % num_subjects)
 
         glob_image_path = os.path.join(self.image_path, '*/*/*.png')
         num_images_total = len(glob.glob(glob_image_path))
-        print 'Number of image files: %d' % num_images_total
+        print('Number of image files: %d' % num_images_total)
 
 
 class CKPlusFaceCropper(object):
     def __init__(self, input_path):
-        print '\nDetecting and Cropping Faces'
+        print('\nDetecting and Cropping Faces')
         self.input_path = input_path
         self.image_path = os.path.join(input_path, 'cohn-kanade-images')
 
@@ -223,7 +223,7 @@ class CKPlusFaceCropper(object):
             np.save(os.path.join(image_file_path), I)
             #Agregado para borrar los png
             os.remove(image_file_path)
-        print 'Missed Faces: ', sorted(missed_faces)
+        print('Missed Faces: ', sorted(missed_faces))
         missed_faces_file_path = os.path.join(self.input_path,
                                               'missed_faces.txt')
         self.write_list_to_file(missed_faces_file_path, missed_faces)
@@ -269,7 +269,7 @@ class CKPlusFaceCropper(object):
                                          max_size_scalar=0.8)
             faces = face_detector.detect_faces(I)
             if len(faces) == 0:
-                print 'Missed the face!'
+                print('Missed the face!')
                 return I, success_flag
 
         success_flag = True
@@ -287,7 +287,7 @@ class CKPlusNumpyFileGenerator(object):
         self.label_path = os.path.join(save_path, 'Emotion_labels')
 
     def run(self):
-        print '\nSaving CK+ images and labels to .npy files.'
+        print('\nSaving CK+ images and labels to .npy files.')
 
         # Get number of images
 #        glob_image_path = os.path.join(self.image_path, '*/*/*.png')
@@ -308,8 +308,8 @@ class CKPlusNumpyFileGenerator(object):
         X = numpy.zeros((num_samples, image_shape[2],
                          image_shape[0], image_shape[1]), dtype='float32')
         y = numpy.zeros((num_samples), dtype='int32')
-        print y
-        print "Numero de muestras", num_samples
+        print(y)
+        print("Numero de muestras", num_samples)
         all_subjs = numpy.zeros((num_samples), dtype='int32')
 
         total_sample_count = 0
@@ -317,7 +317,7 @@ class CKPlusNumpyFileGenerator(object):
 
         # For each subject folder:
         for i, subj in enumerate(subj_list):
-            print 'Subject: %d - %s' % (i, subj)
+            print('Subject: %d - %s' % (i, subj))
 
             # For each individual sequence in the subject folder:
             seq_path = os.path.join(all_images_path, subj)
@@ -326,7 +326,7 @@ class CKPlusNumpyFileGenerator(object):
                 # Get the images of the sequence and the emotion label
                 images = self.read_images(all_images_path, subj, seq,
                                           image_shape)
-                print "todas las imagenes: {}".format(images.shape)
+                print("todas las imagenes: {}".format(images.shape))
                 label = self.read_label(all_labels_path, subj, seq)
                 #Para ponerle 0 como etiqueta a la primera imagen (la neutra)
                 #label_vec = numpy.array([0, label, label, label])
@@ -334,19 +334,19 @@ class CKPlusNumpyFileGenerator(object):
                 label_vec = numpy.array([label, label, label, label])
                 #Ultimas 3 imagenes
                 label_vec = numpy.array([label, label, label])
-                print len(images)
-                print seq_path
+                print(len(images))
+                print(seq_path)
                 index_slice = slice(total_sample_count,
                                     total_sample_count+len(images))
                 X[index_slice] = images
-                print label_vec
-                print y[index_slice]
-                print y
+                print(label_vec)
+                print(y[index_slice])
+                print(y)
                 y[index_slice] = label_vec
                 all_subjs[index_slice] = i
                 total_sample_count += len(images)
 
-        print X
+        print(X)
         return X, y, all_subjs
 
     def read_images(self, all_images_path, subj, seq, image_shape):
@@ -378,21 +378,21 @@ class CKPlusNumpyFileGenerator(object):
         return label
 
     def make_folds(self, subjs, num_folds=10):
-        print '\nMaking the folds.'
+        print('\nMaking the folds.')
         folds = numpy.zeros((subjs.shape), dtype='int32')
         num_subj = len(numpy.unique(subjs))
-        print num_subj
+        print(num_subj)
 
         for i in range(num_subj): #range(num_folds):
             subjs_in_fold = numpy.arange(i, num_subj, 10)
-            print 'Subjs in fold %d: %s' % (i, subjs_in_fold)
+            print('Subjs in fold %d: %s' % (i, subjs_in_fold))
 
             indices = numpy.hstack(
                 [numpy.where(subjs == j)[0] for j in subjs_in_fold])
             folds[indices] = i
 
-        print 'Number of samples/fold: %s' % numpy.histogram(folds,
-                                                             bins=10)[0]
+        print('Number of samples/fold: %s' % numpy.histogram(folds,
+                                                             bins=10)[0])
 
         return folds
 
@@ -475,4 +475,4 @@ if __name__ == "__main__":
     numpy_file_generator = CKPlusNumpyFileGenerator(save_path)
     numpy_file_generator.run()
 
-    print '\nSuccessfully pre-processed the Extended Cohn-Kanade Dataset!'
+    print('\nSuccessfully pre-processed the Extended Cohn-Kanade Dataset!')

@@ -1,10 +1,10 @@
-./raw_sync.sh
-fswatch --batch-marker=EOF -xn . | while read file event; do
+./sync_files/raw_sync.sh
+fswatch --batch-marker=EOF -xrn . | while read file event; do
     if [ $file = "EOF" ]; then
        if [ ${#list[@]} -gt 0 ]; then
            echo TRIGGER
            echo Files: "${list[@]}"
-           ./raw_sync.sh
+           ./sync_files/raw_sync.sh
            list=()
        fi
     else
