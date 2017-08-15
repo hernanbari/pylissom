@@ -1,0 +1,16 @@
+./raw_sync.sh
+fswatch --batch-marker=EOF -xn . | while read file event; do
+    if [ $file = "EOF" ]; then
+       if [ ${#list[@]} -gt 0 ]; then
+           echo TRIGGER
+           echo Files: "${list[@]}"
+           ./raw_sync.sh
+           list=()
+       fi
+    else
+       #echo $file $event
+       if [ ${file: -4} == ".sql" ] || [ ${file: -5} == ".html" ] || [ ${file: -3} == ".py" ] || [ ${file: -5} == ".yaml" ]; then
+           list+=($file)
+       fi
+    fi
+done
