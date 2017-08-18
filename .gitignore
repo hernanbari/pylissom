@@ -2,3 +2,6 @@
 data/
 files
 raw_sync_path
+*log/
+*logs/
+*input_data
