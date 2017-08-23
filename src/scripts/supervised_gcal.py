@@ -1,6 +1,3 @@
-import tensorflow as tf
-from python.layers.core import dense
-
 # Ideas implementativas:
 # 0. Usar tf.contrib.layers.fully_connected / tf.layers.dense para las LGN, pasandole funciones custom de activaciones
 #   e inicializacion, con trainable false para las LGN
@@ -9,8 +6,6 @@ from python.layers.core import dense
 # 3. Buscar funcion gaussiana ya implementada q diga cual es el valor de y dado gaussiana con centro x, checkear topo.
 #   Esto sirve para pesos de LGN
 # 4. Encontrar funcion q te diga como se conenectan las layers entre si, checkear topo
-
-
 # Detalles:
 # - Hay constantes de normalizacion por todos lados del libro/paper q no los anote
 # - Entender mejor settling steps
@@ -44,7 +39,6 @@ from python.layers.core import dense
 # 8. Hebbian rule con normalizacion (checkear pargina 77 que significa actividad presinaptica en el codigo)
 #    CREO Q ES TIPO, INPUT VS OUTPUT, en gcal queda mas claro
 # 9. connection death de lateral connections despues de cierto t_d debajo de un threshold
-
 ##########
 # GCAL
 ##########
@@ -72,35 +66,78 @@ from python.layers.core import dense
 # Learning
 # 4. Misma q lissom
 
-def on_weights():
-    weights = 1
-    return weights
+
+import tensorflow as tf
+
+from src.supervised_gcal.cortex_layer import LissomCortexLayer
+from src.supervised_gcal.hebbian_optimizer import HebbianOptimizer
+from src.supervised_gcal.lgn_layer import LissomLGNLayer
 
 
-def off_weights():
-    weights = 1
-    return weights
+def inference_lgn(image, lgn_shape, sigma_center, sigma_sourround):
+    on_layer = LissomLGNLayer(image.shape, lgn_shape, sigma1=sigma_center, sigma2=sigma_sourround, name='on')
+    off_layer = LissomLGNLayer(image.shape, lgn_shape, sigma2=sigma_center, sigma1=sigma_sourround, name='off')
+    on = on_layer.activation(image)
+    off = off_layer.activation(image)
+    return on, off
 
 
-def inference_lgn(image, weights):
-    lgn = 1
-    return lgn
-
-
-def inference_cortex(on, off):
-    v1 = 1
+def inference_cortex(on, off, v1_shape):
+    v1_layer = LissomCortexLayer(on.shape, v1_shape, name='v1')
+    v1 = v1_layer.activation((on, off))
     return v1
 
 
 def inference(image):
-    on = inference_lgn(image, on_weights())
-    off = inference_lgn(image, off_weights())
-    v1 = inference_cortex(on, off)
+    on, off = inference_lgn(image, image.shape, 1, 1)
+    v1 = inference_cortex(on, off, image.shape)
     # Multi layer perceptron
     with tf.name_scope('multi_layer_perceptron'):
         hidden1 = tf.contrib.layers.fully_connected(inputs=v1, num_outputs=25,
                                                     scope='hidden1')
         logits = tf.contrib.layers.fully_connected(hidden1, num_outputs=10, activation_fn=tf.identity,
                                                    scope='softmax_linear')
-
     return logits
+
+
+def training(loss):
+    optimizer = HebbianOptimizer()
+    train_op = optimizer.minimize(loss)
+    return train_op
+
+
+def loss(logits, labels):
+    """Calculates the loss from the logits and the labels.
+
+  Args:
+    logits: Logits tensor, float - [batch_size, NUM_CLASSES].
+    labels: Labels tensor, int32 - [batch_size].
+
+  Returns:
+    loss: Loss tensor of type float.
+  """
+    labels = tf.to_int64(labels)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        labels=labels, logits=logits, name='xentropy')
+    return tf.reduce_mean(cross_entropy, name='xentropy_mean')
+
+
+def evaluation(logits, labels):
+    """Evaluate the quality of the logits at predicting the label.
+
+  Args:
+    logits: Logits tensor, float - [batch_size, NUM_CLASSES].
+    labels: Labels tensor, int32 - [batch_size], with values in the
+      range [0, NUM_CLASSES).
+
+  Returns:
+    A scalar int32 tensor with the number of examples (out of batch_size)
+    that were predicted correctly.
+  """
+    # For a classifier model, we can use the in_top_k Op.
+    # It returns a bool tensor with shape [batch_size] that is true for
+    # the examples where the label is in the top k (here k=1)
+    # of all logits for that example.
+    correct = tf.nn.in_top_k(logits, labels, 1)
+    # Return the number of true entries.
+    return tf.reduce_sum(tf.cast(correct, tf.int32))
