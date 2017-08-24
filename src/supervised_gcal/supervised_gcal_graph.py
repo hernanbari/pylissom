@@ -69,9 +69,9 @@
 
 import tensorflow as tf
 
-from src.supervised_gcal.cortex_layer import LissomCortexLayer
-from src.supervised_gcal.hebbian_optimizer import HebbianOptimizer
-from src.supervised_gcal.lgn_layer import LissomLGNLayer
+from src.gcal_model.cortex_layer import LissomCortexLayer
+from src.gcal_model.hebbian_optimizer import HebbianOptimizer
+from src.gcal_model.lgn_layer import LissomLGNLayer
 
 
 def inference_lgn(image, lgn_shape, sigma_center, sigma_sourround):
@@ -88,9 +88,7 @@ def inference_cortex(on, off, v1_shape):
     return v1
 
 
-def inference(image):
-    on, off = inference_lgn(image, image.shape, 1, 1)
-    v1 = inference_cortex(on, off, image.shape)
+def inference_classification(v1):
     # Multi layer perceptron
     with tf.name_scope('multi_layer_perceptron'):
         hidden1 = tf.contrib.layers.fully_connected(inputs=v1, num_outputs=25,
@@ -100,10 +98,36 @@ def inference(image):
     return logits
 
 
-def training(loss):
+def inference(image):
+    on, off = inference_lgn(image, image.shape, 1, 1)
+    v1 = inference_cortex(on, off, image.shape)
+    logits = inference_classification(v1)
+    # Maybe a tf.tuple??
+    return v1, logits
+
+
+def training_cortex(v1):
     optimizer = HebbianOptimizer()
-    train_op = optimizer.minimize(loss)
+    train_op = optimizer.minimize(v1)
     return train_op
+
+
+def training_classification(loss, learning_rate):
+    # Create the gradient descent optimizer with the given learning rate.
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    # Create a variable to track the global step.
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    # Use the optimizer to apply the gradients that minimize the loss
+    # (and also increment the global step counter) as a single training step.
+    train_op = optimizer.minimize(loss, global_step=global_step)
+    return train_op
+
+
+def training(v1, loss, learning_rate):
+    train_op_v1 = training_cortex(v1)
+    train_op_classification = training_classification(loss, learning_rate)
+    # Maybe a tf.tuple??
+    return train_op_v1, train_op_classification
 
 
 def loss(logits, labels):

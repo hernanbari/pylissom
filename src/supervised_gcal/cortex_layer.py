@@ -31,7 +31,7 @@
 
 import tensorflow as tf
 
-from src.supervised_gcal.layer import Layer
+from src.gcal_model.layer import Layer
 
 
 class LissomCortexLayer(Layer):

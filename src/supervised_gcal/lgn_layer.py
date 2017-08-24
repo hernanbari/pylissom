@@ -29,7 +29,7 @@
 
 import tensorflow as tf
 
-from src.supervised_gcal.layer import Layer
+from src.gcal_model.layer import Layer
 
 
 def gaussian(x, y, mu_x, mu_y, sigma):
