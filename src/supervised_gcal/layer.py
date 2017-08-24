@@ -6,6 +6,7 @@ class Layer(object):
         self.self_shape = self_shape
         self.input_shape = input_shape
         self.name = name
+        self.weights_shape = [self.input_shape.num_elements(), self.self_shape.num_elements()]
 
     def setup(self):
         with tf.name_scope(self.name):

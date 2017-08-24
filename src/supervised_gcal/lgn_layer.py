@@ -27,18 +27,21 @@
 # Learning
 # 2. Ninguno
 
+import numpy as np
 import tensorflow as tf
 
-from src.gcal_model.layer import Layer
+from src.supervised_gcal.layer import Layer
 
 
 def gaussian(x, y, mu_x, mu_y, sigma):
-    raise NotImplementedError
+    num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
+    den = 2 * np.power(sigma, 2)
+    return np.float32(np.exp(-np.divide(num, den)))
 
 
 class LissomLGNLayer(Layer):
     def __init__(self, input_shape, self_shape, sigma1, sigma2, name):
-        super(LissomLGNLayer).__init__(input_shape, self_shape, name)
+        super().__init__(input_shape, self_shape, name)
         self.sigma2 = sigma2
         self.sigma1 = sigma1
         self._setup()
@@ -47,12 +50,16 @@ class LissomLGNLayer(Layer):
         sigma1_weights_matrix = self._gaussian_weights(self.sigma1)
         sigma2_weights_matrix = self._gaussian_weights(self.sigma2)
         diff_of_gaussians = sigma1_weights_matrix - sigma2_weights_matrix
-        self.weights = tf.constant(diff_of_gaussians, name='weights')
+        self.weights = tf.constant(diff_of_gaussians, dtype=tf.float32, name='weights')
         return
 
     def _gaussian_weights(self, sigma):
-        return tf.np.fromfunction(function=lambda x, y, mu_x, mu_y: gaussian(x, y, mu_x, mu_y, sigma),
-                                  shape=self.input_shape + self.self_shape)
+        weights_shape_4d = tuple(self.input_shape.concatenate(self.self_shape).as_list())
+        weights_matrix = np.fromfunction(function=lambda x, y, mu_x, mu_y: gaussian(x, y, mu_x, mu_y, sigma),
+                                         shape=weights_shape_4d, dtype=np.float32)
+        # TODO: Check this reshape, not tested, behaviour not thought trough
+        reshaped_weights_matrix = np.reshape(weights_matrix, self.weights_shape)
+        return reshaped_weights_matrix
 
-    def _activation(self, image):
-        return tf.nn.relu(tf.matmul(image, self.weights), name='activation')
+    def _activation(self, images):
+        return tf.nn.relu(tf.matmul(images, self.weights), name='activation')

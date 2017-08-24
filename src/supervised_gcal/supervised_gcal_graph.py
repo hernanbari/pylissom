@@ -69,21 +69,23 @@
 
 import tensorflow as tf
 
-from src.gcal_model.cortex_layer import LissomCortexLayer
-from src.gcal_model.hebbian_optimizer import HebbianOptimizer
-from src.gcal_model.lgn_layer import LissomLGNLayer
+from src.supervised_gcal.cortex_layer import LissomCortexLayer
+from src.supervised_gcal.hebbian_optimizer import HebbianOptimizer
+from src.supervised_gcal.lgn_layer import LissomLGNLayer
 
 
-def inference_lgn(image, lgn_shape, sigma_center, sigma_sourround):
-    on_layer = LissomLGNLayer(image.shape, lgn_shape, sigma1=sigma_center, sigma2=sigma_sourround, name='on')
-    off_layer = LissomLGNLayer(image.shape, lgn_shape, sigma2=sigma_center, sigma1=sigma_sourround, name='off')
-    on = on_layer.activation(image)
-    off = off_layer.activation(image)
+def inference_lgn(images, image_shape, lgn_shape, sigma_center, sigma_sourround):
+    import ipdb; ipdb.set_trace()
+    on_layer = LissomLGNLayer(image_shape, lgn_shape, sigma1=sigma_center, sigma2=sigma_sourround, name='on')
+    off_layer = LissomLGNLayer(image_shape, lgn_shape, sigma2=sigma_center, sigma1=sigma_sourround, name='off')
+    on = on_layer.activation(images)
+    off = off_layer.activation(images)
     return on, off
 
 
-def inference_cortex(on, off, v1_shape):
-    v1_layer = LissomCortexLayer(on.shape, v1_shape, name='v1')
+def inference_cortex(on, off, lgn_shape, v1_shape):
+    import ipdb; ipdb.set_trace()
+    v1_layer = LissomCortexLayer(lgn_shape, v1_shape, name='v1')
     v1 = v1_layer.activation((on, off))
     return v1
 
@@ -98,9 +100,12 @@ def inference_classification(v1):
     return logits
 
 
-def inference(image):
-    on, off = inference_lgn(image, image.shape, 1, 1)
-    v1 = inference_cortex(on, off, image.shape)
+def inference(images, image_shape):
+    # TODO: Reduce lgn_shape, it's too big and doesn't fit on memory, implement connection field radius
+    lgn_shape = image_shape
+    on, off = inference_lgn(images, image_shape, lgn_shape, 1, 1)
+    v1_shape = image_shape
+    v1 = inference_cortex(on, off, lgn_shape, v1_shape)
     logits = inference_classification(v1)
     # Maybe a tf.tuple??
     return v1, logits
