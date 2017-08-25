@@ -47,10 +47,11 @@ class LissomLGNLayer(Layer):
         self._setup()
 
     def _setup(self):
-        sigma1_weights_matrix = self._gaussian_weights(self.sigma1)
-        sigma2_weights_matrix = self._gaussian_weights(self.sigma2)
-        diff_of_gaussians = sigma1_weights_matrix - sigma2_weights_matrix
-        self.weights = tf.constant(diff_of_gaussians, dtype=tf.float32, name='weights')
+        with tf.name_scope(self.name):
+            sigma1_weights_matrix = self._gaussian_weights(self.sigma1)
+            sigma2_weights_matrix = self._gaussian_weights(self.sigma2)
+            diff_of_gaussians = sigma1_weights_matrix - sigma2_weights_matrix
+            self.weights = tf.constant(diff_of_gaussians, dtype=tf.float32, name='weights')
         return
 
     def _gaussian_weights(self, sigma):
@@ -62,4 +63,5 @@ class LissomLGNLayer(Layer):
         return reshaped_weights_matrix
 
     def _activation(self, images):
-        return tf.nn.relu(tf.matmul(images, self.weights), name='activation')
+        act = tf.nn.relu(tf.matmul(images, self.weights), name='activation')
+        return act

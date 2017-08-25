@@ -38,8 +38,8 @@ def placeholder_inputs(batch_size):
     # image and label tensors, except the first dimension is now batch_size
     # rather than the full size of the train or test data sets.
     images_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
-                                                           mnist.IMAGE_PIXELS))
-    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
+                                                           mnist.IMAGE_PIXELS), name="images")
+    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size), name='labels')
     return images_placeholder, labels_placeholder
 
 
@@ -116,16 +116,16 @@ def run_training():
 
         import ipdb; ipdb.set_trace()
         # Build a Graph that computes predictions from the inference model.
-        v1, logits = supervised_gcal_graph.inference(images_placeholder, tf.TensorShape([mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]))
+        v1, v1 = supervised_gcal_graph.inference(images_placeholder, tf.TensorShape([mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]))
 
         # Add to the Graph the Ops for loss calculation.
-        loss = supervised_gcal_graph.loss(logits, labels_placeholder)
+        # loss = supervised_gcal_graph.loss(logits, labels_placeholder)
 
         # Add to the Graph the Ops that calculate and apply gradients.
-        train_op_v2, train_op_classification = supervised_gcal_graph.training(v1, loss, FLAGS.learning_rate)
+        train_op_v2, train_op_classification = supervised_gcal_graph.training(v1, v1, FLAGS.learning_rate)
 
         # Add the Op to compare the logits to the labels during evaluation.
-        eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
+        # eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
 
         # Build the summary Tensor based on the TF collection of Summaries.
         summary = tf.summary.merge_all()
@@ -167,8 +167,11 @@ def run_training():
             # inspect the values of your Ops or variables, you may include them
             # in the list passed to sess.run() and the value tensors will be
             # returned in the tuple from the call.
-            _, loss_value = sess.run([train_op_v2, train_op_classification, loss],
+            # _, loss_value = sess.run([train_op_v2, train_op_classification, loss],
+            loss_value = sess.run([train_op_v2],
                                      feed_dict=feed_dict)
+
+            import ipdb; ipdb.set_trace()
 
             duration = time.time() - start_time
 
@@ -244,7 +247,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--batch_size',
         type=int,
-        default=10,
+        default=1,
         help='Batch size.  Must divide evenly into the dataset sizes.'
     )
     parser.add_argument(
@@ -256,7 +259,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--log_dir',
         type=str,
-        default='/tmp/tensorflow/mnist.py/logs/fully_connected_feed',
+        default='pipeline_logs',
         help='Directory to put the log data.'
     )
     parser.add_argument(
@@ -270,6 +273,12 @@ if __name__ == '__main__':
         default=False,
         help="Use debugger to track down bad values during training",
         action='store_true'
+    )
+    parser.add_argument(
+        "--ui_type",
+        type=str,
+        default="readline",
+        help="Command-line user interface type (curses | readline)"
     )
 
     FLAGS, unparsed = parser.parse_known_args()

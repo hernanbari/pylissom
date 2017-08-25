@@ -40,29 +40,29 @@ class LissomCortexLayer(Layer):
         self._setup()
 
     def _setup(self):
-        self.on_weights = tf.Variable(
-            tf.truncated_normal(self.weights_shape, name='on_weights'))
-        self.off_weights = tf.Variable(
-            tf.truncated_normal(self.weights_shape, name='off_weights'))
-        self.inhibitory_weights = tf.Variable(
-            tf.truncated_normal(self.weights_shape, name='inhibitory_weights'))
-        self.excitatory_weights = tf.Variable(
-            tf.truncated_normal(self.weights_shape, name='excitatory_weights'))
+        with tf.name_scope(self.name):
+            self.on_weights = tf.Variable(
+                tf.truncated_normal(self.weights_shape), name='on_weights')
+            self.off_weights = tf.Variable(
+                tf.truncated_normal(self.weights_shape), name='off_weights')
+            self.inhibitory_weights = tf.Variable(
+                tf.truncated_normal(self.weights_shape), name='inhibitory_weights')
+            self.excitatory_weights = tf.Variable(
+                tf.truncated_normal(self.weights_shape), name='excitatory_weights')
 
-        # Variable que guarda activaciones previas
-        self.previous_activations = tf.Variable(
-            tf.zeros(self.weights_shape), trainable=False, name='previous_activations')
+            # Variable que guarda activaciones previas
+            self.previous_activations = tf.Variable(
+                tf.zeros(self.previous_activations_shape), trainable=False, name='previous_activations')
 
     @staticmethod
     def _afferent_activation(input, weights, name):
         return tf.matmul(input, weights, name=name)
 
     @staticmethod
-    def _lateral_activation(input, weights, name):
-        return tf.matmul(input, weights, name=name)
+    def _lateral_activation(previous_activations, weights, name):
+        return tf.matmul(previous_activations, weights, name=name)
 
     def _activation(self, input):
-        # TODO: fix this
         on, off = input
         on_activation = self._afferent_activation(on, self.on_weights, name='on_activation')
         off_activation = self._afferent_activation(off, self.off_weights, name='off_activation')
@@ -71,9 +71,9 @@ class LissomCortexLayer(Layer):
                                                          name='excitatory_activation')
         inhibitory_activation = self._lateral_activation(self.previous_activations, self.inhibitory_weights,
                                                          name='inhibitory_activation')
-        new_activations = tf.nn.relu(afferent_activation + excitatory_activation + inhibitory_activation,
+        new_activations = tf.nn.relu(afferent_activation + excitatory_activation - inhibitory_activation,
                                      name='activation')
         with tf.control_dependencies([new_activations]):
             self.previous_activations_assign = self.previous_activations.assign(new_activations)
-        output = tf.tuple(new_activations, self.previous_activations_assign)
+        output = tf.tuple([new_activations, self.previous_activations_assign])
         return output[0]
