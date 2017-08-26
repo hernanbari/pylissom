@@ -115,19 +115,36 @@ def run_training():
             FLAGS.batch_size)
 
         # Build a Graph that computes predictions from the inference model.
-        v1_layer, logits = supervised_gcal_graph.inference(images_placeholder,
-                                                           tf.TensorShape([mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]))
+        simple_lissom = True
+        v1_layer, logits = supervised_gcal_graph.inference(images=images_placeholder,
+                                                           image_shape=tf.TensorShape(
+                                                               [mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]),
+                                                           simple_lissom=simple_lissom)
 
         # Add to the Graph the Ops for loss calculation.
-        loss = supervised_gcal_graph.loss(logits, labels_placeholder)
+        loss = supervised_gcal_graph.loss(logits=logits, labels=labels_placeholder)
 
         # Add to the Graph the Ops that calculate and apply gradients.
-        train_op_v2, train_op_classification = supervised_gcal_graph.training(v1_layer, loss, FLAGS.learning_rate)
+        train_op_v1, train_op_classification = supervised_gcal_graph.training(v1_layer=v1_layer,
+                                                                              loss=loss,
+                                                                              learning_rate=FLAGS.learning_rate,
+                                                                              simple_lissom=simple_lissom)
 
         # Add the Op to compare the logits to the labels during evaluation.
         eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
 
         # Build the summary Tensor based on the TF collection of Summaries.
+        if simple_lissom:
+            pass
+        else:
+            tf.summary.image(name='v1_layer.on', tensor=tf.reshape(v1_layer.on, [1, 28, 28, 1]))
+
+            tf.summary.image(name='v1_layer.off', tensor=tf.reshape(v1_layer.off, [1, 28, 28, 1]))
+
+        tf.summary.image(name='v1_layer.activation', tensor=tf.reshape(v1_layer.activity, [1, 28, 28, 1]))
+
+        tf.summary.image(name='image', tensor=tf.reshape(images_placeholder, [1, 28, 28, 1]))
+
         summary = tf.summary.merge_all()
 
         # Add the variable initializer Op.
@@ -168,21 +185,21 @@ def run_training():
             # in the list passed to sess.run() and the value tensors will be
             # returned in the tuple from the call.
             # loss_value = sess.run([train_op_v2],
-            _, _, loss_value = sess.run([train_op_v2, train_op_classification, loss],
+            _, _, loss_value = sess.run([train_op_v1, train_op_classification, loss],
                                         feed_dict=feed_dict)
 
             duration = time.time() - start_time
 
             # Write the summaries and print an overview fairly often.
-            if step % 100 == 0:
+            if step < 10 or step % 100 == 0:
                 # Print status to stdout.
                 print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
                 # Update the events file.
-                import ipdb;
-                ipdb.set_trace()
                 summary_str = sess.run(summary, feed_dict=feed_dict)
                 summary_writer.add_summary(summary_str, step)
                 summary_writer.flush()
+                import ipdb;
+                ipdb.set_trace()
 
             # Save a checkpoint and evaluate the model periodically.
             if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:

@@ -69,23 +69,9 @@
 
 import tensorflow as tf
 
-from src.supervised_gcal.cortex_layer import LissomCortexLayer
+from src.supervised_gcal.cortex_layer import inference_cortex
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
-from src.supervised_gcal.lgn_layer import LissomLGNLayer
-
-
-def inference_lgn(images, image_shape, lgn_shape, sigma_center, sigma_sourround, scope):
-    on_layer = LissomLGNLayer(image_shape, lgn_shape, sigma1=sigma_center, sigma2=sigma_sourround, name=scope + 'on')
-    off_layer = LissomLGNLayer(image_shape, lgn_shape, sigma2=sigma_center, sigma1=sigma_sourround, name=scope + 'off')
-    on = on_layer.activation(images)
-    off = off_layer.activation(images)
-    return on, off
-
-
-def inference_cortex(on, off, lgn_shape, v1_shape, scope):
-    v1_layer = LissomCortexLayer(lgn_shape, v1_shape, name=scope + 'v1')
-    v1 = v1_layer.activation((on, off))
-    return v1, v1_layer
+from src.supervised_gcal.lgn_layer import inference_lgn
 
 
 def inference_classification(v1):
@@ -95,55 +81,31 @@ def inference_classification(v1):
     scope = 'classification/multi_layer_perceptron/'
     hidden1 = tf.contrib.layers.fully_connected(inputs=v1, num_outputs=25, scope=scope + 'hidden1/')
     logits = tf.contrib.layers.fully_connected(hidden1, num_outputs=10, activation_fn=tf.identity,
-                                               scope=scope + 'logits/')
+                                               scope=scope + 'softmax_linear/')
 
     return logits
 
 
-def inference_lissom(images, image_shape):
+def inference_lissom(images, image_shape, simple_lissom):
     scope = 'lissom/'
-    lgn_shape = image_shape
-    on, off = inference_lgn(images, image_shape, lgn_shape, 1, 1, scope)
+    if simple_lissom:
+        input = images
+        input_shape = image_shape
+    else:
+        lgn_shape = image_shape
+        input = inference_lgn(images, image_shape, lgn_shape, 1, 1, scope)
+        input_shape = lgn_shape
     v1_shape = image_shape
-    v1, v1_layer = inference_cortex(on, off, lgn_shape, v1_shape, scope)
+    v1, v1_layer = inference_cortex(input, input_shape, v1_shape, scope, simple_lissom)
     return v1, v1_layer
 
 
-def inference(images, image_shape):
+def inference(images, image_shape, simple_lissom):
     # TODO: Reduce lgn_shape, it's too big and doesn't fit on memory, implement connection field radius
-    v1, v1_layer = inference_lissom(images, image_shape)
+    v1, v1_layer = inference_lissom(images, image_shape, simple_lissom)
     logits = inference_classification(v1)
     # Maybe a tf.tuple??
     return v1_layer, logits
-
-
-def training_cortex(v1_layer):
-    with tf.name_scope('lissom/') as scope:
-        optimizer = LissomHebbianOptimizer(learning_rate=0.1, name='Hebbian')
-        train_op = optimizer.update_weights(v1_layer)
-    return train_op
-
-
-def training_classification(loss, learning_rate):
-    # Create the gradient descent optimizer with the given learning rate.
-    with tf.name_scope('classification/') as scope:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-        # Create a variable to track the global step.
-        global_step = tf.Variable(0, name='global_step', trainable=False)
-        # Use the optimizer to apply the gradients that minimize the loss
-        # (and also increment the global step counter) as a single training step.
-        train_op = optimizer.minimize(loss, global_step=global_step,
-                                      var_list=tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=scope))
-    return train_op
-
-
-def training(v1_layer, loss, learning_rate):
-    # Add a scalar summary for the snapshot loss.
-    tf.summary.scalar('loss', loss)
-    train_op_v1 = training_cortex(v1_layer)
-    train_op_classification = training_classification(loss, learning_rate)
-    # Maybe a tf.tuple??
-    return train_op_v1, train_op_classification
 
 
 def loss(logits, labels):
@@ -161,6 +123,35 @@ def loss(logits, labels):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=labels, logits=logits, name='xentropy')
     return tf.reduce_mean(cross_entropy, name='xentropy_mean')
+
+
+def training_cortex(v1_layer, simple_lissom):
+    with tf.name_scope('lissom/') as scope:
+        optimizer = LissomHebbianOptimizer(learning_rate=0.01, name='Hebbian')
+        train_op = optimizer.update_weights(v1_layer, simple_lissom)
+    return train_op
+
+
+def training_classification(loss, learning_rate):
+    # Create the gradient descent optimizer with the given learning rate.
+    with tf.name_scope('classification/') as scope:
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+        # Create a variable to track the global step.
+        global_step = tf.Variable(0, name='global_step', trainable=False)
+        # Use the optimizer to apply the gradients that minimize the loss
+        # (and also increment the global step counter) as a single training step.
+        train_op = optimizer.minimize(loss, global_step=global_step,
+                                      var_list=tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=scope))
+    return train_op
+
+
+def training(v1_layer, loss, learning_rate, simple_lissom):
+    # Add a scalar summary for the snapshot loss.
+    tf.summary.scalar('loss', loss)
+    train_op_v1 = training_cortex(v1_layer, simple_lissom)
+    train_op_classification = training_classification(loss=loss, learning_rate=learning_rate)
+    # Maybe a tf.tuple??
+    return train_op_v1, train_op_classification
 
 
 def evaluation(logits, labels):

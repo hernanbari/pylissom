@@ -65,3 +65,11 @@ class LissomLGNLayer(Layer):
     def _activation(self, images):
         act = tf.nn.relu(tf.matmul(images, self.weights), name='activation')
         return act
+
+
+def inference_lgn(images, image_shape, lgn_shape, sigma_center, sigma_sourround, scope):
+    on_layer = LissomLGNLayer(image_shape, lgn_shape, sigma1=sigma_center, sigma2=sigma_sourround, name=scope + 'on')
+    off_layer = LissomLGNLayer(image_shape, lgn_shape, sigma2=sigma_center, sigma1=sigma_sourround, name=scope + 'off')
+    on = on_layer.activation(images)
+    off = off_layer.activation(images)
+    return on, off
