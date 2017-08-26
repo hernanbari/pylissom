@@ -76,4 +76,8 @@ class LissomCortexLayer(Layer):
         with tf.control_dependencies([new_activations]):
             self.previous_activations_assign = self.previous_activations.assign(new_activations)
         output = tf.tuple([new_activations, self.previous_activations_assign])
+        # For weights update in training step
+        self.on = on
+        self.off = off
+        self.activity = output[0]
         return output[0]

@@ -114,18 +114,18 @@ def run_training():
         images_placeholder, labels_placeholder = placeholder_inputs(
             FLAGS.batch_size)
 
-        import ipdb; ipdb.set_trace()
         # Build a Graph that computes predictions from the inference model.
-        v1, v1 = supervised_gcal_graph.inference(images_placeholder, tf.TensorShape([mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]))
+        v1_layer, logits = supervised_gcal_graph.inference(images_placeholder,
+                                                           tf.TensorShape([mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]))
 
         # Add to the Graph the Ops for loss calculation.
-        # loss = supervised_gcal_graph.loss(logits, labels_placeholder)
+        loss = supervised_gcal_graph.loss(logits, labels_placeholder)
 
         # Add to the Graph the Ops that calculate and apply gradients.
-        train_op_v2, train_op_classification = supervised_gcal_graph.training(v1, v1, FLAGS.learning_rate)
+        train_op_v2, train_op_classification = supervised_gcal_graph.training(v1_layer, loss, FLAGS.learning_rate)
 
         # Add the Op to compare the logits to the labels during evaluation.
-        # eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
+        eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
 
         # Build the summary Tensor based on the TF collection of Summaries.
         summary = tf.summary.merge_all()
@@ -167,11 +167,9 @@ def run_training():
             # inspect the values of your Ops or variables, you may include them
             # in the list passed to sess.run() and the value tensors will be
             # returned in the tuple from the call.
-            # _, loss_value = sess.run([train_op_v2, train_op_classification, loss],
-            loss_value = sess.run([train_op_v2],
-                                     feed_dict=feed_dict)
-
-            import ipdb; ipdb.set_trace()
+            # loss_value = sess.run([train_op_v2],
+            _, _, loss_value = sess.run([train_op_v2, train_op_classification, loss],
+                                        feed_dict=feed_dict)
 
             duration = time.time() - start_time
 
@@ -180,6 +178,8 @@ def run_training():
                 # Print status to stdout.
                 print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
                 # Update the events file.
+                import ipdb;
+                ipdb.set_trace()
                 summary_str = sess.run(summary, feed_dict=feed_dict)
                 summary_writer.add_summary(summary_str, step)
                 summary_writer.flush()

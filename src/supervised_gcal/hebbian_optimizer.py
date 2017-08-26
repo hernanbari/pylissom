@@ -1,47 +1,36 @@
 import tensorflow as tf
-from tensorflow.python.training import optimizer
+
+from src.supervised_gcal.cortex_layer import LissomCortexLayer
 
 
-class HebbianOptimizer(optimizer.Optimizer):
-    # def get_slot(self, var, name):
-
-    # def get_slot_names(self):
-
-    # --------------
-    # Utility methods for subclasses.
-    # --------------
-
-    # def _slot_dict(self, slot_name):
-    #
-    # def _get_or_make_slot(self, var, val, slot_name, op_name):
-
-    # def _get_or_make_slot_with_initializer(self, var, initializer, shape, dtype,
-    #                                        slot_name, op_name):
-    #
-    # def _zeros_slot(self, var, slot_name, op_name):
-
-    def __init__(self, use_locking=False, name='Hebbian'):
-        super().__init__(use_locking, name)
-
-    def _prepare(self):
-        import ipdb; ipdb.set_trace()
-        pass
-
-    def _create_slots(self, var_list):
-        import ipdb; ipdb.set_trace()
-        pass
-
-    def _finish(self, update_ops, name_scope):
-        import ipdb; ipdb.set_trace()
-        super()._finish(update_ops, name_scope)
+def hebbian_learning(weights, input, output, learning_rate=0.1):
+    # Weight adaptation of a single neuron
+    # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
+    with tf.name_scope('hebbian_rule'):
+        hebbian = tf.add(weights, learning_rate * tf.multiply(input, output))
+    col_sum = tf.reduce_sum(hebbian, axis=1, name='col_sum')
+    normalization = tf.divide(hebbian, col_sum, name='normalization')
+    update_op = tf.assign(weights, normalization, name='update_weights')
+    return update_op
 
 
-    def _apply_dense(self, grad, var):
-        import ipdb; ipdb.set_trace()
-        # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
-        def _debug_func(opt, grad, var):
-            import ipdb; ipdb.set_trace()
-            return False
-        debug_op = tf.py_func(_debug_func, [grad, var], [tf.bool])
-        return var
+class LissomHebbianOptimizer(object):
+    def update_weights(self, lissom_layer):
+        assert isinstance(lissom_layer, LissomCortexLayer)
+        with tf.name_scope(self.name):
+            update_on = hebbian_learning(lissom_layer.on_weights, lissom_layer.on, lissom_layer.activity,
+                                         self.learning_rate)
 
+            update_off = hebbian_learning(lissom_layer.off_weights, lissom_layer.off, lissom_layer.activity,
+                                          self.learning_rate)
+
+            update_excitatory = hebbian_learning(lissom_layer.excitatory_weights, lissom_layer.previous_activations,
+                                                 lissom_layer.activity, self.learning_rate)
+
+            update_inhibitory = hebbian_learning(lissom_layer.inhibitory_weights, lissom_layer.previous_activations,
+                                                 lissom_layer.activity, self.learning_rate)
+            return tf.tuple([update_on, update_off, update_excitatory, update_inhibitory], name='lissom_learning')
+
+    def __init__(self, learning_rate, name):
+        self.learning_rate = learning_rate
+        self.name = name
