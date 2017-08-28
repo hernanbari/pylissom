@@ -17,6 +17,7 @@ from tensorflow.python import debug as tf_debug
 
 # Basic model parameters as external flags.
 from src.supervised_gcal import supervised_gcal_graph
+from src.supervised_gcal.supervised_gcal_graph import add_images_summaries
 
 FLAGS = None
 
@@ -100,16 +101,52 @@ def do_eval(sess,
           (num_examples, true_count, precision))
 
 
+def step_summary(duration, feed_dict, loss_value, sess, step, summary, summary_writer):
+    # Print status to stdout.
+    print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+    # Update the events file.
+    summary_str = sess.run(summary, feed_dict=feed_dict)
+    summary_writer.add_summary(summary_str, step)
+    summary_writer.flush()
+
+
+def checkpoint(data_sets, eval_correct, images_placeholder, labels_placeholder, saver, sess, step):
+    checkpoint_file = os.path.join(FLAGS.log_dir, 'model.ckpt')
+    saver.save(sess, checkpoint_file, global_step=step)
+    # Evaluate against the training set.
+    print('Training Data Eval:')
+    do_eval(sess,
+            eval_correct,
+            images_placeholder,
+            labels_placeholder,
+            data_sets.train)
+    # Evaluate against the validation set.
+    print('Validation Data Eval:')
+    do_eval(sess,
+            eval_correct,
+            images_placeholder,
+            labels_placeholder,
+            data_sets.validation)
+    # Evaluate against the test set.
+    print('Test Data Eval:')
+    do_eval(sess,
+            eval_correct,
+            images_placeholder,
+            labels_placeholder,
+            data_sets.test)
+
+
 def run_training():
+    if not FLAGS.ipdb:
+        import ipdb
+        ipdb.set_trace = lambda: 0
+
     """Train MNIST for a number of steps."""
     # Get the sets of images and labels for training, validation, and
     # test on MNIST.
-    print(FLAGS.input_data_dir)
     data_sets = input_data.read_data_sets(FLAGS.input_data_dir, FLAGS.fake_data)
-    print("ALL RIGHT 0")
     # Tell TensorFlow that the model will be built into the default Graph.
     with tf.Graph().as_default():
-        print("ALL RIGHT 1")
         # Generate placeholders for the images and labels.
         images_placeholder, labels_placeholder = placeholder_inputs(
             FLAGS.batch_size)
@@ -134,16 +171,7 @@ def run_training():
         eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
 
         # Build the summary Tensor based on the TF collection of Summaries.
-        if simple_lissom:
-            pass
-        else:
-            tf.summary.image(name='v1_layer.on', tensor=tf.reshape(v1_layer.on, [1, 28, 28, 1]))
-
-            tf.summary.image(name='v1_layer.off', tensor=tf.reshape(v1_layer.off, [1, 28, 28, 1]))
-
-        tf.summary.image(name='v1_layer.activation', tensor=tf.reshape(v1_layer.activity, [1, 28, 28, 1]))
-
-        tf.summary.image(name='image', tensor=tf.reshape(images_placeholder, [1, 28, 28, 1]))
+        add_images_summaries(images_placeholder, simple_lissom, v1_layer)
 
         summary = tf.summary.merge_all()
 
@@ -154,9 +182,7 @@ def run_training():
         saver = tf.train.Saver()
 
         # Create a session for running Ops on the Graph.
-        print("ALL RIGHT 2")
         sess = tf.InteractiveSession()
-        print("ALL RIGHT 3")
 
         # Instantiate a SummaryWriter to output summaries and the Graph.
         summary_writer = tf.summary.FileWriter(FLAGS.log_dir, sess.graph)
@@ -192,40 +218,11 @@ def run_training():
 
             # Write the summaries and print an overview fairly often.
             if step < 10 or step % 100 == 0:
-                # Print status to stdout.
-                print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
-                # Update the events file.
-                summary_str = sess.run(summary, feed_dict=feed_dict)
-                summary_writer.add_summary(summary_str, step)
-                summary_writer.flush()
-                import ipdb;
-                ipdb.set_trace()
+                step_summary(duration, feed_dict, loss_value, sess, step, summary, summary_writer)
 
             # Save a checkpoint and evaluate the model periodically.
             if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-                checkpoint_file = os.path.join(FLAGS.log_dir, 'model.ckpt')
-                saver.save(sess, checkpoint_file, global_step=step)
-                # Evaluate against the training set.
-                print('Training Data Eval:')
-                do_eval(sess,
-                        eval_correct,
-                        images_placeholder,
-                        labels_placeholder,
-                        data_sets.train)
-                # Evaluate against the validation set.
-                print('Validation Data Eval:')
-                do_eval(sess,
-                        eval_correct,
-                        images_placeholder,
-                        labels_placeholder,
-                        data_sets.validation)
-                # Evaluate against the test set.
-                print('Test Data Eval:')
-                do_eval(sess,
-                        eval_correct,
-                        images_placeholder,
-                        labels_placeholder,
-                        data_sets.test)
+                checkpoint(data_sets, eval_correct, images_placeholder, labels_placeholder, saver, sess, step)
 
 
 def main(_):
@@ -283,6 +280,12 @@ if __name__ == '__main__':
         '--fake_data',
         default=False,
         help='If true, uses fake data for unit testing.',
+        action='store_true'
+    )
+    parser.add_argument(
+        "--ipdb",
+        default=False,
+        help="Activate ipdb.set_trace()",
         action='store_true'
     )
     parser.add_argument(

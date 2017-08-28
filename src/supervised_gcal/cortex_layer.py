@@ -34,60 +34,71 @@ import tensorflow as tf
 from src.supervised_gcal.layer import Layer
 
 
+def normalize(input, name='normalize'):
+    return tf.divide(input, tf.norm(input, axis=0), name=name)
+
+
+def get_normalized_uniform(shape):
+    random = tf.random_uniform(shape, dtype=tf.float32, name='random_uniform')
+    normalized_random = normalize(random)
+    return normalized_random
+
+
+def custom_sigmoid(input, tetha, name):
+    with tf.name_scope(name):
+        less_mask = tf.less(input, tf.constant(tetha, dtype=tf.float32, shape=input.shape))
+        zero_update = tf.where(less_mask, tf.constant(0, dtype=tf.float32, shape=input.shape), input)
+        return tf.minimum(zero_update, 1, name='output')
+
+
 class LissomCortexLayer(Layer):
-    def __init__(self, input_shape, self_shape, name):
+    def __init__(self, input_shape, self_shape, name, theta=0.4):
+        self.theta = theta
         super().__init__(input_shape, self_shape, name)
         self._setup()
 
     def _setup(self):
         with tf.name_scope(self.name):
-            self.on_weights = tf.Variable(
-                tf.truncated_normal(self.weights_shape, dtype=tf.float32, mean=0.5), name='on_weights')
-            self.off_weights = tf.Variable(
-                tf.truncated_normal(self.weights_shape, dtype=tf.float32, mean=0.5), name='off_weights')
-            self.inhibitory_weights = tf.Variable(
-                tf.truncated_normal(self.weights_shape, dtype=tf.float32, mean=0.5), name='inhibitory_weights')
-            self.excitatory_weights = tf.Variable(
-                tf.truncated_normal(self.weights_shape, dtype=tf.float32, mean=0.5), name='excitatory_weights')
+            self.on_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='on_weights')
+            self.off_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='off_weights')
+            self.inhibitory_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='inhibitory_weights')
+            self.excitatory_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='excitatory_weights')
 
-            self.retina_weights = tf.Variable(
-                tf.truncated_normal(self.weights_shape, dtype=tf.float32, mean=0.5), name='retina_weights')
+            self.retina_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='retina_weights')
 
             # Variable que guarda activaciones previas
             self.previous_activations = tf.Variable(
                 tf.zeros(self.previous_activations_shape, dtype=tf.float32), trainable=False,
                 name='previous_activations')
 
-    @staticmethod
-    def _afferent_activation(input, weights, name):
-        return tf.matmul(input, weights, name=name)
+    def _afferent_activation(self, input, weights, name):
+        return custom_sigmoid(tf.matmul(input, weights, name=name + '/matmul'), self.theta, name=name)
 
-    @staticmethod
-    def _lateral_activation(previous_activations, weights, name):
-        return tf.matmul(previous_activations, weights, name=name)
+    def _lateral_activation(self, previous_activations, weights, name):
+        return custom_sigmoid(tf.matmul(previous_activations, weights, name=name + '/matmul'), self.theta, name=name)
 
     def _activation(self, input, simple_lissom=True):
         if simple_lissom:
             retina = input
-            retina_activation = self._afferent_activation(retina, self.retina_weights, name='retina_activation')
-            # afferent_activation = tf.nn.relu(retina_activation, name='activation')
-            afferent_activation = tf.minimum(retina_activation, tf.ones(retina_activation.shape),
-                                             name='afferent_activation')
             self.retina = retina
+            self.retina_activation = self._afferent_activation(retina, self.retina_weights, name='retina_activation')
+            self.afferent_activation = tf.identity(self.retina_activation, name='afferent_activation')
         else:
             on, off = input
             on_activation = self._afferent_activation(on, self.on_weights, name='on_activation')
             off_activation = self._afferent_activation(off, self.off_weights, name='off_activation')
-            afferent_activation = tf.add(on_activation, off_activation, name='afferent_activation')
+            self.afferent_activation = tf.add(on_activation, off_activation, name='afferent_activation')
             self.on = on
             self.off = off
 
-        excitatory_activation = self._lateral_activation(self.previous_activations, self.excitatory_weights,
-                                                         name='excitatory_activation')
-        inhibitory_activation = self._lateral_activation(self.previous_activations, self.inhibitory_weights,
-                                                         name='inhibitory_activation')
-        new_activations = tf.nn.relu(afferent_activation + excitatory_activation - inhibitory_activation,
-                                     name='activation')
+        with tf.control_dependencies([self.afferent_activation]):
+            excitatory_activation = self._lateral_activation(self.afferent_activation, self.excitatory_weights,
+                                                             name='excitatory_activation')
+            inhibitory_activation = self._lateral_activation(self.afferent_activation, self.inhibitory_weights,
+                                                             name='inhibitory_activation')
+            new_activations = custom_sigmoid(self.afferent_activation+excitatory_activation-inhibitory_activation, self.theta,
+                                             name='activation')
+
         with tf.control_dependencies([new_activations]):
             self.previous_activations_assign = self.previous_activations.assign(new_activations)
         output = tf.tuple([new_activations, self.previous_activations_assign])

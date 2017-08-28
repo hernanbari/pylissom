@@ -102,7 +102,9 @@ def inference_lissom(images, image_shape, simple_lissom):
 
 def inference(images, image_shape, simple_lissom):
     # TODO: Reduce lgn_shape, it's too big and doesn't fit on memory, implement connection field radius
-    v1, v1_layer = inference_lissom(images, image_shape, simple_lissom)
+    # TODO: LA NORMA DE LAS IMAGENES TIENE Q SER MENOR A 1, SINO, LOS PESOOS DAN MAYOR A 1, PENSARLO
+    images_normalized = tf.divide(images, tf.norm(images, axis=1), name='normalized_images')
+    v1, v1_layer = inference_lissom(images_normalized, image_shape, simple_lissom)
     logits = inference_classification(v1)
     # Maybe a tf.tuple??
     return v1_layer, logits
@@ -127,7 +129,7 @@ def loss(logits, labels):
 
 def training_cortex(v1_layer, simple_lissom):
     with tf.name_scope('lissom/') as scope:
-        optimizer = LissomHebbianOptimizer(learning_rate=0.01, name='Hebbian')
+        optimizer = LissomHebbianOptimizer(learning_rate=0.1, name='Hebbian')
         train_op = optimizer.update_weights(v1_layer, simple_lissom)
     return train_op
 
@@ -174,3 +176,32 @@ def evaluation(logits, labels):
         correct = tf.nn.in_top_k(logits, labels, 1)
         # Return the number of true entries.
         return tf.reduce_sum(tf.cast(correct, tf.int32))
+
+
+def add_images_summaries(images_placeholder, simple_lissom, v1_layer, weights_images=2):
+    if simple_lissom:
+        tf.summary.image(name='first_retina_weights',
+                         tensor=tf.reshape(tf.transpose(v1_layer.retina_weights[:, :weights_images]),
+                                           [weights_images, 28, 28, 1]), max_outputs=weights_images)
+
+        tf.summary.image(name='last_retina_weights',
+                         tensor=tf.reshape(tf.transpose(v1_layer.retina_weights[:, -weights_images:]),
+                                           [weights_images, 28, 28, 1]), max_outputs=weights_images)
+
+        tf.summary.image(name='v1_layer.retina_activation',
+                         tensor=tf.reshape(v1_layer.retina_activation, [1, 28, 28, 1]))
+
+        tf.summary.image(name='v1_layer.afferent_activation',
+                         tensor=tf.reshape(v1_layer.afferent_activation, [1, 28, 28, 1]))
+    else:
+        tf.summary.image(name='v1_layer.on', tensor=tf.reshape(v1_layer.on, [1, 28, 28, 1]))
+
+        tf.summary.image(name='v1_layer.off', tensor=tf.reshape(v1_layer.off, [1, 28, 28, 1]))
+    tf.summary.image(name='inhibitory_weights',
+                     tensor=tf.reshape(tf.transpose(v1_layer.inhibitory_weights[:, :weights_images]),
+                                       [weights_images, 28, 28, 1]), max_outputs=weights_images)
+    tf.summary.image(name='excitatory_weights',
+                     tensor=tf.reshape(tf.transpose(v1_layer.excitatory_weights[:, :weights_images]),
+                                       [weights_images, 28, 28, 1]), max_outputs=weights_images)
+    tf.summary.image(name='v1_layer.activation', tensor=tf.reshape(v1_layer.activity, [1, 28, 28, 1]))
+    tf.summary.image(name='image', tensor=tf.reshape(images_placeholder, [1, 28, 28, 1]))

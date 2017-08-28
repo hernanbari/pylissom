@@ -8,9 +8,9 @@ def hebbian_learning(weights, input, output, learning_rate):
     # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
     with tf.name_scope(weights.name[:-2]):
         with tf.name_scope('hebbian_rule'):
-            hebbian = tf.add(weights, learning_rate * tf.matmul(tf.transpose(input), output))
-        col_sum = tf.reduce_sum(hebbian, axis=0, name='col_sum')
-        normalization = tf.divide(hebbian, col_sum, name='normalization')
+            delta = tf.multiply(learning_rate, tf.matmul(tf.transpose(input, name='transpose'), output, name='matmul'), name='delta')
+            hebbian = tf.add(weights, delta, 'sum_delta')
+        normalization = tf.divide(hebbian, tf.norm(hebbian, axis=0, name='hebbian_norm'), name='normalization')
         update_op = tf.assign(weights, normalization, name='update_weights')
         return update_op
 
