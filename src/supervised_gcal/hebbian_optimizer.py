@@ -7,10 +7,14 @@ def hebbian_learning(weights, input, output, learning_rate):
     # Weight adaptation of a single neuron
     # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
     with tf.name_scope(weights.name[:-2]):
+        zero_mask = tf.equal(weights, tf.constant(0, dtype=tf.float32, shape=weights.shape))
+
         with tf.name_scope('hebbian_rule'):
-            delta = tf.multiply(learning_rate, tf.matmul(tf.transpose(input, name='transpose'), output, name='matmul'), name='delta')
+            delta = tf.multiply(learning_rate, tf.matmul(tf.transpose(input, name='transpose'), output, name='matmul'),
+                                name='delta')
             hebbian = tf.add(weights, delta, 'sum_delta')
-        normalization = tf.divide(hebbian, tf.norm(hebbian, axis=0, name='hebbian_norm'), name='normalization')
+        zero_update = tf.where(zero_mask, tf.constant(0, dtype=tf.float32, shape=hebbian.shape), hebbian)
+        normalization = tf.divide(zero_update, tf.norm(zero_update, axis=0, name='hebbian_norm'), name='normalization')
         update_op = tf.assign(weights, normalization, name='update_weights')
         return update_op
 
@@ -34,10 +38,10 @@ class LissomHebbianOptimizer(object):
                 params.append(update_on)
                 params.append(update_off)
 
-            update_excitatory = hebbian_learning(lissom_layer.excitatory_weights, lissom_layer.previous_activations,
+            update_excitatory = hebbian_learning(lissom_layer.excitatory_weights, lissom_layer.excitatory_activation,
                                                  lissom_layer.activity, self.learning_rate)
 
-            update_inhibitory = hebbian_learning(lissom_layer.inhibitory_weights, lissom_layer.previous_activations,
+            update_inhibitory = hebbian_learning(lissom_layer.inhibitory_weights, lissom_layer.inhibitory_activation,
                                                  lissom_layer.activity, self.learning_rate)
             params.append(update_inhibitory)
             params.append(update_excitatory)

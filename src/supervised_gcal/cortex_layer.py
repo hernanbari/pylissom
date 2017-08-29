@@ -29,13 +29,15 @@
 # Learning
 # 4. Misma q lissom
 
+import numpy as np
 import tensorflow as tf
 
 from src.supervised_gcal.layer import Layer
 
 
 def normalize(input, name='normalize'):
-    return tf.divide(input, tf.norm(input, axis=0), name=name)
+    import ipdb; ipdb.set_trace()
+    return tf.divide(input, tf.norm(input), name=name)
 
 
 def get_normalized_uniform(shape):
@@ -51,20 +53,51 @@ def custom_sigmoid(input, tetha, name):
         return tf.minimum(zero_update, 1, name='output')
 
 
+def util_fun(x, y, mu_x, mu_y, radius):
+    return np.sqrt(((x - mu_x) ** 2 + (y - mu_y) ** 2)) > radius
+
+
+def circular_mask(mat, radius, name):
+    if radius is None:
+        return mat
+    dims = mat.shape[0]
+    half_dims = int(np.sqrt(dims.value))
+    tmp_shape = (half_dims, half_dims, half_dims, half_dims)
+    # When the distance between the points of the two matrices is greater than radius, set to 0
+    mask = np.fromfunction(function=lambda x, y, mu_x, mu_y: util_fun(x, y, mu_x, mu_y, radius),
+                           shape=tmp_shape, dtype=int)
+    mask_reshaped = tf.reshape(mask, mat.shape)
+    mask_update = tf.where(mask_reshaped, tf.constant(0, dtype=tf.float32, shape=mat.shape), mat, name=name)
+    output = mat.assign(mask_update)
+    return output
+
+
 class LissomCortexLayer(Layer):
-    def __init__(self, input_shape, self_shape, name, theta=0.4):
+    def __init__(self, input_shape, self_shape, name, theta=0.0, afferent_radius=None, excitatory_radius=2,
+                 inhibitory_radius=None):
+        self.inhibitory_radius = inhibitory_radius
+        self.excitatory_radius = excitatory_radius
+        self.afferent_radius = afferent_radius
         self.theta = theta
         super().__init__(input_shape, self_shape, name)
         self._setup()
 
     def _setup(self):
         with tf.name_scope(self.name):
-            self.on_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='on_weights')
-            self.off_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='off_weights')
-            self.inhibitory_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='inhibitory_weights')
-            self.excitatory_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='excitatory_weights')
+            self.on_weights = circular_mask(tf.Variable(get_normalized_uniform(self.weights_shape)),
+                                            radius=self.afferent_radius, name='on_weights')
 
-            self.retina_weights = tf.Variable(get_normalized_uniform(self.weights_shape), name='retina_weights')
+            self.off_weights = circular_mask(tf.Variable(get_normalized_uniform(self.weights_shape)),
+                                             radius=self.afferent_radius, name='off_weights')
+
+            self.inhibitory_weights = circular_mask(tf.Variable(get_normalized_uniform(self.weights_shape)),
+                                                    radius=self.inhibitory_radius, name='inhibitory_weights')
+
+            self.excitatory_weights = circular_mask(tf.Variable(get_normalized_uniform(self.weights_shape)),
+                                                    radius=self.excitatory_radius, name='excitatory_weights')
+
+            self.retina_weights = circular_mask(tf.Variable(get_normalized_uniform(self.weights_shape)),
+                                                radius=self.afferent_radius, name='retina_weights')
 
             # Variable que guarda activaciones previas
             self.previous_activations = tf.Variable(
@@ -92,12 +125,16 @@ class LissomCortexLayer(Layer):
             self.off = off
 
         with tf.control_dependencies([self.afferent_activation]):
-            excitatory_activation = self._lateral_activation(self.afferent_activation, self.excitatory_weights,
-                                                             name='excitatory_activation')
-            inhibitory_activation = self._lateral_activation(self.afferent_activation, self.inhibitory_weights,
-                                                             name='inhibitory_activation')
-            new_activations = custom_sigmoid(self.afferent_activation+excitatory_activation-inhibitory_activation, self.theta,
-                                             name='activation')
+            self.excitatory_activation = self._lateral_activation(self.afferent_activation, self.excitatory_weights,
+                                                                  name='excitatory_activation')
+            self.inhibitory_activation = self._lateral_activation(self.afferent_activation, self.inhibitory_weights,
+                                                                  name='inhibitory_activation')
+            import ipdb; ipdb.set_trace()
+            self.inhibitory_activation = tf.Print(self.inhibitory_activation, [self.inhibitory_activation], first_n=1, summarize=self.inhibitory_activation.shape.num_elements())
+            new_activations = custom_sigmoid(
+                self.afferent_activation + self.excitatory_activation - self.inhibitory_activation,
+                self.theta,
+                name='activation')
 
         with tf.control_dependencies([new_activations]):
             self.previous_activations_assign = self.previous_activations.assign(new_activations)

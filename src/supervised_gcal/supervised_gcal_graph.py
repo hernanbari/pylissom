@@ -129,7 +129,7 @@ def loss(logits, labels):
 
 def training_cortex(v1_layer, simple_lissom):
     with tf.name_scope('lissom/') as scope:
-        optimizer = LissomHebbianOptimizer(learning_rate=0.1, name='Hebbian')
+        optimizer = LissomHebbianOptimizer(learning_rate=0.005, name='Hebbian')
         train_op = optimizer.update_weights(v1_layer, simple_lissom)
     return train_op
 
@@ -197,11 +197,21 @@ def add_images_summaries(images_placeholder, simple_lissom, v1_layer, weights_im
         tf.summary.image(name='v1_layer.on', tensor=tf.reshape(v1_layer.on, [1, 28, 28, 1]))
 
         tf.summary.image(name='v1_layer.off', tensor=tf.reshape(v1_layer.off, [1, 28, 28, 1]))
+
     tf.summary.image(name='inhibitory_weights',
                      tensor=tf.reshape(tf.transpose(v1_layer.inhibitory_weights[:, :weights_images]),
                                        [weights_images, 28, 28, 1]), max_outputs=weights_images)
+
     tf.summary.image(name='excitatory_weights',
                      tensor=tf.reshape(tf.transpose(v1_layer.excitatory_weights[:, :weights_images]),
                                        [weights_images, 28, 28, 1]), max_outputs=weights_images)
+
+    tf.summary.image(name='excitatory_activation',
+                     tensor=tf.reshape(v1_layer.excitatory_activation, [1, 28, 28, 1]))
+
+    tf.summary.image(name='inhibitory_activation',
+                     tensor=tf.reshape(v1_layer.inhibitory_activation, [1, 28, 28, 1]))
+
     tf.summary.image(name='v1_layer.activation', tensor=tf.reshape(v1_layer.activity, [1, 28, 28, 1]))
+
     tf.summary.image(name='image', tensor=tf.reshape(images_placeholder, [1, 28, 28, 1]))
