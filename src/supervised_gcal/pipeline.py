@@ -8,6 +8,7 @@ import argparse
 import os.path
 import sys
 import time
+import numpy as np
 
 import tensorflow as tf
 from six.moves import xrange  # pylint: disable=redefined-builtin
@@ -101,9 +102,10 @@ def do_eval(sess,
           (num_examples, true_count, precision))
 
 
-def step_summary(duration, feed_dict, loss_value, sess, step, summary, summary_writer):
+def step_summary(duration, feed_dict, sess, step, summary, summary_writer):
     # Print status to stdout.
-    print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+    # print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+    print('Step '+str(step))
     # Update the events file.
     summary_str = sess.run(summary, feed_dict=feed_dict)
     summary_writer.add_summary(summary_str, step)
@@ -153,22 +155,29 @@ def run_training():
 
         # Build a Graph that computes predictions from the inference model.
         simple_lissom = True
-        v1_layer, logits = supervised_gcal_graph.inference(images=images_placeholder,
+        # v1_layer, logits = supervised_gcal_graph.inference(images=images_placeholder,
+        #                                                    image_shape=tf.TensorShape(
+        #                                                        [mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]),
+        #                                                    simple_lissom=simple_lissom)
+
+        v1, v1_layer = supervised_gcal_graph.inference_lissom(images_placeholder,
                                                            image_shape=tf.TensorShape(
                                                                [mnist.IMAGE_SIZE, mnist.IMAGE_SIZE]),
                                                            simple_lissom=simple_lissom)
 
         # Add to the Graph the Ops for loss calculation.
-        loss = supervised_gcal_graph.loss(logits=logits, labels=labels_placeholder)
+        # loss = supervised_gcal_graph.loss(logits=logits, labels=labels_placeholder)
 
         # Add to the Graph the Ops that calculate and apply gradients.
-        train_op_v1, train_op_classification = supervised_gcal_graph.training(v1_layer=v1_layer,
-                                                                              loss=loss,
-                                                                              learning_rate=FLAGS.learning_rate,
-                                                                              simple_lissom=simple_lissom)
+        # train_op_v1, train_op_classification = supervised_gcal_graph.training(v1_layer=v1_layer,
+        #                                                                       loss=loss,
+        #                                                                       learning_rate=FLAGS.learning_rate,
+        #                                                                       simple_lissom=simple_lissom)
 
-        # Add the Op to compare the logits to the labels during evaluation.
-        eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
+        train_op_v1 = supervised_gcal_graph.training_cortex(v1_layer=v1_layer,
+                                                                              simple_lissom=simple_lissom)
+        # # Add the Op to compare the logits to the labels during evaluation.
+        # eval_correct = supervised_gcal_graph.evaluation(logits, labels_placeholder)
 
         # Build the summary Tensor based on the TF collection of Summaries.
         add_images_summaries(images_placeholder, simple_lissom, v1_layer)
@@ -195,6 +204,11 @@ def run_training():
         if FLAGS.debug:
             sess = tf_debug.LocalCLIDebugWrapperSession(sess, ui_type=FLAGS.ui_type)
 
+            def has_all_ones(datum, tensor):
+                return not np.all(tensor != np.ones(tensor.shape))
+
+            sess.add_tensor_filter("has_all_ones", has_all_ones)
+
         # Start the training loop.
         for step in range(FLAGS.max_steps):
             start_time = time.time()
@@ -211,18 +225,22 @@ def run_training():
             # in the list passed to sess.run() and the value tensors will be
             # returned in the tuple from the call.
             # loss_value = sess.run([train_op_v2],
-            _, _, loss_value = sess.run([train_op_v1, train_op_classification, loss],
+            # _, _, loss_value = sess.run([train_op_v1, train_op_classification, loss],
+            #                             feed_dict=feed_dict)
+
+            _ = sess.run([train_op_v1],
                                         feed_dict=feed_dict)
 
             duration = time.time() - start_time
 
             # Write the summaries and print an overview fairly often.
             if step < 10 or step % 100 == 0:
-                step_summary(duration, feed_dict, loss_value, sess, step, summary, summary_writer)
+                # step_summary(duration, feed_dict, loss_value, sess, step, summary, summary_writer)
+                step_summary(duration, feed_dict, sess, step, summary, summary_writer)
 
             # Save a checkpoint and evaluate the model periodically.
-            if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-                checkpoint(data_sets, eval_correct, images_placeholder, labels_placeholder, saver, sess, step)
+            # if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
+            #     checkpoint(data_sets, eval_correct, images_placeholder, labels_placeholder, saver, sess, step)
 
 
 def main(_):

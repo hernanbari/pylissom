@@ -1,19 +1,20 @@
 import tensorflow as tf
 
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
+from src.supervised_gcal.utils import get_zeros
 
 
 def hebbian_learning(weights, input, output, learning_rate):
     # Weight adaptation of a single neuron
     # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
     with tf.name_scope(weights.name[:-2]):
-        zero_mask = tf.equal(weights, tf.constant(0, dtype=tf.float32, shape=weights.shape))
+        zero_mask = tf.equal(weights, get_zeros(shape=weights.shape), name='zeros_mask')
 
         with tf.name_scope('hebbian_rule'):
-            delta = tf.multiply(learning_rate, tf.matmul(tf.transpose(input, name='transpose'), output, name='matmul'),
+            delta = tf.multiply(learning_rate, tf.matmul(tf.transpose(input), output, name='matmul'),
                                 name='delta')
             hebbian = tf.add(weights, delta, 'sum_delta')
-        zero_update = tf.where(zero_mask, tf.constant(0, dtype=tf.float32, shape=hebbian.shape), hebbian)
+        zero_update = tf.where(zero_mask, get_zeros(shape=hebbian.shape), hebbian, name='weights_with_old_zeros')
         normalization = tf.divide(zero_update, tf.norm(zero_update, axis=0, name='hebbian_norm'), name='normalization')
         update_op = tf.assign(weights, normalization, name='update_weights')
         return update_op
