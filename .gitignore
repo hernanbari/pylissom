@@ -5,3 +5,5 @@ raw_sync_path
 *log/
 *logs/
 *input_data
+*pyc
+*egg*
