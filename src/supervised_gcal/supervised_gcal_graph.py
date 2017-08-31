@@ -86,8 +86,8 @@ def inference_classification(v1):
     return logits
 
 
-def inference_lissom(images_placeholder, image_shape, simple_lissom):
-    images = tf.divide(images_placeholder, tf.norm(images_placeholder, axis=1), name='normalized_images')
+def inference_lissom(images, image_shape, simple_lissom):
+    # images = tf.divide(images_placeholder, tf.norm(images_placeholder, axis=1), name='normalized_images')
     scope = 'lissom/'
     if simple_lissom:
         input = images
@@ -130,7 +130,7 @@ def loss(logits, labels):
 
 def training_cortex(v1_layer, simple_lissom):
     with tf.name_scope('lissom/') as scope:
-        optimizer = LissomHebbianOptimizer(learning_rate=0.1, name='Hebbian')
+        optimizer = LissomHebbianOptimizer(learning_rate=0.01, name='Hebbian')
         train_op = optimizer.update_weights(v1_layer, simple_lissom)
     return train_op
 
@@ -179,57 +179,56 @@ def evaluation(logits, labels):
         return tf.reduce_sum(tf.cast(correct, tf.int32))
 
 
-def add_images_summaries(images_placeholder, simple_lissom, v1_layer, weights_images=2):
-    # with tf.name_scope('summaries'):
+def rescale_to_0_255(tensor):
+    target_max = 255.0
+    target_min = 0.0
+    return tf.cast(tf.minimum(tensor * (target_max - target_min) + target_min, 255), dtype=tf.uint8)
+
+
+def activation_summary(activation, print=False, n=1, max_outputs=1, weights=False, last=False, name=None):
+    nscope = str(activation.name[:-2].replace('/', '.')) if name is None else name
+    with tf.name_scope('summaries.'+nscope) as scope:
+        if weights:
+            if last:
+                activation = activation[:, -max_outputs:]
+            else:
+                activation = activation[:, :max_outputs]
+            activation = tf.transpose(activation)
+            activation = tf.multiply(activation, tf.constant(28.0, shape=activation.shape))
+        if print:
+            activation = tf.Print(activation, [activation], first_n=n, summarize=activation.shape.num_elements())
+        activation = rescale_to_0_255(activation)
+        if print:
+            activation = tf.Print(activation, [activation], first_n=n, summarize=activation.shape.num_elements())
+        return tf.summary.image(name=scope,
+                                tensor=tf.reshape(activation, [max_outputs, 28, 28, 1]),
+                                max_outputs=max_outputs)
+
+
+def add_images_summaries(images_placeholder, simple_lissom, v1_layer):
+    max_outputs = 2
     if simple_lissom:
-        scope = 'first_retina_weights'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope,
-                             tensor=tf.reshape(tf.transpose(v1_layer.retina_weights[:, :weights_images]),
-                                               [weights_images, 28, 28, 1]), max_outputs=weights_images)
-        scope = 'last_retina_weights'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope,
-                             tensor=tf.reshape(tf.transpose(v1_layer.retina_weights[:, -weights_images:]),
-                                               [weights_images, 28, 28, 1]), max_outputs=weights_images)
-        scope = 'v1_layer.retina_activation'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope,
-                             tensor=tf.reshape(v1_layer.retina_activation, [1, 28, 28, 1]))
-        scope = 'v1_layer.afferent_activation'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope,
-                             tensor=tf.reshape(v1_layer.afferent_activation, [1, 28, 28, 1]))
+        pass
+        activation_summary(v1_layer.retina_weights, weights=True, max_outputs=max_outputs,
+                           name='first_retina_weights')
+        activation_summary(v1_layer.retina_weights, weights=True, max_outputs=max_outputs, last=True,
+                           name='last_retina_weights')
+
+        activation_summary(v1_layer.retina_activation)
+        activation_summary(v1_layer.afferent_activation)
     else:
         scope = 'v1_layer.on'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope, tensor=tf.reshape(v1_layer.on, [1, 28, 28, 1]))
-        scope = 'v1_layer.off'
-        with tf.name_scope(scope):
-            tf.summary.image(name=scope, tensor=tf.reshape(v1_layer.off, [1, 28, 28, 1]))
+        # with tf.name_scope(scope):
+        #     tf.summary.image(name=scope, tensor=rescale_to_0_255(tf.reshape(v1_layer.on, [1, 28, 28, 1])))
+        # scope = 'v1_layer.off'
+        # with tf.name_scope(scope):
+        #     tf.summary.image(name=scope, tensor=rescale_to_0_255(tf.reshape(v1_layer.off, [1, 28, 28, 1])))
 
-    scope = 'summaries.inhibitory_activation'
-    with tf.name_scope(scope):
-        var = tf.reshape(tf.transpose(v1_layer.inhibitory_activation), [1, 28, 28, 1])
-        tf.summary.image(name=scope,
-                         tensor=tf.Print(var, [var], first_n=1, summarize=784), max_outputs=weights_images)
-    scope = 'summaries.excitatory_weights'
-    with tf.name_scope(scope):
-        tf.summary.image(name=scope,
-                         tensor=tf.reshape(tf.transpose(v1_layer.excitatory_weights[:, :weights_images]),
-                                           [weights_images, 28, 28, 1]), max_outputs=weights_images)
-    scope = 'summaries.excitatory_activation'
-    with tf.name_scope(scope):
-        tf.summary.image(name=scope,
-                         tensor=tf.reshape(v1_layer.excitatory_activation, [1, 28, 28, 1]))
-    scope = 'summaries.inhibitory_weights'
-    with tf.name_scope(scope):
-        tf.summary.image(name=scope,
-                         tensor=tf.reshape(tf.transpose(v1_layer.inhibitory_weights[:, :weights_images]),
-                                           [weights_images, 28, 28, 1]), max_outputs=weights_images)
-    scope = 'summaries.v1_layer.activation'
-    with tf.name_scope(scope):
-        tf.summary.image(name=scope, tensor=tf.reshape(v1_layer.activity, [1, 28, 28, 1]))
-    scope = 'summaries.image'
-    with tf.name_scope(scope):
-        tf.summary.image(name=scope, tensor=tf.reshape(images_placeholder, [1, 28, 28, 1]))
+    activation_summary(v1_layer.inhibitory_activation)
+    activation_summary(v1_layer.excitatory_activation)
+    activation_summary(v1_layer.activity)
+    activation_summary(images_placeholder)
+
+    activation_summary(v1_layer.excitatory_weights, weights=True, max_outputs=max_outputs)
+    activation_summary(v1_layer.inhibitory_weights, weights=True, max_outputs=max_outputs, print=True, n=5)
+

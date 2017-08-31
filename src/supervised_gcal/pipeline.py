@@ -228,8 +228,8 @@ def run_training():
             # _, _, loss_value = sess.run([train_op_v1, train_op_classification, loss],
             #                             feed_dict=feed_dict)
 
-            _ = sess.run([train_op_v1],
-                                        feed_dict=feed_dict)
+            if step > 0:
+                _ = sess.run([train_op_v1], feed_dict=feed_dict)
 
             duration = time.time() - start_time
 
@@ -261,7 +261,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--max_steps',
         type=int,
-        default=2000,
+        default=101,
         help='Number of steps to run trainer.'
     )
     parser.add_argument(
