@@ -48,14 +48,16 @@ def circular_mask(mat, radius):
     if radius is None:
         return mat
     dims = mat.shape[0]
-    half_dims = int(np.sqrt(dims.value))
+    half_dims = int(np.sqrt(dims))
     tmp_shape = (half_dims, half_dims, half_dims, half_dims)
 
     # When the distance between the points of the two matrices is greater than radius, set to 0
     mask = np.fromfunction(function=lambda x, y, mu_x, mu_y: mask_distance_gt_radius(x, y, mu_x, mu_y, radius),
                            shape=tmp_shape, dtype=int)
-    masked_mat = np.ma.masked_where(condition=mask, a=mat).fill(0)
-    return masked_mat
+    mask = np.reshape(mask, mat.shape)
+    masked_mat = np.ma.masked_where(condition=mask, a=mat)
+    return masked_mat.filled(0)
+
 
 
 class LissomCortexLayer(Layer):
@@ -68,8 +70,8 @@ class LissomCortexLayer(Layer):
         super().__init__(input_shape, self_shape)
 
     def _get_weight_variable(self, radius):
-        return torch.autograd.Variable(normalize(circular_mask(get_uniform(self.weights_shape),
-                                                               radius=radius)))
+        return torch.autograd.Variable(torch.Tensor(normalize(circular_mask(get_uniform(self.weights_shape),
+                                                               radius=radius))))
 
     def _setup_variables(self):
         self.on_weights = self._get_weight_variable(self.afferent_radius)
@@ -86,7 +88,7 @@ class LissomCortexLayer(Layer):
         self.previous_activations = self._get_weight_variable(self.afferent_radius)
 
     def _afferent_activation(self, input, weights, name):
-        return custom_sigmoid(tf.matmul(input, weights, name=name + '/matmul'), self.theta, name=name)
+        return custom_sigmoid(torch.matmul(input, weights), self.theta, name=name)
 
     def _lateral_activation(self, previous_activations, weights, name):
         return custom_sigmoid(tf.matmul(previous_activations, weights, name=name + '/matmul'), self.theta, name=name)
