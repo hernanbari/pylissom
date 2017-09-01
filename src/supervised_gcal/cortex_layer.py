@@ -30,8 +30,8 @@
 # 4. Misma q lissom
 
 import numpy as np
-import torch
 
+import torch
 from src.supervised_gcal.layer import Layer
 from src.supervised_gcal.utils import get_zeros, get_uniform, mask_distance_gt_radius, normalize
 
@@ -63,7 +63,7 @@ class LissomCortexLayer(Layer):
     def _get_weight_variable(self, radius):
         # TODO: learn what Parameter means
         return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_uniform(self.weights_shape),
-                                                                            radius=radius))))
+                                                                       radius=radius))))
 
     def _setup_variables(self):
         self.on_weights = self._get_weight_variable(self.afferent_radius)
@@ -112,7 +112,7 @@ class LissomCortexLayer(Layer):
         return new_activations
 
 
-def inference_cortex(input, lgn_shape, v1_shape, scope, simple_lissom):
+def inference_cortex(input, lgn_shape, v1_shape, simple_lissom):
     v1_layer = LissomCortexLayer(lgn_shape, v1_shape)
     if simple_lissom:
         v1 = v1_layer.activation(input)
