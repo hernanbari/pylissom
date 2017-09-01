@@ -32,8 +32,8 @@
 import numpy as np
 import tensorflow as tf
 
-from src.supervised_gcal.layer import Layer
-from src.supervised_gcal.utils import get_zeros, get_ones
+from tf_src.src import Layer
+from tf_src.src import get_zeros, get_ones
 
 
 def normalize(input, name='normalize'):

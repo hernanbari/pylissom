@@ -69,9 +69,9 @@
 
 import tensorflow as tf
 
-from src.supervised_gcal.cortex_layer import inference_cortex
-from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
-from src.supervised_gcal.lgn_layer import inference_lgn
+from tf_src.src import LissomHebbianOptimizer
+from tf_src.src import inference_cortex
+from tf_src.src import inference_lgn
 
 
 def inference_classification(v1):

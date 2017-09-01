@@ -30,7 +30,7 @@
 import numpy as np
 import tensorflow as tf
 
-from src.supervised_gcal.layer import Layer
+from tf_src.src import Layer
 
 
 def gaussian(x, y, mu_x, mu_y, sigma):

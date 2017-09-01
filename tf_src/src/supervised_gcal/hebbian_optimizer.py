@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-from src.supervised_gcal.cortex_layer import LissomCortexLayer
-from src.supervised_gcal.utils import get_zeros
+from tf_src.src import LissomCortexLayer
+from tf_src.src import get_zeros
 
 
 def hebbian_learning(weights, input, output, learning_rate, sum=False):

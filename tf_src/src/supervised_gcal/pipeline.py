@@ -8,17 +8,17 @@ import argparse
 import os.path
 import sys
 import time
-import numpy as np
 
+import numpy as np
 import tensorflow as tf
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.examples.tutorials.mnist import mnist
 from tensorflow.python import debug as tf_debug
 
+from tf_src.src import add_images_summaries
 # Basic model parameters as external flags.
-from src.supervised_gcal import supervised_gcal_graph
-from src.supervised_gcal.supervised_gcal_graph import add_images_summaries
+from tf_src.src import supervised_gcal_graph
 
 FLAGS = None
 
