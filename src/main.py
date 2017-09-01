@@ -2,15 +2,18 @@ from __future__ import print_function
 
 import argparse
 
+import numpy as np
+import visdom
 from torchvision import datasets, transforms
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
 from torch.autograd import Variable
+
+vis = visdom.Visdom()
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -40,16 +43,11 @@ if args.cuda:
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 train_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=True, download=True,
-                   transform=transforms.Compose([
-                       transforms.ToTensor(),
-                       transforms.Normalize((0.1307,), (0.3081,))
-                   ])),
+                   transform=transforms.ToTensor()
+                   ),
     batch_size=args.batch_size, shuffle=True, **kwargs)
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])),
+    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
     batch_size=args.batch_size, shuffle=True, **kwargs)
 
 
@@ -71,16 +69,14 @@ class Net(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x)
 
+
 # model = Net()
-print("POLOTOEI")
 model = LissomCortexLayer((1, 784), (28, 28))
-print("POLOTOEI")
 if args.cuda:
     model.cuda()
 
 # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 optimizer = LissomHebbianOptimizer(0.1)
-print("POLOTOEI")
 
 
 def train(epoch):
@@ -90,16 +86,19 @@ def train(epoch):
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
         # optimizer.zero_grad()
-        print("ALOJHA")
-        import ipdb;
-        ipdb.set_trace()
         output = model(data, simple_lissom=True)
         # output - model(data)
         # loss = F.nll_loss(output, target)
         # loss.backward()
-        print("MUJOLO")
 
         optimizer.update_weights(model, simple_lissom=True)
+        images_numpy = [np.reshape(x.numpy(), (1, 28, 28)) for x in
+                        [data.data, output, model.afferent_activation, model.inhibitory_activation,
+                         model.excitatory_activation, model.retina_activation]]
+        for title, im in zip(['input', 'output', 'model.afferent_activation', 'model.inhibitory_activation',
+                              'model.excitatory_activation', 'model.retina_activation'], images_numpy):
+            vis.image(im, opts={'caption': title, 'height': 300, 'width': 300})
+            
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
