@@ -8,7 +8,7 @@ def hebbian_learning(weights, input, output, learning_rate, sum=False):
     zero_mask = torch.gt(weights.data, 0).float()
 
     delta = learning_rate * torch.matmul(torch.t(input), output)
-    hebbian = weights.data + delta.data
+    hebbian = weights.data + delta
     zero_update = torch.mul(hebbian, zero_mask)
     if sum:
         den = torch.norm(zero_update, p=1, dim=0)

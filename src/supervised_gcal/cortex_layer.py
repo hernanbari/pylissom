@@ -77,15 +77,16 @@ class LissomCortexLayer(Layer):
         self.retina_weights = self._get_weight_variable(self.afferent_radius)
 
         # Variable que guarda activaciones previas
-        self.previous_activations = torch.autograd.Variable(torch.Tensor(get_zeros(self.weights_shape)))
+        self.previous_activations = torch.Tensor(get_zeros(self.previous_activations_shape))
 
     def _afferent_activation(self, input, weights):
-        return torch.clamp(torch.matmul(input, weights), min=self.theta, max=1)
+        return torch.clamp(torch.matmul(input, weights.data), min=self.theta, max=1)
 
     def _lateral_activation(self, previous_activations, weights):
-        return torch.clamp(torch.matmul(previous_activations, weights), min=self.theta, max=1)
+        return torch.clamp(torch.matmul(previous_activations, weights.data), min=self.theta, max=1)
 
     def forward(self, input, simple_lissom=True):
+        input = input.data.view((1, 784))
         if simple_lissom:
             retina = input
             self.retina = retina
@@ -107,7 +108,7 @@ class LissomCortexLayer(Layer):
             self.afferent_activation + 0.2 * self.excitatory_activation - self.inhibitory_activation * 0.4,
             min=self.theta, max=1)
 
-        self.previous_activations.data = new_activations.data
+        self.previous_activations = new_activations
 
         return new_activations
 
