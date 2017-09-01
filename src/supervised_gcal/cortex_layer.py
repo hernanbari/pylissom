@@ -36,14 +36,6 @@ from src.supervised_gcal.layer import Layer
 from src.supervised_gcal.utils import get_zeros, get_uniform, mask_distance_gt_radius, normalize
 
 
-def custom_sigmoid(input, tetha, name):
-    with tf.name_scope(name):
-        less_mask = tf.less(input, tf.constant(tetha, dtype=tf.float32, shape=input.shape, name='thetas'),
-                            name='theta_mask')
-        mask_update = tf.where(less_mask, get_zeros(shape=input.shape), input, name='mask_update')
-        return tf.minimum(mask_update, get_ones(shape=mask_update.shape), name='output')
-
-
 def circular_mask(mat, radius):
     if radius is None:
         return mat
@@ -59,7 +51,6 @@ def circular_mask(mat, radius):
     return masked_mat.filled(0)
 
 
-
 class LissomCortexLayer(Layer):
     def __init__(self, input_shape, self_shape, theta=0.0, afferent_radius=None, excitatory_radius=2,
                  inhibitory_radius=None):
@@ -70,8 +61,9 @@ class LissomCortexLayer(Layer):
         super().__init__(input_shape, self_shape)
 
     def _get_weight_variable(self, radius):
-        return torch.autograd.Variable(torch.Tensor(normalize(circular_mask(get_uniform(self.weights_shape),
-                                                               radius=radius))))
+        # TODO: learn what Parameter means
+        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_uniform(self.weights_shape),
+                                                                            radius=radius))))
 
     def _setup_variables(self):
         self.on_weights = self._get_weight_variable(self.afferent_radius)
@@ -85,63 +77,43 @@ class LissomCortexLayer(Layer):
         self.retina_weights = self._get_weight_variable(self.afferent_radius)
 
         # Variable que guarda activaciones previas
-        self.previous_activations = self._get_weight_variable(self.afferent_radius)
+        self.previous_activations = torch.autograd.Variable(torch.Tensor(get_zeros(self.weights_shape)))
 
-    def _afferent_activation(self, input, weights, name):
-        return custom_sigmoid(torch.matmul(input, weights), self.theta, name=name)
+    def _afferent_activation(self, input, weights):
+        return torch.clamp(torch.matmul(input, weights), min=self.theta, max=1)
 
-    def _lateral_activation(self, previous_activations, weights, name):
-        return custom_sigmoid(tf.matmul(previous_activations, weights, name=name + '/matmul'), self.theta, name=name)
+    def _lateral_activation(self, previous_activations, weights):
+        return torch.clamp(torch.matmul(previous_activations, weights), min=self.theta, max=1)
 
-    def _activation(self, input, simple_lissom=True):
+    def forward(self, input, simple_lissom=True):
         if simple_lissom:
             retina = input
             self.retina = retina
-            self.retina_activation = self._afferent_activation(retina, self.retina_weights, name='retina_activation')
-            self.afferent_activation = tf.identity(self.retina_activation, name='afferent_activation')
+            self.retina_activation = self._afferent_activation(retina, self.retina_weights)
+            self.afferent_activation = self.retina_activation
         else:
             on, off = input
-            on_activation = self._afferent_activation(on, self.on_weights, name='on_activation')
-            off_activation = self._afferent_activation(off, self.off_weights, name='off_activation')
-            self.afferent_activation = tf.add(on_activation, off_activation, name='afferent_activation')
-            self.on = on
-            self.off = off
+            on_activation = self._afferent_activation(on, self.on_weights)
+            # off_activation = self._afferent_activation(off, self.off_weights)
+            # self.afferent_activation = tf.add(on_activation, off_activation)
+            # self.on = on
+            # self.off = off
+        self.excitatory_activation = self._lateral_activation(self.afferent_activation,
+                                                              self.excitatory_weights)
+        self.inhibitory_activation = self._lateral_activation(self.afferent_activation,
+                                                              self.inhibitory_weights)
 
-        with tf.control_dependencies([self.afferent_activation]):
-            self.excitatory_activation = self._lateral_activation(self.afferent_activation,
-                                                                  self.excitatory_weights,
-                                                                  name='excitatory_activation')
-            self.inhibitory_activation = self._lateral_activation(self.afferent_activation,
-                                                                  self.inhibitory_weights,
-                                                                  name='inhibitory_activation')
+        new_activations = torch.clamp(
+            self.afferent_activation + 0.2 * self.excitatory_activation - self.inhibitory_activation * 0.4,
+            min=self.theta, max=1)
 
-            new_activations = custom_sigmoid(
-                tf.subtract(tf.add(self.afferent_activation, tf.multiply(self.excitatory_activation,
-                                                                         tf.constant(0.2, dtype=tf.float32,
-                                                                                     shape=self.excitatory_activation.shape)),
-                                   name='sum_aff_exc'),
-                            tf.multiply(self.inhibitory_activation,
-                                        tf.constant(0.4, dtype=tf.float32, shape=self.inhibitory_activation.shape)),
-                            name='sub_inhib'),
-                self.theta,
-                name='activation')
+        self.previous_activations.data = new_activations.data
 
-        with tf.control_dependencies([new_activations]):
-            self.previous_activations_assign = tf.assign(self.previous_activations, new_activations,
-                                                         name='assign_previous_activations')
-
-            self.inhibitory_activation = tf.Print(self.inhibitory_activation, [self.inhibitory_activation], first_n=0,
-                                                  summarize=self.inhibitory_activation.shape.num_elements(),
-                                                  name='inhibitory_activation_print')
-
-        output = tf.tuple([new_activations, self.previous_activations_assign], name='lissom_final_ops')
-        # For weights update in training step
-        self.activity = output[0]
-        return output[0]
+        return new_activations
 
 
 def inference_cortex(input, lgn_shape, v1_shape, scope, simple_lissom):
-    v1_layer = LissomCortexLayer(lgn_shape, v1_shape, name=scope + 'v1')
+    v1_layer = LissomCortexLayer(lgn_shape, v1_shape)
     if simple_lissom:
         v1 = v1_layer.activation(input)
     else:
