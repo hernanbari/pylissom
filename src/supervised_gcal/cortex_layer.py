@@ -53,7 +53,10 @@ def circular_mask(mat, radius):
 
 class LissomCortexLayer(Layer):
     def __init__(self, input_shape, self_shape, theta=0.0, afferent_radius=None, excitatory_radius=2,
-                 inhibitory_radius=None):
+                 inhibitory_radius=None, settling_steps=15, inhib_factor=1.35, excit_factor=1.05):
+        self.excit_factor = excit_factor
+        self.inhib_factor = inhib_factor
+        self.settling_steps = settling_steps
         self.inhibitory_radius = inhibitory_radius
         self.excitatory_radius = excitatory_radius
         self.afferent_radius = afferent_radius
@@ -99,16 +102,18 @@ class LissomCortexLayer(Layer):
             # self.afferent_activation = tf.add(on_activation, off_activation)
             # self.on = on
             # self.off = off
-        self.excitatory_activation = self._lateral_activation(self.afferent_activation,
-                                                              self.excitatory_weights)
-        self.inhibitory_activation = self._lateral_activation(self.afferent_activation,
-                                                              self.inhibitory_weights)
+        self.previous_activations = self.afferent_activation
+        for _ in range(self.settling_steps):
+            self.excitatory_activation = self._lateral_activation(self.previous_activations,
+                                                                  self.excitatory_weights)
+            self.inhibitory_activation = self._lateral_activation(self.previous_activations,
+                                                                  self.inhibitory_weights)
 
-        new_activations = torch.clamp(
-            self.afferent_activation + 0.2 * self.excitatory_activation - self.inhibitory_activation * 0.4,
-            min=self.theta, max=1)
+            new_activations = torch.clamp(
+                self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation,
+                min=self.theta, max=1)
 
-        self.previous_activations = new_activations
+            self.previous_activations = new_activations
 
         return new_activations
 

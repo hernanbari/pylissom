@@ -27,7 +27,7 @@ parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                     help='input batch size for testing (default: 1000)')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
+parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
@@ -85,17 +85,19 @@ class Net(nn.Module):
 
 
 # model = Net()
-model = LissomCortexLayer((1, 784), (28, 28))
+model = LissomCortexLayer((1, 784), (20, 20))
 if args.cuda:
     model.cuda()
 
 # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-optimizer = LissomHebbianOptimizer(0.1)
+optimizer = LissomHebbianOptimizer()
 
 
 def train(epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
+        if batch_idx > 100:
+            break
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
@@ -111,7 +113,7 @@ def train(epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), 100))
 
-        if batch_idx < 2000 and (batch_idx < 5 or batch_idx % 100 == 0):
+        if batch_idx < 2000 or (batch_idx < 5 or batch_idx % 100 == 0):
             images_numpy = [x.view(1, 1, 28, 28) for x in
                             [data.data, output, model.afferent_activation, model.inhibitory_activation,
                              model.excitatory_activation, model.retina_activation]]
@@ -122,7 +124,8 @@ def train(epoch):
                 im = vutils.make_grid(im)
                 writer.add_image(title, im, batch_idx)
 
-            weights = [w for w in map(summary_weights, [model.retina_weights, model.inhibitory_weights, model.excitatory_weights])]
+            weights = [w for w in
+                       map(summary_weights, [model.retina_weights, model.inhibitory_weights, model.excitatory_weights])]
             weights.append(summary_weights(model.retina_weights, last=True))
             images_numpy = [x.view(2, 1, 28, 28) for x in weights]
             for title, im in zip(['model.retina_weights_first', 'model.inhibitory_weights', 'model.excitatory_weights',

@@ -42,5 +42,5 @@ class LissomHebbianOptimizer(object):
 
         return
 
-    def __init__(self, learning_rate):
+    def __init__(self, learning_rate=0.005):
         self.learning_rate = learning_rate
