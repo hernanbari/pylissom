@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import argparse
+import os
+import shutil
 
 import visdom
 from tensorboard import SummaryWriter
@@ -14,6 +16,8 @@ from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
 from torch.autograd import Variable
 from torchvision import datasets, transforms
 
+if os.path.exists('runs'):
+    shutil.rmtree('runs')
 writer = SummaryWriter()
 vis = visdom.Visdom()
 
@@ -102,23 +106,40 @@ def train(epoch):
         # loss.backward()
 
         optimizer.update_weights(model, simple_lissom=True)
-        images_numpy = [x.view(1, 1, 28, 28) for x in
-                        [data.data, output, model.afferent_activation, model.inhibitory_activation,
-                         model.excitatory_activation, model.retina_activation]]
-
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), 100))
-        if batch_idx < 50 and (batch_idx < 5 or batch_idx % 10 == 0):
+
+        if batch_idx < 2000 and (batch_idx < 5 or batch_idx % 100 == 0):
+            images_numpy = [x.view(1, 1, 28, 28) for x in
+                            [data.data, output, model.afferent_activation, model.inhibitory_activation,
+                             model.excitatory_activation, model.retina_activation]]
+
             for title, im in zip(['input', 'output', 'model.afferent_activation', 'model.inhibitory_activation',
                                   'model.excitatory_activation', 'model.retina_activation'], images_numpy):
-                import ipdb;
-                ipdb.set_trace()
                 vis.image(im, opts={'caption': title, 'height': 200, 'width': 200})
                 im = vutils.make_grid(im)
                 writer.add_image(title, im, batch_idx)
+
+            weights = [w for w in map(summary_weights, [model.retina_weights, model.inhibitory_weights, model.excitatory_weights])]
+            weights.append(summary_weights(model.retina_weights, last=True))
+            images_numpy = [x.view(2, 1, 28, 28) for x in weights]
+            for title, im in zip(['model.retina_weights_first', 'model.inhibitory_weights', 'model.excitatory_weights',
+                                  'model.retina_weights_last'], images_numpy):
+                im = vutils.make_grid(im, nrow=2)
+                writer.add_image(title, im, batch_idx)
+
     writer.close()
+
+
+def summary_weights(input, last=False, max_outputs=2):
+    input = input * 28
+    if last:
+        input = input[:, -max_outputs:]
+    else:
+        input = input[:, :max_outputs]
+    return torch.t(input).contiguous().data
 
 
 def test():
