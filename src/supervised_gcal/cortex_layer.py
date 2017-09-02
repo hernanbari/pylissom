@@ -41,7 +41,9 @@ def circular_mask(mat, radius):
         return mat
     dims = mat.shape[0]
     half_dims = int(np.sqrt(dims))
-    tmp_shape = (half_dims, half_dims, half_dims, half_dims)
+    dims2 = mat.shape[1]
+    half_dims2 = int(np.sqrt(dims2))
+    tmp_shape = (half_dims, half_dims, half_dims2, half_dims2)
 
     # When the distance between the points of the two matrices is greater than radius, set to 0
     mask = np.fromfunction(function=lambda x, y, mu_x, mu_y: mask_distance_gt_radius(x, y, mu_x, mu_y, radius),

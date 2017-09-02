@@ -85,7 +85,7 @@ class Net(nn.Module):
 
 
 # model = Net()
-model = LissomCortexLayer((1, 784), (20, 20))
+model = LissomCortexLayer((1, 784), (28, 28))
 if args.cuda:
     model.cuda()
 
@@ -96,7 +96,7 @@ optimizer = LissomHebbianOptimizer()
 def train(epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        if batch_idx > 100:
+        if batch_idx > 2000:
             break
         if args.cuda:
             data, target = data.cuda(), target.cuda()
