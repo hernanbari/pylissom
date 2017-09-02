@@ -2,17 +2,19 @@ from __future__ import print_function
 
 import argparse
 
-import numpy as np
 import visdom
-from torchvision import datasets, transforms
+from tensorboard import SummaryWriter
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.utils as vutils
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
 from torch.autograd import Variable
+from torchvision import datasets, transforms
 
+writer = SummaryWriter()
 vis = visdom.Visdom()
 
 # Training settings
@@ -33,7 +35,15 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
+parser.add_argument('--ipdb', action='store_true', default=False,
+                    help='activate ipdb set_trace()')
 args = parser.parse_args()
+
+if not args.ipdb:
+    import ipdb
+
+    ipdb.set_trace = lambda: 0
+
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
 torch.manual_seed(args.seed)
@@ -92,17 +102,23 @@ def train(epoch):
         # loss.backward()
 
         optimizer.update_weights(model, simple_lissom=True)
-        images_numpy = [np.reshape(x.numpy(), (1, 28, 28)) for x in
+        images_numpy = [x.view(1, 1, 28, 28) for x in
                         [data.data, output, model.afferent_activation, model.inhibitory_activation,
                          model.excitatory_activation, model.retina_activation]]
-        for title, im in zip(['input', 'output', 'model.afferent_activation', 'model.inhibitory_activation',
-                              'model.excitatory_activation', 'model.retina_activation'], images_numpy):
-            vis.image(im, opts={'caption': title, 'height': 300, 'width': 300})
-            
+
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), 100))
+        if batch_idx < 50 and (batch_idx < 5 or batch_idx % 10 == 0):
+            for title, im in zip(['input', 'output', 'model.afferent_activation', 'model.inhibitory_activation',
+                                  'model.excitatory_activation', 'model.retina_activation'], images_numpy):
+                import ipdb;
+                ipdb.set_trace()
+                vis.image(im, opts={'caption': title, 'height': 200, 'width': 200})
+                im = vutils.make_grid(im)
+                writer.add_image(title, im, batch_idx)
+    writer.close()
 
 
 def test():
