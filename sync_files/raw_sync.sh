@@ -6,10 +6,10 @@ else
     date
 
 
-    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" | grep py$ | grep -v npy > sync_files/files
-    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" | grep yaml$ >> sync_files/files
-    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" | grep sql$ >> sync_files/files
-    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" | grep ipynb$ >> sync_files/files
+    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" -not -path "./pytorch" | grep py$ | grep -v npy > sync_files/files
+    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" -not -path "./pytorch" | grep yaml$ >> sync_files/files
+    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" -not -path "./pytorch" | grep sql$ >> sync_files/files
+    find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" -not -path "./pytorch" | grep ipynb$ >> sync_files/files
 
 
     rsync -r --partial --files-from=sync_files/files --rsh=ssh . hbari@nikola.dc.uba.ar:$nikola_path
