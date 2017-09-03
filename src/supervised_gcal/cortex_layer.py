@@ -72,10 +72,6 @@ class LissomCortexLayer(Layer):
                                                                        radius=radius))))
 
     def _setup_variables(self):
-        self.on_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
-
-        self.off_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
-
         self.inhibitory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.inhibitory_radius)
 
         self.excitatory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.excitatory_radius)
@@ -84,6 +80,11 @@ class LissomCortexLayer(Layer):
 
         # Variable que guarda activaciones previas
         self.previous_activations = torch.Tensor(get_zeros(self.activations_shape))
+
+        # NOT IMPLEMENTED YET
+        # self.on_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
+        #
+        # self.off_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
     def _afferent_activation(self, input, weights):
         return torch.clamp(torch.matmul(input, weights.data), min=self.min_theta, max=self.max_theta)
@@ -99,8 +100,10 @@ class LissomCortexLayer(Layer):
             self.retina_activation = self._afferent_activation(retina, self.retina_weights)
             self.afferent_activation = self.retina_activation
         else:
-            on, off = input
-            on_activation = self._afferent_activation(on, self.on_weights)
+            pass
+            # NOT IMPLEMENTED
+            # on, off = input
+            # on_activation = self._afferent_activation(on, self.on_weights)
             # off_activation = self._afferent_activation(off, self.off_weights)
             # self.afferent_activation = tf.add(on_activation, off_activation)
             # self.on = on
@@ -126,6 +129,8 @@ def inference_cortex(input, lgn_shape, v1_shape, simple_lissom):
     if simple_lissom:
         v1 = v1_layer.activation(input)
     else:
-        on, off = input
-        v1 = v1_layer.activation((on, off))
+        pass
+        # NOT IMPLEMENTED
+        # on, off = input
+        # v1 = v1_layer.activation((on, off))
     return v1, v1_layer

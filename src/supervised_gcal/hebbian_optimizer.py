@@ -28,11 +28,13 @@ class LissomHebbianOptimizer(object):
                              lissom_layer.previous_activations,
                              self.learning_rate)
         else:
-            hebbian_learning(lissom_layer.on_weights, lissom_layer.on, lissom_layer.previous_activations,
-                             self.learning_rate)
-
-            hebbian_learning(lissom_layer.off_weights, lissom_layer.off, lissom_layer.previous_activations,
-                             self.learning_rate)
+            pass
+            # NOT IMPLEMENTED
+            # hebbian_learning(lissom_layer.on_weights, lissom_layer.on, lissom_layer.previous_activations,
+            #                  self.learning_rate)
+            #
+            # hebbian_learning(lissom_layer.off_weights, lissom_layer.off, lissom_layer.previous_activations,
+            #                  self.learning_rate)
 
         hebbian_learning(lissom_layer.excitatory_weights, lissom_layer.previous_activations,
                          lissom_layer.previous_activations, self.learning_rate, sum=True)
