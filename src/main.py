@@ -4,11 +4,11 @@ import argparse
 import os
 import shutil
 
+import numpy as np
 import visdom
 from tensorboard import SummaryWriter
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.utils as vutils
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
@@ -64,16 +64,21 @@ test_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
     batch_size=args.batch_size, shuffle=True, **kwargs)
 
-
 # Lissom Model
-model = LissomCortexLayer((1, 784), (28, 28))
+classes = 10
+lissom_shape = (20, 20)
+input_shape = (28, 28)
+lissom_neurons = int(np.prod(lissom_shape))
+input_neurons = int(np.prod(input_shape))
+model = LissomCortexLayer((1, input_neurons), lissom_shape)
 optimizer = LissomHebbianOptimizer()
 
 # 2 Layer Net
+hidden_neurons = 20
 model_nn = torch.nn.Sequential(
-    torch.nn.Linear(784, 20),
+    torch.nn.Linear(lissom_neurons, hidden_neurons),
     torch.nn.ReLU(),
-    torch.nn.Linear(20, 10),
+    torch.nn.Linear(hidden_neurons, classes),
     torch.nn.LogSoftmax()
 )
 optimizer_nn = torch.optim.Adam(model_nn.parameters(), lr=1e-4)
@@ -109,30 +114,28 @@ def train(epoch):
 
 
 def summary_images(batch_idx, data, output):
-    images_numpy = [x.view(1, 1, 28, 28) for x in
-                    [data.data, output, model.afferent_activation, model.inhibitory_activation,
+    images_numpy = [x.view((1, 1) + lissom_shape) for x in
+                    [output, model.afferent_activation, model.inhibitory_activation,
                      model.excitatory_activation, model.retina_activation]]
+    images_numpy.append(data.data.view((1, 1) + input_shape))
     for title, im in zip(['input', 'output', 'model.afferent_activation', 'model.inhibitory_activation',
                           'model.excitatory_activation', 'model.retina_activation'], images_numpy):
         im = vutils.make_grid(im)
         writer.add_image(title, im, batch_idx)
-    orig_weights = [model.retina_weights, model.inhibitory_weights, model.excitatory_weights]
+    orig_weights = [model.inhibitory_weights, model.excitatory_weights]
     weights = [w for w in
                map(summary_weights, orig_weights)]
-    images_numpy = [x.view(784, 1, 28, 28) for x in weights]
-    for title, im in zip(['model.retina_weights_first', 'model.inhibitory_weights', 'model.excitatory_weights',
-                          'model.retina_weights_last'], images_numpy):
-        im = vutils.make_grid(im, nrow=28)
+    weights.append(summary_weights(model.retina_weights, afferent=True))
+    for title, im in zip(['model.inhibitory_weights', 'model.excitatory_weights',
+                          'model.retina_weights'], weights):
+        im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])))
         writer.add_image(title, im, batch_idx)
 
 
-def summary_weights(input, last=False, max_outputs=784):
-    input = input * 28
-    if last:
-        input = input[:, -max_outputs:]
-    else:
-        input = input[:, :max_outputs]
-    return torch.t(input).contiguous().data
+def summary_weights(input, afferent=False):
+    shape = input_shape if afferent else lissom_shape
+    input = input * shape[0]
+    return torch.t(input).contiguous().data.view((input.shape[1], 1) + shape)
 
 
 def test():

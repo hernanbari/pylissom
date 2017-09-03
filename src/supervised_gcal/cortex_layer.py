@@ -54,44 +54,45 @@ def circular_mask(mat, radius):
 
 
 class LissomCortexLayer(Layer):
-    def __init__(self, input_shape, self_shape, theta=0.0, afferent_radius=None, excitatory_radius=2,
-                 inhibitory_radius=None, settling_steps=15, inhib_factor=1.35, excit_factor=1.05):
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0,afferent_radius=None, excitatory_radius=2,
+                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05):
+        self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
         self.settling_steps = settling_steps
         self.inhibitory_radius = inhibitory_radius
         self.excitatory_radius = excitatory_radius
         self.afferent_radius = afferent_radius
-        self.theta = theta
+        self.min_theta = min_theta
         super().__init__(input_shape, self_shape)
 
-    def _get_weight_variable(self, radius):
+    def _get_weight_variable(self, shape, radius):
         # TODO: learn what Parameter means
-        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_uniform(self.weights_shape),
+        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_uniform(shape),
                                                                        radius=radius))))
 
     def _setup_variables(self):
-        self.on_weights = self._get_weight_variable(self.afferent_radius)
+        self.on_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
-        self.off_weights = self._get_weight_variable(self.afferent_radius)
+        self.off_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
-        self.inhibitory_weights = self._get_weight_variable(self.inhibitory_radius)
+        self.inhibitory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.inhibitory_radius)
 
-        self.excitatory_weights = self._get_weight_variable(self.excitatory_radius)
+        self.excitatory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.excitatory_radius)
 
-        self.retina_weights = self._get_weight_variable(self.afferent_radius)
+        self.retina_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
         # Variable que guarda activaciones previas
-        self.previous_activations = torch.Tensor(get_zeros(self.previous_activations_shape))
+        self.previous_activations = torch.Tensor(get_zeros(self.activations_shape))
 
     def _afferent_activation(self, input, weights):
-        return torch.clamp(torch.matmul(input, weights.data), min=self.theta, max=1)
+        return torch.clamp(torch.matmul(input, weights.data), min=self.min_theta, max=self.max_theta)
 
     def _lateral_activation(self, previous_activations, weights):
-        return torch.clamp(torch.matmul(previous_activations, weights.data), min=self.theta, max=1)
+        return torch.clamp(torch.matmul(previous_activations, weights.data), min=self.min_theta, max=self.max_theta)
 
     def forward(self, input, simple_lissom=True):
-        input = input.data.view((1, 784))
+        input = input.data.view(self.input_shape)
         if simple_lissom:
             retina = input
             self.retina = retina
@@ -113,7 +114,7 @@ class LissomCortexLayer(Layer):
 
             new_activations = torch.clamp(
                 self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation,
-                min=self.theta, max=1)
+                min=self.min_theta, max=1)
 
             self.previous_activations = new_activations
 
