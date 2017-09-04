@@ -89,10 +89,10 @@ class LissomCortexLayer(Layer):
         # self.off_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
     def _afferent_activation(self, input, weights):
-        return torch.clamp(torch.matmul(input, weights.data), min=self.min_theta, max=self.max_theta)
+        return torch.matmul(input, weights.data)
 
     def _lateral_activation(self, previous_activations, weights):
-        return torch.clamp(torch.matmul(previous_activations, weights.data), min=self.min_theta, max=self.max_theta)
+        return torch.matmul(previous_activations, weights.data)
 
     def process_input(self, input, normalize=False):
         var = input
