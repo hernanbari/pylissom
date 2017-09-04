@@ -54,8 +54,10 @@ def circular_mask(mat, radius):
 
 
 class LissomCortexLayer(Layer):
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0,afferent_radius=None, excitatory_radius=2,
-                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05):
+    # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0,afferent_radius=None, excitatory_radius=4,
+                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05, simple_lissom=True):
+        self.simple_lissom = simple_lissom
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -92,17 +94,24 @@ class LissomCortexLayer(Layer):
     def _lateral_activation(self, previous_activations, weights):
         return torch.clamp(torch.matmul(previous_activations, weights.data), min=self.min_theta, max=self.max_theta)
 
-    def forward(self, input, simple_lissom=True):
-        input = input.data.view(self.input_shape)
-        if simple_lissom:
-            retina = input
+    def process_input(self, input, normalize=False):
+        var = input
+        if normalize:
+            var = var / torch.norm(input, p=1, dim=1)
+        var = var.data.view(self.input_shape)
+        return var
+
+    def forward(self, input):
+        processed_input = self.process_input(input)
+        if self.simple_lissom:
+            retina = processed_input
             self.retina = retina
             self.retina_activation = self._afferent_activation(retina, self.retina_weights)
             self.afferent_activation = self.retina_activation
         else:
             pass
             # NOT IMPLEMENTED
-            # on, off = input
+            # on, off = processed_input
             # on_activation = self._afferent_activation(on, self.on_weights)
             # off_activation = self._afferent_activation(off, self.off_weights)
             # self.afferent_activation = tf.add(on_activation, off_activation)
@@ -117,7 +126,7 @@ class LissomCortexLayer(Layer):
 
             new_activations = torch.clamp(
                 self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation,
-                min=self.min_theta, max=1)
+                min=self.min_theta, max=self.max_theta)
 
             self.previous_activations = new_activations
 
