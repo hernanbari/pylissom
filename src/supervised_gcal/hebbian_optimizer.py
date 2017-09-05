@@ -47,7 +47,7 @@ def hebbian_learning(weights, input, output, learning_rate, sum=False):
     else:
         # L2 without input image normalization is garbage
         # In spite of being used correctly, the activations are too low
-        den = torch.norm(zero_update, p=2, dim=0)
+        den = torch.norm(zero_update, p=1, dim=0)
     normalization = torch.div(zero_update, den)
     weights.data = normalization
     return

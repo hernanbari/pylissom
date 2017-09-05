@@ -57,9 +57,6 @@ train_loader = torch.utils.data.DataLoader(
                    transform=transforms.ToTensor()
                    ),
     batch_size=args.batch_size, shuffle=False, **kwargs)
-test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-    batch_size=args.batch_size, shuffle=False, **kwargs)
 
 # Lissom Model
 classes = 10
@@ -70,17 +67,8 @@ input_neurons = int(np.prod(input_shape))
 lissom_model = LissomCortexLayer(input_shape, lissom_shape)
 optimizer = LissomHebbianOptimizer()
 
-# 2 Layer Net
-hidden_neurons = 20
-perceptron_model = torch.nn.Sequential(
-    torch.nn.Linear(lissom_neurons, classes),
-    torch.nn.LogSoftmax()
-)
-optimizer_nn = torch.optim.SGD(perceptron_model.parameters(), lr=0.1)
-
 if args.cuda:
     lissom_model.cuda()
-    perceptron_model.cuda()
 
 
 def train_lissom(epoch):
@@ -96,7 +84,7 @@ def train_lissom(epoch):
         optimizer.update_weights(lissom_model, step=batch_idx)
         summary_images(lissom_model, batch_idx, data, output, writer)
 
-        if batch_idx % (args.log_interval * 64) == 0:
+        if batch_idx % (args.log_interval * 50) == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader)))
@@ -106,8 +94,31 @@ def train_lissom(epoch):
 for epoch in range(1, args.epochs + 1):
     train_lissom(epoch)
 
+# Increases batch sizes for perceptron
+kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+train_loader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=True, download=True,
+                   transform=transforms.ToTensor()
+                   ),
+    batch_size=64, shuffle=False, **kwargs)
 
-def train_nn(epoch):
+test_loader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
+    batch_size=1000, shuffle=False, **kwargs)
+
+# 2 Layer Net
+hidden_neurons = 20
+perceptron_model = torch.nn.Sequential(
+    torch.nn.Linear(lissom_neurons, classes),
+    torch.nn.LogSoftmax()
+)
+optimizer_nn = torch.optim.SGD(perceptron_model.parameters(), lr=0.1)
+
+if args.cuda:
+    perceptron_model.cuda()
+
+
+def train_nn(epoch, control=False):
     perceptron_model.train()
     # Train network
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -116,28 +127,34 @@ def train_nn(epoch):
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
-        output = lissom_model(data)
+        if not control:
+            output = lissom_model(data)
+        else:
+            output = data
         nn_output = perceptron_model(torch.autograd.Variable(output))
         loss = F.nll_loss(nn_output, target)
         optimizer_nn.zero_grad()
         loss.backward()
         optimizer_nn.step()
 
-        if batch_idx % (args.log_interval * 64) == 0:
+        if batch_idx % (args.log_interval * 50) == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.data[0]))
 
 
-def test():
-    lissom_model.eval()
+def test(control=False):
+    perceptron_model.eval()
     test_loss = 0
     correct = 0
     for data, target in test_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
-        output = lissom_model(data)
+        if not control:
+            output = lissom_model(data)
+        else:
+            output = data
         nn_output = perceptron_model(torch.autograd.Variable(output))
         test_loss += F.nll_loss(nn_output, target, size_average=False).data[0]  # sum up batch loss
         pred = nn_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
@@ -152,3 +169,8 @@ def test():
 for epoch in range(1, args.epochs * 10 + 1):
     train_nn(epoch)
     test()
+
+# Control
+for epoch in range(1, args.epochs * 10 + 1):
+    train_nn(epoch, control=True)
+    test(control=True)

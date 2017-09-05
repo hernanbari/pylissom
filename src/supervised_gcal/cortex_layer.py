@@ -5,8 +5,8 @@ from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circula
 
 class LissomCortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
-    def __init__(self, input_shape, self_shape, min_theta=1.0, max_theta=3.5, afferent_radius=None, excitatory_radius=8,
-                 inhibitory_radius=None, settling_steps=9, inhib_factor=1.35, excit_factor=1.05):
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=4,
+                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -40,7 +40,7 @@ class LissomCortexLayer(Layer):
     def _lateral_activation(self, previous_activations, weights):
         return torch.matmul(previous_activations, weights.data)
 
-    def process_input(self, input, normalize=True):
+    def process_input(self, input, normalize=False):
         var = input
         if normalize:
             var = var / torch.norm(input, p=1, dim=1)
@@ -48,7 +48,7 @@ class LissomCortexLayer(Layer):
         return var
 
     def custom_sigmoid(self, new_activations):
-        threshold_less = torch.nn.functional.threshold(new_activations, self.min_theta, value=0)
+        threshold_less = torch.nn.functional.threshold(new_activations, self.min_theta, value=0.0)
         new_activations.masked_fill_(
             mask=torch.gt(threshold_less, self.max_theta).data,
             value=1.0)
