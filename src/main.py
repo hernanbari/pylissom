@@ -100,11 +100,11 @@ train_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=True, download=True,
                    transform=transforms.ToTensor()
                    ),
-    batch_size=64, shuffle=False, **kwargs)
+    batch_size=1, shuffle=False, **kwargs)
 
 test_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-    batch_size=1000, shuffle=False, **kwargs)
+    batch_size=1, shuffle=False, **kwargs)
 
 # 2 Layer Net
 hidden_neurons = 20

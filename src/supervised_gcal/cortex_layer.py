@@ -73,5 +73,5 @@ class LissomCortexLayer(Layer):
             new_activations = self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation
             new_activations = self.custom_sigmoid(new_activations).data
 
-            self.previous_activations = new_activations.data
+            self.previous_activations = new_activations
         return new_activations
