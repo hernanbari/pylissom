@@ -9,9 +9,9 @@ from tensorboard import SummaryWriter
 
 import torch
 import torch.nn.functional as F
-import torchvision.utils as vutils
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
+from src.supervised_gcal.utils import summary_images
 from torch.autograd import Variable
 from torchvision import datasets, transforms
 
@@ -67,24 +67,48 @@ lissom_shape = (20, 20)
 input_shape = (28, 28)
 lissom_neurons = int(np.prod(lissom_shape))
 input_neurons = int(np.prod(input_shape))
-model = LissomCortexLayer((1, input_neurons), lissom_shape)
+lissom_model = LissomCortexLayer(input_shape, lissom_shape)
 optimizer = LissomHebbianOptimizer()
 
 # 2 Layer Net
 hidden_neurons = 20
-model_nn = torch.nn.Sequential(
+perceptron_model = torch.nn.Sequential(
     torch.nn.Linear(lissom_neurons, classes),
     torch.nn.LogSoftmax()
 )
-optimizer_nn = torch.optim.SGD(model_nn.parameters(), lr=0.1)
+optimizer_nn = torch.optim.SGD(perceptron_model.parameters(), lr=0.1)
 
 if args.cuda:
-    model.cuda()
-    model_nn.cuda()
+    lissom_model.cuda()
+    perceptron_model.cuda()
+
+
+def train_lissom(epoch):
+    lissom_model.train()
+    writer = SummaryWriter(log_dir='runs/epoch_' + str(epoch))
+    for batch_idx, (data, target) in enumerate(train_loader):
+        if batch_idx > 2000:
+            break
+        if args.cuda:
+            data, target = data.cuda(), target.cuda()
+        data, target = Variable(data), Variable(target)
+        output = lissom_model(data)
+        optimizer.update_weights(lissom_model, step=batch_idx)
+        summary_images(lissom_model, batch_idx, data, output, writer)
+
+        if batch_idx % (args.log_interval * 64) == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                       100. * batch_idx / len(train_loader)))
+    writer.close()
+
+
+for epoch in range(1, args.epochs + 1):
+    train_lissom(epoch)
 
 
 def train_nn(epoch):
-    model_nn.train()
+    perceptron_model.train()
     # Train network
     for batch_idx, (data, target) in enumerate(train_loader):
         if batch_idx > 2000:
@@ -92,8 +116,8 @@ def train_nn(epoch):
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
-        output = model(data)
-        nn_output = model_nn(torch.autograd.Variable(output))
+        output = lissom_model(data)
+        nn_output = perceptron_model(torch.autograd.Variable(output))
         loss = F.nll_loss(nn_output, target)
         optimizer_nn.zero_grad()
         loss.backward()
@@ -105,61 +129,16 @@ def train_nn(epoch):
                        100. * batch_idx / len(train_loader), loss.data[0]))
 
 
-def train_lissom(epoch):
-    model.train()
-    writer = SummaryWriter(log_dir='runs/epoch_'+str(epoch))
-    for batch_idx, (data, target) in enumerate(train_loader):
-        if batch_idx > 2000:
-            break
-        if args.cuda:
-            data, target = data.cuda(), target.cuda()
-        data, target = Variable(data), Variable(target)
-        output = model(data)
-        optimizer.update_weights(model, step=batch_idx)
-        summary_images(batch_idx, data, output, writer)
-
-        if batch_idx % (args.log_interval * 64) == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader)))
-    writer.close()
-
-
-def summary_images(batch_idx, data, output, writer):
-    images_numpy = [x.view((1, 1) + lissom_shape) for x in
-                    [output, model.afferent_activation, model.inhibitory_activation,
-                     model.excitatory_activation, model.retina_activation]]
-    images_numpy.append(data.data.view((1, 1) + input_shape))
-    for title, im in zip(['output', 'model.afferent_activation', 'model.inhibitory_activation',
-                          'model.excitatory_activation', 'model.retina_activation', 'input'], images_numpy):
-        im = vutils.make_grid(im)
-        writer.add_image(title, im, batch_idx)
-    orig_weights = [model.inhibitory_weights, model.excitatory_weights]
-    weights = [w for w in
-               map(summary_weights, orig_weights)]
-    weights.append(summary_weights(model.retina_weights, afferent=True))
-    for title, im in zip(['model.inhibitory_weights', 'model.excitatory_weights',
-                          'model.retina_weights'], weights):
-        im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])))
-        writer.add_image(title, im, batch_idx)
-
-
-def summary_weights(input, afferent=False):
-    shape = input_shape if afferent else lissom_shape
-    input = input * shape[0]
-    return torch.t(input).contiguous().data.view((input.shape[1], 1) + shape)
-
-
 def test():
-    model.eval()
+    lissom_model.eval()
     test_loss = 0
     correct = 0
     for data, target in test_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
-        output = model(data)
-        nn_output = model_nn(torch.autograd.Variable(output))
+        output = lissom_model(data)
+        nn_output = perceptron_model(torch.autograd.Variable(output))
         test_loss += F.nll_loss(nn_output, target, size_average=False).data[0]  # sum up batch loss
         pred = nn_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
@@ -170,9 +149,6 @@ def test():
         100. * correct / len(test_loader.dataset)))
 
 
-for epoch in range(1, args.epochs + 1):
-    train_lissom(epoch)
-
-for epoch in range(1, args.epochs*10 + 1):
+for epoch in range(1, args.epochs * 10 + 1):
     train_nn(epoch)
     test()

@@ -1,63 +1,12 @@
-############
-# V1/ Cortex
-# Conexiones
-# 0. Se conectan con cierto centro random a su LGN on/off optimo con cierto radio definido
-# 1. El radio definido tiene q ser grande y q se superpongan
-# 2. Pesos iniciales random normalizados
-# 3. Conexiones laterales positivas excitatorias un poco menores a las aferentes
-# 4. Conexiones laterales positivas inhibitorias mas grandes q la afferente
-# Activacion
-# 5. relu_con_threshold de
-# 6. on_dot_product(input,pesos) + off_dot_product(input,pesos)
-# 7. + excitatoria_dot_product(neurona,pesos)_t-1 - inhibitoria_dot_product(neurona,pesos)_t-1
-# Learning
-# 8. Hebbian rule con normalizacion (checkear pargina 77 que significa actividad presinaptica en el codigo)
-#    CREO Q ES TIPO, INPUT VS OUTPUT, en gcal queda mas claro
-# 9. connection death de lateral connections despues de cierto t_d debajo de un threshold
-
-#########
-# V1/Cortex
-# Conexiones
-# 0. Creo q no cambian
-# Activaciones
-# 1. Igual q lissom, agrega constantes
-# 2. Se repite 16 veces por input, en la cual los pesos afferentes se mantienen pero el resto cambia por alguna razon
-#   q no entendi (Creo q igual q lissom)
-# Adaptation
-# 3. Cuando terminan los settling steps, cada neurona se updatea el treshold haciendo un promedio exponencial smoothed
-#   sobre sus patrones de activacion
-# Learning
-# 4. Misma q lissom
-
-import numpy as np
-
 import torch
 from src.supervised_gcal.layer import Layer
-from src.supervised_gcal.utils import get_zeros, get_uniform, mask_distance_gt_radius, normalize
-
-
-def circular_mask(mat, radius):
-    if radius is None:
-        return mat
-    dims = mat.shape[0]
-    half_dims = int(np.sqrt(dims))
-    dims2 = mat.shape[1]
-    half_dims2 = int(np.sqrt(dims2))
-    tmp_shape = (half_dims, half_dims, half_dims2, half_dims2)
-
-    # When the distance between the points of the two matrices is greater than radius, set to 0
-    mask = np.fromfunction(function=lambda x, y, mu_x, mu_y: mask_distance_gt_radius(x, y, mu_x, mu_y, radius),
-                           shape=tmp_shape, dtype=int)
-    mask = np.reshape(mask, mat.shape)
-    masked_mat = np.ma.masked_where(condition=mask, a=mat)
-    return masked_mat.filled(0)
+from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circular_mask
 
 
 class LissomCortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0,afferent_radius=None, excitatory_radius=4,
-                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05, simple_lissom=True):
-        self.simple_lissom = simple_lissom
+    def __init__(self, input_shape, self_shape, min_theta=1.0, max_theta=3.5, afferent_radius=None, excitatory_radius=8,
+                 inhibitory_radius=None, settling_steps=9, inhib_factor=1.35, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -74,19 +23,16 @@ class LissomCortexLayer(Layer):
                                                                        radius=radius))))
 
     def _setup_variables(self):
-        self.inhibitory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.inhibitory_radius)
+        self.inhibitory_weights = self._get_weight_variable(shape=self.lateral_weights_shape,
+                                                            radius=self.inhibitory_radius)
 
-        self.excitatory_weights = self._get_weight_variable(shape=self.lateral_weights_shape, radius=self.excitatory_radius)
+        self.excitatory_weights = self._get_weight_variable(shape=self.lateral_weights_shape,
+                                                            radius=self.excitatory_radius)
 
         self.retina_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
         # Variable que guarda activaciones previas
         self.previous_activations = torch.Tensor(get_zeros(self.activations_shape))
-
-        # NOT IMPLEMENTED YET
-        # self.on_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
-        #
-        # self.off_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
 
     def _afferent_activation(self, input, weights):
         return torch.matmul(input, weights.data)
@@ -94,29 +40,28 @@ class LissomCortexLayer(Layer):
     def _lateral_activation(self, previous_activations, weights):
         return torch.matmul(previous_activations, weights.data)
 
-    def process_input(self, input, normalize=False):
+    def process_input(self, input, normalize=True):
         var = input
         if normalize:
             var = var / torch.norm(input, p=1, dim=1)
         var = var.data.view(self.input_shape)
         return var
 
+    def custom_sigmoid(self, new_activations):
+        threshold_less = torch.nn.functional.threshold(new_activations, self.min_theta, value=0)
+        new_activations.masked_fill_(
+            mask=torch.gt(threshold_less, self.max_theta).data,
+            value=1.0)
+
+        new_activations.sub_(self.min_theta).div_(self.max_theta - self.min_theta)
+
     def forward(self, input):
         processed_input = self.process_input(input)
-        if self.simple_lissom:
-            retina = processed_input
-            self.retina = retina
-            self.retina_activation = self._afferent_activation(retina, self.retina_weights)
-            self.afferent_activation = self.retina_activation
-        else:
-            pass
-            # NOT IMPLEMENTED
-            # on, off = processed_input
-            # on_activation = self._afferent_activation(on, self.on_weights)
-            # off_activation = self._afferent_activation(off, self.off_weights)
-            # self.afferent_activation = tf.add(on_activation, off_activation)
-            # self.on = on
-            # self.off = off
+        retina = processed_input
+        self.retina = retina
+        self.retina_activation = self._afferent_activation(retina, self.retina_weights)
+        self.afferent_activation = self.retina_activation
+
         self.previous_activations = self.afferent_activation
         for _ in range(self.settling_steps):
             self.excitatory_activation = self._lateral_activation(self.previous_activations,
@@ -124,22 +69,9 @@ class LissomCortexLayer(Layer):
             self.inhibitory_activation = self._lateral_activation(self.previous_activations,
                                                                   self.inhibitory_weights)
 
-            new_activations = torch.clamp(
-                self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation,
-                min=self.min_theta, max=self.max_theta)
+            new_activations = self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation
+            self.custom_sigmoid(new_activations)
 
             self.previous_activations = new_activations
 
         return new_activations
-
-
-def inference_cortex(input, lgn_shape, v1_shape, simple_lissom):
-    v1_layer = LissomCortexLayer(lgn_shape, v1_shape)
-    if simple_lissom:
-        v1 = v1_layer.activation(input)
-    else:
-        pass
-        # NOT IMPLEMENTED
-        # on, off = input
-        # v1 = v1_layer.activation((on, off))
-    return v1, v1_layer
