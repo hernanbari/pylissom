@@ -48,12 +48,13 @@ class LissomCortexLayer(Layer):
         return var
 
     def custom_sigmoid(self, new_activations):
-        threshold_less = torch.nn.functional.threshold(new_activations, self.min_theta, value=0.0)
+        new_activations = torch.nn.functional.threshold(new_activations, self.min_theta, value=0.0)
         new_activations.masked_fill_(
-            mask=torch.gt(threshold_less, self.max_theta).data,
+            mask=torch.gt(new_activations, self.max_theta),
             value=1.0)
 
         new_activations.sub_(self.min_theta).div_(self.max_theta - self.min_theta)
+        return new_activations
 
     def forward(self, input):
         processed_input = self.process_input(input)
@@ -70,8 +71,7 @@ class LissomCortexLayer(Layer):
                                                                   self.inhibitory_weights)
 
             new_activations = self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation
-            self.custom_sigmoid(new_activations)
+            new_activations = self.custom_sigmoid(new_activations).data
 
-            self.previous_activations = new_activations
-
+            self.previous_activations = new_activations.data
         return new_activations
