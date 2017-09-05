@@ -27,7 +27,7 @@ def kill_neurons(w, threshold):
 
 
 epoch = 1
-final_epoch = 38.0 - 1
+final_epoch = 40.0 - 1
 
 
 def linear_neighbors_decay(w, start):

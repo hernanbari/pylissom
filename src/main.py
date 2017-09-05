@@ -24,7 +24,7 @@ parser.add_argument('--batch-size', type=int, default=1, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',
                     help='input batch size for testing (default: 1000)')
-parser.add_argument('--epochs', type=int, default=38, metavar='N',
+parser.add_argument('--epochs', type=int, default=40, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
@@ -91,6 +91,7 @@ def train_nn(epoch):
             break
         if args.cuda:
             data, target = data.cuda(), target.cuda()
+        data, target = Variable(data), Variable(target)
         output = model(data)
         nn_output = model_nn(torch.autograd.Variable(output))
         loss = F.nll_loss(nn_output, target)
@@ -157,7 +158,7 @@ def test():
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
-        output = model(data, simple_lissom=True)
+        output = model(data)
         nn_output = model_nn(torch.autograd.Variable(output))
         test_loss += F.nll_loss(nn_output, target, size_average=False).data[0]  # sum up batch loss
         pred = nn_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
