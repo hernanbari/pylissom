@@ -11,10 +11,10 @@ class LissomHebbianOptimizer(object):
                          self.learning_rate)
 
         hebbian_learning(lissom_layer.excitatory_weights, lissom_layer.previous_activations,
-                         lissom_layer.previous_activations, self.learning_rate, sum=True)
+                         lissom_layer.previous_activations, self.learning_rate)
 
         hebbian_learning(lissom_layer.inhibitory_weights, lissom_layer.previous_activations,
-                         lissom_layer.previous_activations, self.learning_rate, sum=True)
+                         lissom_layer.previous_activations, self.learning_rate)
 
         if self.pruning_step == step:
             if self.connection_death_threshold is not None:
@@ -34,7 +34,7 @@ class LissomHebbianOptimizer(object):
         self.learning_rate = learning_rate
 
 
-def hebbian_learning(weights, input, output, learning_rate, sum=False):
+def hebbian_learning(weights, input, output, learning_rate, sum=True):
     # Weight adaptation of a single neuron
     # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
     zero_mask = torch.gt(weights.data, 0).float()
@@ -47,7 +47,7 @@ def hebbian_learning(weights, input, output, learning_rate, sum=False):
     else:
         # L2 without input image normalization is garbage
         # In spite of being used correctly, the activations are too low
-        den = torch.norm(zero_update, p=1, dim=0)
+        den = torch.norm(zero_update, p=2, dim=0)
     normalization = torch.div(zero_update, den)
     weights.data = normalization
     return

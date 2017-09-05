@@ -6,7 +6,7 @@ from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circula
 class LissomCortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
     def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=4,
-                 inhibitory_radius=None, settling_steps=30, inhib_factor=1.35, excit_factor=1.05):
+                 inhibitory_radius=None, settling_steps=10, inhib_factor=5.00, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -43,7 +43,7 @@ class LissomCortexLayer(Layer):
     def process_input(self, input, normalize=False):
         var = input
         if normalize:
-            var = var / torch.norm(input, p=1, dim=1)
+            var = var / torch.norm(input, p=2, dim=1)
         var = var.data.view(self.input_shape)
         return var
 

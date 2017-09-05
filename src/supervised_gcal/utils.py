@@ -61,10 +61,10 @@ def kill_neurons(w, threshold):
 
 def summary_images(lissom_model, batch_idx, data, output, writer):
     lissom_shape = lissom_model.self_shape
-    input_shape = lissom_model.input_shape
     images_numpy = [x.view((1, 1) + lissom_shape) for x in
                     [output, lissom_model.afferent_activation, lissom_model.inhibitory_activation,
                      lissom_model.excitatory_activation, lissom_model.retina_activation]]
+    input_shape = (28, 28)
     images_numpy.append(data.data.view((1, 1) + input_shape))
     for title, im in zip(['output', 'model.afferent_activation', 'model.inhibitory_activation',
                           'model.excitatory_activation', 'model.retina_activation', 'input'], images_numpy):
