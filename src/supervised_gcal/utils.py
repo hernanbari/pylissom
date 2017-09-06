@@ -24,6 +24,25 @@ def normalize(input):
     return np.divide(input, np.linalg.norm(input, ord=1, axis=0))
 
 
+def gaussian(x, y, mu_x, mu_y, sigma):
+    num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
+    den = 2 * np.power(sigma, 2)
+    return np.float32(np.exp(-np.divide(num, den)))-0.000000001
+
+
+def get_gaussian(shape, sigma):
+    dims = shape[0]
+    half_dims = int(np.sqrt(dims))
+    dims2 = shape[1]
+    half_dims2 = int(np.sqrt(dims2))
+    tmp_shape = (half_dims, half_dims, half_dims2, half_dims2)
+
+    mat = np.fromfunction(function=lambda x, y, mu_x, mu_y: gaussian(x, y, mu_x, mu_y, sigma=sigma),
+                           shape=tmp_shape, dtype=int)
+    mat = np.reshape(mat, shape)
+    return mat
+
+
 def circular_mask(mat, radius):
     if radius is None:
         return mat

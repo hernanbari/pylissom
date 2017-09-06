@@ -1,12 +1,12 @@
 import torch
 from src.supervised_gcal.layer import Layer
-from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circular_mask
+from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circular_mask, get_gaussian
 
 
 class LissomCortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=4,
-                 inhibitory_radius=None, settling_steps=10, inhib_factor=5.00, excit_factor=1.05):
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=8.0,
+                 inhibitory_radius=None, settling_steps=100, inhib_factor=1.35, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -19,7 +19,8 @@ class LissomCortexLayer(Layer):
 
     def _get_weight_variable(self, shape, radius):
         # TODO: learn what Parameter means
-        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_uniform(shape),
+        sigma = (radius/5 if radius / 5 > 1 else 1) if radius is not None else 4
+        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_gaussian(shape, sigma),
                                                                        radius=radius))))
 
     def _setup_variables(self):

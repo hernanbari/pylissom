@@ -25,10 +25,6 @@ parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',
                     help='input batch size for testing (default: 1000)')
 parser.add_argument('--epochs', type=int, default=40, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                    help='learning rate (default: 0.01)')
-parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
-                    help='SGD momentum (default: 0.5)')
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -39,6 +35,10 @@ parser.add_argument('--ipdb', action='store_true', default=False,
                     help='activate ipdb set_trace()')
 parser.add_argument('--ck', action='store_true', default=False,
                     help='uses cohn-kanade dataset')
+parser.add_argument('--two-layers', action='store_true', default=False,
+                    help='uses 2 lissom layers')
+parser.add_argument('--only-one', action='store_true', default=False,
+                    help='trains with number one')
 
 args = parser.parse_args()
 
@@ -66,6 +66,13 @@ optimizer = LissomHebbianOptimizer()
 if args.cuda:
     lissom_model.cuda()
 
+if args.two_layers:
+    lissom_model_2 = LissomCortexLayer(lissom_shape, lissom_shape)
+    optimizer_2 = LissomHebbianOptimizer()
+
+    if args.cuda:
+        lissom_model_2.cuda()
+
 
 def train_lissom(epoch):
     lissom_model.train()
@@ -76,9 +83,20 @@ def train_lissom(epoch):
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
+        if args.only_one and target.data[0] == 1:
+            for i in range(250):
+                output = lissom_model(data)
+                optimizer.update_weights(lissom_model, step=batch_idx)
+                summary_images(lissom_model, batch_idx, data, output, writer)
+            break
+
         output = lissom_model(data)
         optimizer.update_weights(lissom_model, step=batch_idx)
         summary_images(lissom_model, batch_idx, data, output, writer)
+
+        if args.two_layers:
+            output_2 = lissom_model_2(Variable(output))
+            optimizer_2.update_weights(lissom_model_2, step=batch_idx)
 
         if batch_idx % (args.log_interval * 50) == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
@@ -115,6 +133,8 @@ def train_nn(epoch, control=False):
         data, target = Variable(data), Variable(target)
         if not control:
             output = lissom_model(data)
+            if args.two_layers:
+                output = lissom_model_2(Variable(output))
         else:
             output = data
         nn_output = perceptron_model(torch.autograd.Variable(output))
@@ -142,6 +162,8 @@ def test(control=False):
         data, target = Variable(data, volatile=True), Variable(target)
         if not control:
             output = lissom_model(data)
+            if args.two_layers:
+                output = lissom_model_2(Variable(output))
         else:
             output = data
         nn_output = perceptron_model(torch.autograd.Variable(output))
