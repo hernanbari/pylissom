@@ -1,7 +1,6 @@
 import numpy as np
 
 import torch
-from torchvision import utils as vutils
 
 
 def get_zeros(shape):
@@ -59,30 +58,3 @@ def kill_neurons(w, threshold):
     return w.masked_fill_(mask=torch.lt(w, threshold), value=0)
 
 
-def summary_images(lissom_model, batch_idx, data, output, writer):
-    lissom_shape = lissom_model.self_shape
-    images_numpy = [x.view((1, 1) + lissom_shape) for x in
-                    [output, lissom_model.afferent_activation, lissom_model.inhibitory_activation,
-                     lissom_model.excitatory_activation, lissom_model.retina_activation]]
-    input_shape = (28, 28)
-    images_numpy.append(data.data.view((1, 1) + input_shape))
-    for title, im in zip(['output', 'model.afferent_activation', 'model.inhibitory_activation',
-                          'model.excitatory_activation', 'model.retina_activation', 'input'], images_numpy):
-        im = vutils.make_grid(im)
-        writer.add_image(title, im, batch_idx)
-    orig_weights = [lissom_model.inhibitory_weights, lissom_model.excitatory_weights]
-    weights = [w for w in
-               map(lambda w: summary_weights(input_shape, lissom_shape, w), orig_weights)]
-    weights.append(
-        summary_weights(input_shape=input_shape, lissom_shape=lissom_shape, weights=lissom_model.retina_weights,
-                        afferent=True))
-    for title, im in zip(['model.inhibitory_weights', 'model.excitatory_weights',
-                          'model.retina_weights'], weights):
-        im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])))
-        writer.add_image(title, im, batch_idx)
-
-
-def summary_weights(input_shape, lissom_shape, weights, afferent=False):
-    shape = input_shape if afferent else lissom_shape
-    weights = weights * shape[0]
-    return torch.t(weights).contiguous().data.view((weights.shape[1], 1) + shape)

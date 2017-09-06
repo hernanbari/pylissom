@@ -11,9 +11,8 @@ import torch
 import torch.nn.functional as F
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
-from src.supervised_gcal.utils import summary_images
+from src.utils_pipeline import summary_images, get_dataset
 from torch.autograd import Variable
-from torchvision import datasets, transforms
 
 if os.path.exists('runs'):
     shutil.rmtree('runs')
@@ -38,6 +37,9 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 parser.add_argument('--ipdb', action='store_true', default=False,
                     help='activate ipdb set_trace()')
+parser.add_argument('--ck', action='store_true', default=False,
+                    help='uses cohn-kanade dataset')
+
 args = parser.parse_args()
 
 if not args.ipdb:
@@ -51,17 +53,11 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=True, download=True,
-                   transform=transforms.ToTensor()
-                   ),
-    batch_size=args.batch_size, shuffle=False, **kwargs)
-
+train_loader = get_dataset(train=True, args=args)
 # Lissom Model
 classes = 10
 lissom_shape = (20, 20)
-input_shape = (28, 28)
+input_shape = (28, 28) if not args.ck else (96, 96)
 lissom_neurons = int(np.prod(lissom_shape))
 input_neurons = int(np.prod(input_shape))
 lissom_model = LissomCortexLayer(input_shape, lissom_shape)
@@ -94,17 +90,7 @@ def train_lissom(epoch):
 for epoch in range(1, args.epochs + 1):
     train_lissom(epoch)
 
-# Increases batch sizes for perceptron
-kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=True, download=True,
-                   transform=transforms.ToTensor()
-                   ),
-    batch_size=1, shuffle=False, **kwargs)
-
-test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-    batch_size=1, shuffle=False, **kwargs)
+train_loader = get_dataset(train=True, args=args)
 
 # 2 Layer Net
 hidden_neurons = 20
@@ -141,6 +127,9 @@ def train_nn(epoch, control=False):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.data[0]))
+
+
+test_loader = get_dataset(train=False, args=args)
 
 
 def test(control=False):
