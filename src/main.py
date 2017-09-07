@@ -177,11 +177,11 @@ def test(control=False):
         100. * correct / len(test_loader.dataset)))
 
 
-for epoch in range(1, args.epochs * 10 + 1):
+for epoch in range(1, args.epochs + 1):
     train_nn(epoch)
     test()
 
 # Control
-for epoch in range(1, args.epochs * 10 + 1):
+for epoch in range(1, args.epochs + 1):
     train_nn(epoch, control=True)
     test(control=True)
