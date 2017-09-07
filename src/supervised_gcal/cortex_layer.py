@@ -1,3 +1,6 @@
+from tensorboard import SummaryWriter
+from torchvision import utils as vutils
+
 import torch
 from src.supervised_gcal.layer import Layer
 from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circular_mask, get_gaussian
@@ -6,7 +9,7 @@ from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circula
 class LissomCortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
     def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=8.0,
-                 inhibitory_radius=None, settling_steps=100, inhib_factor=1.35, excit_factor=1.05):
+                 inhibitory_radius=None, settling_steps=10, inhib_factor=2.0, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -19,7 +22,7 @@ class LissomCortexLayer(Layer):
 
     def _get_weight_variable(self, shape, radius):
         # TODO: learn what Parameter means
-        sigma = (radius/5 if radius / 5 > 1 else 1) if radius is not None else 4
+        sigma = (radius/5 if radius / 5 > 1 else 1) if radius is not None else 2
         return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_gaussian(shape, sigma),
                                                                        radius=radius))))
 
@@ -52,7 +55,7 @@ class LissomCortexLayer(Layer):
         new_activations = torch.nn.functional.threshold(new_activations, self.min_theta, value=0.0)
         new_activations.masked_fill_(
             mask=torch.gt(new_activations, self.max_theta),
-            value=1.0)
+            value=1)
 
         new_activations.sub_(self.min_theta).div_(self.max_theta - self.min_theta)
         return new_activations
@@ -75,4 +78,7 @@ class LissomCortexLayer(Layer):
             new_activations = self.custom_sigmoid(new_activations).data
 
             self.previous_activations = new_activations
+        # from IPython.core.debugger import Pdb as dbg
+        # dbg().set_trace()
+
         return new_activations

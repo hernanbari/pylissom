@@ -27,7 +27,8 @@ def normalize(input):
 def gaussian(x, y, mu_x, mu_y, sigma):
     num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
     den = 2 * np.power(sigma, 2)
-    return np.float32(np.exp(-np.divide(num, den)))-0.000000001
+    ans = np.float32(np.exp(-np.divide(num, den)))
+    return ans
 
 
 def get_gaussian(shape, sigma):
@@ -61,7 +62,7 @@ def circular_mask(mat, radius):
 
 
 epoch = 1
-final_epoch = 40.0 - 1
+final_epoch = 8.0 - 1
 
 
 def linear_neighbors_decay(w, start):
