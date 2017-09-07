@@ -56,7 +56,7 @@ if args.cuda:
 train_loader = get_dataset(train=True, args=args)
 # Lissom Model
 classes = 10
-lissom_shape = (20, 20)
+lissom_shape = (28, 28)
 input_shape = (28, 28) if not args.ck else (96, 96)
 lissom_neurons = int(np.prod(lissom_shape))
 input_neurons = int(np.prod(input_shape))

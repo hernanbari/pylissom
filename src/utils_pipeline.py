@@ -14,8 +14,8 @@ def summary_images(lissom_model, batch_idx, data, output, writer):
     images_numpy.append(data.data.view((1, 1) + input_shape))
     for title, im in zip(['output', 'model.afferent_activation', 'model.inhibitory_activation',
                           'model.excitatory_activation', 'model.retina_activation', 'input'], images_numpy):
-        im = vutils.make_grid(im)
-        writer.add_image(title, im, batch_idx, range=(0, 1))
+        im = vutils.make_grid(im, range=(0, 1))
+        writer.add_image(title, im, batch_idx)
     orig_weights = [lissom_model.inhibitory_weights, lissom_model.excitatory_weights]
     weights = [w for w in
                map(lambda w: summary_weights(input_shape, lissom_shape, w), orig_weights)]
@@ -24,8 +24,8 @@ def summary_images(lissom_model, batch_idx, data, output, writer):
                         afferent=True))
     for title, im in zip(['model.inhibitory_weights', 'model.excitatory_weights',
                           'model.retina_weights'], weights):
-        im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])))
-        writer.add_image(title, im, batch_idx, range=(0, 1))
+        im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
+        writer.add_image(title, im, batch_idx)
 
 
 def summary_weights(input_shape, lissom_shape, weights, afferent=False):
