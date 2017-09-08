@@ -1,9 +1,6 @@
-from tensorboard import SummaryWriter
-from torchvision import utils as vutils
-
 import torch
 from src.supervised_gcal.layer import Layer
-from src.supervised_gcal.utils import get_zeros, get_uniform, normalize, circular_mask, get_gaussian
+from src.supervised_gcal.utils import get_zeros, normalize, circular_mask, get_gaussian, custom_sigmoid
 
 
 class LissomCortexLayer(Layer):
@@ -44,22 +41,6 @@ class LissomCortexLayer(Layer):
     def _lateral_activation(self, previous_activations, weights):
         return torch.matmul(previous_activations, weights.data)
 
-    def process_input(self, input, normalize=False):
-        var = input
-        if normalize:
-            var = var / torch.norm(input, p=2, dim=1)
-        var = var.data.view(self.input_shape)
-        return var
-
-    def custom_sigmoid(self, new_activations):
-        new_activations = torch.nn.functional.threshold(new_activations, self.min_theta, value=0.0)
-        new_activations.masked_fill_(
-            mask=torch.gt(new_activations, self.max_theta),
-            value=1)
-
-        new_activations.sub_(self.min_theta).div_(self.max_theta - self.min_theta)
-        return new_activations
-
     def forward(self, input):
         processed_input = self.process_input(input)
         retina = processed_input
@@ -75,7 +56,7 @@ class LissomCortexLayer(Layer):
                                                                   self.inhibitory_weights)
 
             new_activations = self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation
-            new_activations = self.custom_sigmoid(new_activations).data
+            new_activations = custom_sigmoid(self.min_theta, self.max_theta, new_activations).data
 
             self.previous_activations = new_activations
         # from IPython.core.debugger import Pdb as dbg

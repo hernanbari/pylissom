@@ -17,3 +17,10 @@ class Layer(torch.nn.Module):
 
     def _setup_variables(self):
         raise NotImplementedError
+
+    def process_input(self, input, normalize=False):
+        var = input
+        if normalize:
+            var = var / torch.norm(input, p=2, dim=1)
+        var = var.data.view(self.input_shape)
+        return var

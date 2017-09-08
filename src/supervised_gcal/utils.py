@@ -26,7 +26,7 @@ def normalize(input):
 
 def gaussian(x, y, mu_x, mu_y, sigma):
     num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
-    den = 2 * np.power(sigma, 2)
+    den = np.power(sigma, 2)
     ans = np.float32(np.exp(-np.divide(num, den)))
     return ans
 
@@ -78,3 +78,11 @@ def kill_neurons(w, threshold):
     return w.masked_fill_(mask=torch.lt(w, threshold), value=0)
 
 
+def custom_sigmoid(min_theta, max_theta, activation):
+    activation = torch.nn.functional.threshold(activation, min_theta, value=0.0)
+    activation.masked_fill_(
+        mask=torch.gt(activation, max_theta),
+        value=1)
+
+    activation.sub_(min_theta).div_(max_theta - min_theta)
+    return activation
