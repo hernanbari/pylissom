@@ -136,7 +136,7 @@ def train_nn(epoch, control=False):
             if args.two_layers:
                 output = lissom_model_2(Variable(output))
         else:
-            output = data
+            output = data.data
         nn_output = perceptron_model(torch.autograd.Variable(output))
         loss = F.nll_loss(nn_output, target)
         optimizer_nn.zero_grad()
@@ -165,7 +165,7 @@ def test(control=False):
             if args.two_layers:
                 output = lissom_model_2(Variable(output))
         else:
-            output = data
+            output = data.data
         nn_output = perceptron_model(torch.autograd.Variable(output))
         test_loss += F.nll_loss(nn_output, target, size_average=False).data[0]  # sum up batch loss
         pred = nn_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
