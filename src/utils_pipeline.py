@@ -70,3 +70,13 @@ class CKDataset(Dataset):
 
     def __len__(self):
         return len(self.X)
+
+
+def summary_lgn(lgn_layer, input_shape, lissom_shape, batch_idx, data, output, writer):
+    im = summary_weights(input_shape, lissom_shape, lgn_layer.weights, afferent=True)
+    im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
+    writer.add_image('lgn weights', im, batch_idx)
+    im = vutils.make_grid(data.data, range=(0, 1))
+    writer.add_image('input_lgn', im, batch_idx)
+    im = vutils.make_grid(output.view(1, 1, lissom_shape[0], lissom_shape[0]).data, range=(0, 1))
+    writer.add_image('lgn activation', im, batch_idx)

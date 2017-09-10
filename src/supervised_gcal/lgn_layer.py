@@ -4,7 +4,8 @@ from src.supervised_gcal.utils import custom_sigmoid, get_gaussian, circular_mas
 
 
 class LissomLGNLayer(Layer):
-    def __init__(self, input_shape, self_shape, sigma_center=0.5, sigma_sorround=2.0, min_theta=0.0, max_theta=1.0, lgn_factor=1.0, on=False):
+    def __init__(self, input_shape, self_shape, sigma_center=1.0, sigma_sorround=3.0, min_theta=0.0, max_theta=1.0,
+                 lgn_factor=1.0, on=False):
         self.lgn_factor = lgn_factor
         self.on = on
         self.max_theta = max_theta
@@ -13,9 +14,7 @@ class LissomLGNLayer(Layer):
         self.sigma_center = sigma_center
         super().__init__(input_shape, self_shape)
 
-    def _get_weight_variable(self, shape, sigma, radius=10):
-        # TODO: learn what Parameter means
-        # sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2
+    def _get_weight_variable(self, shape, sigma, radius=20):
         return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_gaussian(shape, sigma),
                                                                        radius=radius))))
 
