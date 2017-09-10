@@ -7,3 +7,7 @@ raw_sync_path
 *input_data
 *pyc
 *egg*
+pytorch
+torch
+torchvision
+vision-master
