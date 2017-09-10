@@ -36,12 +36,15 @@ def get_gaussian(shape, sigma):
     half_dims = int(np.sqrt(dims))
     dims2 = shape[1]
     half_dims2 = int(np.sqrt(dims2))
-    tmp_shape = (half_dims, half_dims, half_dims2, half_dims2)
-
-    mat = np.fromfunction(function=lambda x, y, mu_x, mu_y: gaussian(x, y, mu_x, mu_y, sigma=sigma),
-                           shape=tmp_shape, dtype=int)
-    mat = np.reshape(mat, shape)
-    return mat
+    step = half_dims/half_dims2
+    tmp_map = []
+    for i in np.arange(0, half_dims, step):
+        for j in np.arange(0, half_dims, step):
+            var = np.fromfunction(function=lambda x, y:  gaussian(x, y, int(i), int(j), sigma=sigma),
+                           shape=(half_dims, half_dims), dtype=int)
+            tmp_map.append(np.reshape(var, dims))
+    tmp_map = np.asarray(tmp_map)
+    return np.transpose(tmp_map)
 
 
 def circular_mask(mat, radius):
@@ -51,13 +54,16 @@ def circular_mask(mat, radius):
     half_dims = int(np.sqrt(dims))
     dims2 = mat.shape[1]
     half_dims2 = int(np.sqrt(dims2))
-    tmp_shape = (half_dims, half_dims, half_dims2, half_dims2)
-
-    # When the distance between the points of the two matrices is greater than radius, set to 0
-    mask = np.fromfunction(function=lambda x, y, mu_x, mu_y: mask_distance_gt_radius(x, y, mu_x, mu_y, radius),
-                           shape=tmp_shape, dtype=int)
-    mask = np.reshape(mask, mat.shape)
-    masked_mat = np.ma.masked_where(condition=mask, a=mat)
+    step = half_dims/half_dims2
+    tmp_map = []
+    for i in np.arange(0, half_dims, step):
+        for j in np.arange(0, half_dims, step):
+            var = np.fromfunction(function=lambda x, y:  mask_distance_gt_radius(x, y, int(i), int(j), radius=radius),
+                           shape=(half_dims, half_dims), dtype=int)
+            tmp_map.append(np.reshape(var, dims))
+    tmp_map = np.asarray(tmp_map)
+    tmp_map = np.transpose(tmp_map)
+    masked_mat = np.ma.masked_where(condition=tmp_map, a=mat)
     return masked_mat.filled(0)
 
 
