@@ -5,6 +5,11 @@ from torch.utils.data import Dataset
 from torchvision import utils as vutils, datasets, transforms
 
 
+# def tensor_to_im(tensor, shape, writer):
+#     tensor = tensor.view((1, 1), shape)
+#     im = vutils.make_grid(tensor, range=(0, 1))
+#     writer.add_image()
+
 def summary_images(lissom_model, batch_idx, data, output, writer):
     lissom_shape = lissom_model.self_shape
     images_numpy = [x.view((1, 1) + lissom_shape) for x in
@@ -31,7 +36,7 @@ def summary_images(lissom_model, batch_idx, data, output, writer):
 def summary_weights(input_shape, lissom_shape, weights, afferent=False):
     shape = input_shape if afferent else lissom_shape
     weights = weights * shape[0]
-    return torch.t(weights).contiguous().data.view((weights.shape[1], 1) + shape)
+    return torch.t(weights).data.to_dense().view((weights.shape[1], 1) + shape)
 
 
 def get_dataset(train, args):
@@ -72,11 +77,11 @@ class CKDataset(Dataset):
         return len(self.X)
 
 
-def summary_lgn(lgn_layer, input_shape, lissom_shape, batch_idx, data, output, writer):
+def summary_lgn(lgn_layer, input_shape, lissom_shape, batch_idx, data, output, writer, name):
     im = summary_weights(input_shape, lissom_shape, lgn_layer.weights, afferent=True)
     im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
-    writer.add_image('lgn weights', im, batch_idx)
+    writer.add_image('lgn weights_'+name, im, batch_idx)
     im = vutils.make_grid(data.data, range=(0, 1))
-    writer.add_image('input_lgn', im, batch_idx)
+    writer.add_image('input_lgn_'+name, im, batch_idx)
     im = vutils.make_grid(output.view(1, 1, lissom_shape[0], lissom_shape[0]).data, range=(0, 1))
-    writer.add_image('lgn activation', im, batch_idx)
+    writer.add_image('lgn activation_'+name, im, batch_idx)

@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from src.supervised_gcal.cortex_layer import LissomCortexLayer
 from src.supervised_gcal.hebbian_optimizer import LissomHebbianOptimizer
 from src.supervised_gcal.lgn_layer import LissomLGNLayer
-from src.utils_pipeline import summary_images, get_dataset, summary_lgn
+from src.utils_pipeline import summary_images, get_dataset, summary_lgn, summary_weights
 from torch.autograd import Variable
 
 if os.path.exists('runs'):
@@ -57,17 +57,25 @@ if args.cuda:
 train_loader = get_dataset(train=True, args=args)
 # Lissom Model
 classes = 10
-lissom_shape = (30, 30)
+lissom_shape = (70, 70)
 input_shape = (28, 28) if not args.ck else (96, 96)
 lissom_neurons = int(np.prod(lissom_shape))
 input_neurons = int(np.prod(input_shape))
-lissom_model = LissomCortexLayer(lissom_shape, lissom_shape)
-optimizer = LissomHebbianOptimizer()
+# lissom_model = LissomCortexLayer(lissom_shape, lissom_shape)
+# optimizer = LissomHebbianOptimizer()
 on_layer = LissomLGNLayer(input_shape, lissom_shape, on=True)
 off_layer = LissomLGNLayer(input_shape, lissom_shape, on=False)
+epoch = 999
+writer = SummaryWriter(log_dir='runs/epoch_' + str(999))
+im = summary_weights(input_shape, lissom_shape, on_layer.weights, afferent=True)
+
+from torchvision import utils as vutils
+
+im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
+writer.add_image('lgn weights', im, 0)
 
 if args.cuda:
-    lissom_model.cuda()
+    # lissom_model.cuda()
     on_layer.cuda()
     off_layer.cuda()
 
@@ -80,7 +88,7 @@ if args.two_layers:
 
 
 def train_lissom(epoch):
-    lissom_model.train()
+    # lissom_model.train()
     writer = SummaryWriter(log_dir='runs/epoch_' + str(epoch))
     for batch_idx, (data, target) in enumerate(train_loader):
         if batch_idx > 2000:
@@ -97,20 +105,25 @@ def train_lissom(epoch):
 
         output_on = on_layer(data)
         output_off = off_layer(data)
-        summary_lgn(on_layer, input_shape, lissom_shape, batch_idx, data, output_on, writer)
-        data = output_on + output_off
-        output = lissom_model(data)
-        optimizer.update_weights(lissom_model, step=batch_idx)
-        summary_images(lissom_model, batch_idx, data, output, writer)
+        summary_lgn(off_layer, input_shape, lissom_shape, batch_idx, data, output_off, writer, 'off')
+        summary_lgn(on_layer, input_shape, lissom_shape, batch_idx, data, output_on, writer, 'on')
+        im = (output_on+output_off).view((1, 1) + lissom_shape)
+        im = vutils.make_grid(im.data, range=(0, 1))
+        writer.add_image('lgn_activation', im, batch_idx)
+        import ipdb; ipdb.set_trace()
+        # data = output_on + output_off
+        # output = lissom_model(data)
+        # optimizer.update_weights(lissom_model, step=batch_idx)
+        # summary_images(lissom_model, batch_idx, data, output, writer)
 
         if args.two_layers:
             output_2 = lissom_model_2(Variable(output))
             optimizer_2.update_weights(lissom_model_2, step=batch_idx)
 
-        if batch_idx % (args.log_interval * 50) == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader)))
+        # if batch_idx % (args.log_interval * 50) == 0:
+        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
+        #         epoch, batch_idx * len(data), len(train_loader.dataset),
+        #                100. * batch_idx / len(train_loader)))
     writer.close()
 
 

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.sparse import csr_matrix
 
 import torch
 
@@ -24,27 +25,40 @@ def normalize(input):
     return np.divide(input, np.linalg.norm(input, ord=1, axis=0))
 
 
-def gaussian(x, y, mu_x, mu_y, sigma):
+def gaussian(x, y, mu_x, mu_y, sigma, radius):
     num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
     den = np.power(sigma, 2)
     ans = np.float32(np.exp(-np.divide(num, den)))
+    mask = np.sqrt(((x - mu_x) ** 2 + (y - mu_y) ** 2)) > radius
+    masked_mat = np.ma.masked_where(condition=mask, a=ans)
+    ans = masked_mat.filled(0)
     return ans
 
 
-def get_gaussian(shape, sigma):
+def get_gaussian(shape, sigma, radius):
     dims = shape[0]
     half_dims = int(np.sqrt(dims))
     dims2 = shape[1]
     half_dims2 = int(np.sqrt(dims2))
     step = half_dims/half_dims2
+    tmp_idx = []
     tmp_map = []
     for i in np.arange(0, half_dims, step):
         for j in np.arange(0, half_dims, step):
-            var = np.fromfunction(function=lambda x, y:  gaussian(x, y, int(i), int(j), sigma=sigma),
+            var = np.fromfunction(function=lambda x, y:  gaussian(x, y, int(i), int(j), sigma=sigma, radius=radius),
                            shape=(half_dims, half_dims), dtype=int)
-            tmp_map.append(np.reshape(var, dims))
-    tmp_map = np.asarray(tmp_map)
-    return np.transpose(tmp_map)
+            var = np.reshape(var, dims)
+            var = np.divide(var, np.linalg.norm(var, ord=1, axis=0))
+            nnz_idx = np.nonzero(var)
+            tmp_idx.append(nnz_idx)
+            tmp_map.append(var[nnz_idx])
+    tmp_map = np.array([x for r in tmp_map for x in r])
+    tmp_idx_cols = np.array([x for r in tmp_idx for x in r[0]])
+    tmp_idx_rows = [[idx_r]*len(r[0]) for idx_r, r in enumerate(tmp_idx)]
+    tmp_idx_rows = np.array([x for r in tmp_idx_rows for x in r])
+    idx = np.array([tmp_idx_rows, tmp_idx_cols])
+    var_sparse = torch.sparse.FloatTensor(torch.from_numpy(idx), torch.from_numpy(tmp_map), torch.Size([int(dims2), int(dims)]))
+    return var_sparse.t()
 
 
 def circular_mask(mat, radius):
