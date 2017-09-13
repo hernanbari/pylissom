@@ -15,9 +15,6 @@ from src.supervised_gcal.lgn_layer import LissomLGNLayer
 from src.utils_pipeline import summary_images, get_dataset, summary_lgn, summary_weights
 from torch.autograd import Variable
 
-if os.path.exists('runs'):
-    shutil.rmtree('runs')
-
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=1, metavar='N',
@@ -40,8 +37,13 @@ parser.add_argument('--two-layers', action='store_true', default=False,
                     help='uses 2 lissom layers')
 parser.add_argument('--only-one', action='store_true', default=False,
                     help='trains with number one')
+parser.add_argument('--logdir', default='runs',
+                    help='log dir for tensorboard')
 
 args = parser.parse_args()
+
+if os.path.exists(args.logdir):
+    shutil.rmtree(args.logdir)
 
 if not args.ipdb:
     import ipdb
@@ -63,21 +65,32 @@ lissom_neurons = int(np.prod(lissom_shape))
 input_neurons = int(np.prod(input_shape))
 # lissom_model = LissomCortexLayer(lissom_shape, lissom_shape)
 # optimizer = LissomHebbianOptimizer()
-on_layer = LissomLGNLayer(input_shape, lissom_shape, on=True)
-off_layer = LissomLGNLayer(input_shape, lissom_shape, on=False)
-epoch = 999
-writer = SummaryWriter(log_dir='runs/epoch_' + str(999))
-im = summary_weights(input_shape, lissom_shape, on_layer.weights, afferent=True)
-
+batch_idx, (data, target) = next(enumerate(train_loader))
+data, target = Variable(data), Variable(target)
+writer = SummaryWriter(log_dir='runs/epoch_' + str(batch_idx))
+i = batch_idx
 from torchvision import utils as vutils
 
-im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
-writer.add_image('lgn weights', im, 0)
+# for sigma_center in np.arange(0.1, 2, step=0.2):
+#     for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
+#         for radius in [3, 5, 8, 10, 15, 20]:
+#             on_layer = LissomLGNLayer(input_shape, lissom_shape, radius=radius, sigma_center=sigma_center, sigma_sorround=sigma_sorround*sigma_center, on=True)
+#             off_layer = LissomLGNLayer(input_shape, lissom_shape, radius=radius, sigma_center=sigma_center, sigma_sorround=sigma_sorround*sigma_center, on=False)
+#
+#             output_on = on_layer(data)
+#             output_off = off_layer(data)
+#             summary_lgn(off_layer, input_shape, lissom_shape, batch_idx, data, output_off, writer, 'off')
+#             summary_lgn(on_layer, input_shape, lissom_shape, batch_idx, data, output_on, writer, 'on')
+#             im = (output_on + output_off).view((1, 1) + lissom_shape)
+#             im = vutils.make_grid(im.data, range=(0, 1))
+#             writer.add_image('lgn_activation', im, batch_idx)
+#             batch_idx += 1
+#
 
-if args.cuda:
+# if args.cuda:
     # lissom_model.cuda()
-    on_layer.cuda()
-    off_layer.cuda()
+    # on_layer.cuda()
+    # off_layer.cuda()
 
 if args.two_layers:
     lissom_model_2 = LissomCortexLayer(lissom_shape, lissom_shape)
@@ -107,10 +120,11 @@ def train_lissom(epoch):
         output_off = off_layer(data)
         summary_lgn(off_layer, input_shape, lissom_shape, batch_idx, data, output_off, writer, 'off')
         summary_lgn(on_layer, input_shape, lissom_shape, batch_idx, data, output_on, writer, 'on')
-        im = (output_on+output_off).view((1, 1) + lissom_shape)
+        im = (output_on + output_off).view((1, 1) + lissom_shape)
         im = vutils.make_grid(im.data, range=(0, 1))
         writer.add_image('lgn_activation', im, batch_idx)
-        import ipdb; ipdb.set_trace()
+        import ipdb;
+        ipdb.set_trace()
         # data = output_on + output_off
         # output = lissom_model(data)
         # optimizer.update_weights(lissom_model, step=batch_idx)
@@ -120,15 +134,15 @@ def train_lissom(epoch):
             output_2 = lissom_model_2(Variable(output))
             optimizer_2.update_weights(lissom_model_2, step=batch_idx)
 
-        # if batch_idx % (args.log_interval * 50) == 0:
-        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
-        #         epoch, batch_idx * len(data), len(train_loader.dataset),
-        #                100. * batch_idx / len(train_loader)))
+            # if batch_idx % (args.log_interval * 50) == 0:
+            #     print('Train Epoch: {} [{}/{} ({:.0f}%)]'.format(
+            #         epoch, batch_idx * len(data), len(train_loader.dataset),
+            #                100. * batch_idx / len(train_loader)))
     writer.close()
 
 
-for epoch in range(1, args.epochs + 1):
-    train_lissom(epoch)
+# for epoch in range(1, args.epochs + 1):
+#     train_lissom(epoch)
 
 train_loader = get_dataset(train=True, args=args)
 
@@ -158,7 +172,7 @@ def train_nn(epoch, control=False):
             if args.two_layers:
                 output = lissom_model_2(Variable(output))
         else:
-            output = data.data
+            output = data.data.view(torch.Size((data.shape[0], input_neurons)))
         nn_output = perceptron_model(torch.autograd.Variable(output))
         loss = F.nll_loss(nn_output, target)
         optimizer_nn.zero_grad()
@@ -187,7 +201,7 @@ def test(control=False):
             if args.two_layers:
                 output = lissom_model_2(Variable(output))
         else:
-            output = data.data
+            output = data.data.view(torch.Size((data.shape[0], input_neurons)))
         nn_output = perceptron_model(torch.autograd.Variable(output))
         test_loss += F.nll_loss(nn_output, target, size_average=False).data[0]  # sum up batch loss
         pred = nn_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
@@ -199,11 +213,21 @@ def test(control=False):
         100. * correct / len(test_loader.dataset)))
 
 
-for epoch in range(1, args.epochs + 1):
-    train_nn(epoch)
-    test()
+# for epoch in range(1, args.epochs + 1):
+#     train_nn(epoch)
+#     test()
 
 # Control
+hidden_neurons = 20
+perceptron_model = torch.nn.Sequential(
+    torch.nn.Linear(input_neurons, classes),
+    torch.nn.LogSoftmax()
+)
+optimizer_nn = torch.optim.SGD(perceptron_model.parameters(), lr=0.1)
+
+if args.cuda:
+    perceptron_model.cuda()
+
 for epoch in range(1, args.epochs + 1):
     train_nn(epoch, control=True)
     test(control=True)

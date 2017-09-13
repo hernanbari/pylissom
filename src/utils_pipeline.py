@@ -1,3 +1,5 @@
+from random import shuffle
+
 import numpy as np
 
 import torch
@@ -52,7 +54,7 @@ def get_dataset(train, args):
 
 class CKDataset(Dataset):
     def __init__(self, train, path_images='/home/rosana/data/X.npy', path_labels='/home/rosana/data/y.npy',
-                 train_pct=0.75):
+                 train_pct=0.25):
         self.train_pct = train_pct
         self.path_labels = path_labels
         self.path_images = path_images
@@ -60,15 +62,9 @@ class CKDataset(Dataset):
         y = np.load(self.path_labels)
         # subjs = np.load('/home/rosana/data/subjs.npy')
 
-        self.x_shape = X[0].shape
+        X, y = self.shuffle(X, y)
 
-        train_len = int(len(X) * self.train_pct)
-        if train:
-            self.X = X[:train_len]
-            self.y = y[:train_len]
-        else:
-            self.X = X[train_len:]
-            self.y = y[train_len:]
+        self.X, self.y = self._split(X, y, train)
 
     def __getitem__(self, item):
         return torch.Tensor(self.X[item]), int(self.y[item])
@@ -76,12 +72,25 @@ class CKDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
+    @staticmethod
+    def shuffle(X, y):
+        x_y = list(zip(X, y))
+        shuffle(list(x_y))
+        return zip(*x_y)
+
+    def _split(self, X, y, train):
+        train_len = int(len(X) * self.train_pct)
+        if train:
+            return X[:train_len], y[:train_len]
+        else:
+            return X[train_len:], y[train_len:]
+
 
 def summary_lgn(lgn_layer, input_shape, lissom_shape, batch_idx, data, output, writer, name):
     im = summary_weights(input_shape, lissom_shape, lgn_layer.weights, afferent=True)
     im = vutils.make_grid(im, nrow=int(np.sqrt(im.shape[0])), range=(0, 1))
-    writer.add_image('lgn weights_'+name, im, batch_idx)
+    writer.add_image('lgn weights_' + name, im, batch_idx)
     im = vutils.make_grid(data.data, range=(0, 1))
-    writer.add_image('input_lgn_'+name, im, batch_idx)
+    writer.add_image('input_lgn_' + name, im, batch_idx)
     im = vutils.make_grid(output.view(1, 1, lissom_shape[0], lissom_shape[0]).data, range=(0, 1))
-    writer.add_image('lgn activation_'+name, im, batch_idx)
+    writer.add_image('lgn activation_' + name, im, batch_idx)
