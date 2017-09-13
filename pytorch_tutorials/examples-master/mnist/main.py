@@ -80,7 +80,6 @@ def train(epoch):
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
-        import ipdb; ipdb.set_trace()
         output = model(data)
         loss = F.nll_loss(output, target)
         loss.backward()
