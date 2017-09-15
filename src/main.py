@@ -36,6 +36,8 @@ parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
 parser.add_argument('--model', choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom'],
                     help='which model to evaluate')
+parser.add_argument('--shape', type=int, default=28, metavar='N',
+                    help='# of rows of square maps')
 
 args = parser.parse_args()
 
@@ -53,9 +55,6 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-import ipdb;
-
-ipdb.set_trace()
 test_loader = get_dataset(train=False, args=args)
 train_loader = get_dataset(train=True, args=args)
 
@@ -68,19 +67,19 @@ loss_fn = None
 
 if args.model == 'lgn' or args.model == 'lissom' or args.model == 'supervised':
     # LGN layer
-    lgn_shape = input_shape
+    lgn_shape = (args.shape, args.shape)
     model = LGNLayer(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised':
     # Cortex Layer
-    cortex_shape = input_shape
+    cortex_shape = (args.shape, args.shape)
     model = CortexLayer(input_shape, cortex_shape)
-    optimizer = CortexHebbian(model)
+    optimizer = CortexHebbian(model.parameters(), cortex_layer=model)
 
 if args.model == 'lissom' or args.model == 'supervised':
     # Full Lissom
     model = FullLissom(input_shape, lgn_shape, cortex_shape)
-    optimizer = CortexHebbian(model.v1)
+    optimizer = CortexHebbian(model.parameters(), cortex_layer=model.v1)
 
 if args.model == 'supervised' or args.model == 'control':
     if args.model == 'supervised':
@@ -94,7 +93,7 @@ if args.model == 'supervised' or args.model == 'control':
         torch.nn.LogSoftmax()
     )
     optimizer_nn = torch.optim.SGD(net.parameters(), lr=0.1)
-    loss_fn = torch.nn.NLLLoss
+    loss_fn = torch.nn.functional.nll_loss
 
     if args.model == 'control':
         model = net
@@ -114,10 +113,7 @@ if args.model == 'supervised' or args.model == 'control':
 if args.model == 'hlissom':
     raise NotImplementedError
 
-pipeline = Pipeline(model, optimizer, loss_fn)
-import ipdb;
-
-ipdb.set_trace()
+pipeline = Pipeline(model, optimizer, loss_fn, cuda=args.cuda)
 for epoch in range(1, args.epochs + 1):
     pipeline.train(train_data_loader=train_loader, epoch=epoch)
     pipeline.test(test_data_loader=test_loader)

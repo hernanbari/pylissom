@@ -25,18 +25,21 @@ class LGNLayer(Layer):
                                                                       self.radius,
                                                                       self.sparse)
         if self.on:
-            self.weights = torch.autograd.Variable(sigma_center_weights_matrix - sigma_sorround_weights_matrix).t()
+            diff = (sigma_center_weights_matrix - sigma_sorround_weights_matrix).t()
         else:
-            self.weights = torch.autograd.Variable(sigma_sorround_weights_matrix - sigma_center_weights_matrix).t()
+            diff = (sigma_sorround_weights_matrix - sigma_center_weights_matrix).t()
+        self.register_buffer(name='weights', tensor=diff)
 
     def forward(self, lgn_input):
-        # TODO: pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense
         self.lgn_input = lgn_input
         if not self.sparse:
-            matmul = torch.matmul(self.lgn_input, self.weights)
+            matmul = torch.matmul(self.lgn_input.data, self.weights)
         else:
-            matmul = torch.matmul(self.weights.t(), self.lgn_input.t()).t()
+            # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
+            # That's why it's reversed
+            matmul = torch.matmul(self.weights.t(), self.lgn_input.data.t()).t()
 
+        # Custom sigmoid returns a variable
         self.activation = self.custom_sigmoid(self.min_theta, self.max_theta,
                                               self.lgn_factor * matmul)
         return self.activation

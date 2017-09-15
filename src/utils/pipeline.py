@@ -40,15 +40,13 @@ class Pipeline(object):
             if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data, volatile=not train), Variable(target)
-            import ipdb; ipdb.set_trace()
             data = self._process_input(data)
             self.optimizer.zero_grad() if self.optimizer else None
             output = self.model(data)
+            if self.loss_fn:
+                loss = self.loss_fn(output, target)
             if train:
                 if self.loss_fn:
-                    # TODO: Learn what this means
-                    # Each Function instance should be only called once.
-                    loss = F.nll_loss(output, target)
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
                 self._train_log(batch_idx, data, data_loader, loss)

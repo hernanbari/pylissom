@@ -3,22 +3,15 @@ from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 
 
-class CortexOptimizer(object):
-    # TODO: inherit from torch.optim.Optimizer
-    def __init__(self, cortex_layer):
-        self.cortex_layer = cortex_layer
-
-    def step(self):
+class CortexOptimizer(torch.optim.Optimizer):
+    def step(self, closure):
         raise NotImplementedError
-
-    def zero_grad(self):
-        pass
 
 
 class CombinedCortexOptimizer(CortexOptimizer):
     optimizers = []
 
-    def step(self):
+    def step(self, **kwargs):
         for opt in self.optimizers:
             opt.step()
 
@@ -38,12 +31,13 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
-    def __init__(self, cortex_layer, learning_rate=0.005):
-        super().__init__(cortex_layer)
-        self.learning_rate = learning_rate
-
-    def step(self):
+    def __init__(self, params, cortex_layer, learning_rate=0.005):
+        self.cortex_layer = cortex_layer
         assert isinstance(self.cortex_layer, CortexLayer)
+        self.learning_rate = learning_rate
+        super().__init__(params, {'learning_rate': learning_rate})
+
+    def step(self, **kwargs):
         self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.cortex_input,
                                self.cortex_layer.activation, self.learning_rate)
 
@@ -57,18 +51,18 @@ class CortexHebbian(CortexOptimizer):
     def _hebbian_learning(weights, input, output, learning_rate, sum=True):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
-        zero_mask = torch.gt(weights, 0).float()
+        zero_mask = torch.gt(weights.data, 0).float()
 
-        delta = learning_rate * torch.matmul(torch.t(input), output)
-        weights.add_(delta)
-        weights.data.mul_(zero_mask.data)
+        delta = learning_rate * torch.matmul(torch.t(input.data), output.data)
+        weights.data.add_(delta)
+        weights.data.mul_(zero_mask)
         if sum:
-            den = torch.norm(weights, p=1, dim=0)
+            den = torch.norm(weights.data, p=1, dim=0)
         else:
             # L2 without input image normalization is garbage
             # In spite of being used correctly, the activations are too low
-            den = torch.norm(weights, p=2, dim=0)
-        weights.data.div_(den.data)
+            den = torch.norm(weights.data, p=2, dim=0)
+        weights.data.div_(den)
         return
 
 
@@ -78,7 +72,7 @@ class CortexPruner(CortexOptimizer):
         self.pruning_step = pruning_step
         self.step_counter = 0
 
-    def step(self):
+    def step(self, **kwargs):
         if self.pruning_step % self.step_counter == 0:
             self.prune()
         self.step_counter += 1
