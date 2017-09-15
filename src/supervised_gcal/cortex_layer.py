@@ -1,11 +1,11 @@
 import torch
-from src.supervised_gcal.layer import Layer
-from src.supervised_gcal.utils import get_zeros, normalize, circular_mask, get_gaussian, custom_sigmoid
+from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
 
 
-class LissomCortexLayer(Layer):
+class CortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None, excitatory_radius=8.0,
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None,
+                 excitatory_radius=8.0,
                  inhibitory_radius=None, settling_steps=10, inhib_factor=1.5, excit_factor=1.05):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
@@ -17,49 +17,36 @@ class LissomCortexLayer(Layer):
         self.min_theta = min_theta
         super().__init__(input_shape, self_shape)
 
-    def _get_weight_variable(self, shape, radius):
-        # TODO: learn what Parameter means
-        sigma = (radius/5 if radius / 5 > 1 else 1) if radius is not None else 2
-        return torch.nn.Parameter(torch.Tensor(normalize(circular_mask(get_gaussian(shape, sigma),
-                                                                       radius=radius))))
+    def _get_weight_variable(self, input_shape, weights_shape, radius):
+        sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2
+        return torch.nn.Parameter(get_gaussian_weights_variable(input_shape, weights_shape, sigma, radius)).t()
 
     def _setup_variables(self):
-        self.inhibitory_weights = self._get_weight_variable(shape=self.lateral_weights_shape,
+        self.inhibitory_weights = self._get_weight_variable(input_shape=self.self_shape,
+                                                            weights_shape=self.self_shape,
                                                             radius=self.inhibitory_radius)
 
-        self.excitatory_weights = self._get_weight_variable(shape=self.lateral_weights_shape,
-                                                            radius=self.excitatory_radius)
+        self.excitatory_weights = self._get_weight_variable(input_shape=self.self_shape,
+                                                            weights_shape=self.self_shape,
+                                                            radius=self.inhibitory_radius)
 
-        self.retina_weights = self._get_weight_variable(shape=self.afferent_weights_shape, radius=self.afferent_radius)
+        self.afferent_weights = self._get_weight_variable(input_shape=self.input_shape,
+                                                          weights_shape=self.self_shape,
+                                                          radius=self.inhibitory_radius)
 
-        # Variable que guarda activaciones previas
-        self.previous_activations = torch.Tensor(get_zeros(self.activations_shape))
+    def forward(self, cortex_input):
+        self.cortex_input = cortex_input
+        self.afferent_activation = torch.matmul(self.cortex_input, self.afferent_weights)
 
-    def _afferent_activation(self, input, weights):
-        return torch.matmul(input, weights.data)
-
-    def _lateral_activation(self, previous_activations, weights):
-        return torch.matmul(previous_activations, weights.data)
-
-    def forward(self, input):
-        processed_input = self.process_input(input)
-        retina = processed_input
-        self.retina = retina
-        self.retina_activation = self._afferent_activation(retina, self.retina_weights)
-        self.afferent_activation = self.retina_activation
-
-        self.previous_activations = self.afferent_activation
+        current_activation = self.afferent_activation
         for _ in range(self.settling_steps):
-            self.excitatory_activation = self._lateral_activation(self.previous_activations,
-                                                                  self.excitatory_weights)
-            self.inhibitory_activation = self._lateral_activation(self.previous_activations,
-                                                                  self.inhibitory_weights)
+            self.excitatory_activation = torch.matmul(current_activation, self.excitatory_weights)
+            self.inhibitory_activation = torch.matmul(current_activation, self.inhibitory_weights)
 
-            new_activations = self.afferent_activation + self.excit_factor * self.excitatory_activation - self.inhib_factor * self.inhibitory_activation
-            new_activations = custom_sigmoid(self.min_theta, self.max_theta, new_activations).data
+            sum_activations = self.afferent_activation \
+                              + self.excit_factor * self.excitatory_activation \
+                              - self.inhib_factor * self.inhibitory_activation
 
-            self.previous_activations = new_activations
-        # from IPython.core.debugger import Pdb as dbg
-        # dbg().set_trace()
-
-        return new_activations
+            current_activation = self.custom_sigmoid(self.min_theta, self.max_theta, sum_activations)
+        self.activation = current_activation
+        return self.activation

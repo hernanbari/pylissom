@@ -1,26 +1,42 @@
+from functools import lru_cache
+
 import numpy as np
 
 import torch
+from src.supervised_gcal.utils.math import normalize
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, get_gaussian_weights, \
+    dense_weights_to_sparse
 
 
 class Layer(torch.nn.Module):
     def __init__(self, input_shape, self_shape):
         super().__init__()
-        input_neurons = int(np.prod(input_shape))
         self.self_shape = self_shape
-        self.orig_input_shape = input_shape
-        self.input_shape = (1, input_neurons)
-        self.afferent_weights_shape = (np.prod(self.input_shape), np.prod(self.self_shape))
-        self.lateral_weights_shape = (np.prod(self.self_shape), np.prod(self.self_shape))
-        self.activations_shape = (1, np.prod(self.self_shape))
+        self.input_shape = input_shape
+        self.activation_shape = torch.Size((1, int(np.prod(self.self_shape))))
         self._setup_variables()
 
     def _setup_variables(self):
         raise NotImplementedError
 
-    def process_input(self, input, normalize=False):
-        var = input
-        if normalize:
-            var = var / torch.norm(input, p=2, dim=1)
-        var = var.data.view(self.input_shape)
-        return var
+    def custom_sigmoid(min_theta, max_theta, activation):
+        activation = torch.nn.functional.threshold(activation, min_theta, value=0.0)
+        activation.masked_fill_(
+            mask=torch.gt(activation, max_theta),
+            value=1)
+
+        activation.sub_(min_theta).div_(max_theta - min_theta)
+        return activation
+
+
+# Outside class only for caching purposes
+@lru_cache()
+def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
+    weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
+                                                                            output_shape,
+                                                                            sigma=sigma),
+                                                       radius=radius),
+                        axis=1)
+    if sparse:
+        weights = dense_weights_to_sparse(weights)
+    return weights
