@@ -7,12 +7,12 @@ import shutil
 import numpy as np
 
 import torch
-from src.models import FullLissom
-from src.pipeline import Pipeline
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
+from src.supervised_gcal.models import FullLissom
 from src.supervised_gcal.optimizers import CortexHebbian, SequentialOptimizer
 from src.utils.datasets import get_dataset
+from src.utils.pipeline import Pipeline
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
