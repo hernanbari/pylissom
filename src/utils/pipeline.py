@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torch.autograd import Variable
+import torch.nn.functional as F
 
 
 class Pipeline(object):
@@ -39,28 +40,35 @@ class Pipeline(object):
             if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data, volatile=not train), Variable(target)
-
+            import ipdb; ipdb.set_trace()
             data = self._process_input(data)
-
+            self.optimizer.zero_grad() if self.optimizer else None
             output = self.model(data)
-            if self.loss_fn:
-                loss = self.loss_fn(output, target, size_average=train)
-                loss.backward()
             if train:
+                if self.loss_fn:
+                    # TODO: Learn what this means
+                    # Each Function instance should be only called once.
+                    loss = F.nll_loss(output, target)
+                    loss.backward()
                 self.optimizer.step() if self.optimizer else None
-                if batch_idx % self.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)])'.format(
-                        self.epoch, batch_idx * len(data), len(data_loader.dataset),
-                                    100. * batch_idx / len(data_loader)))
-                    if self.loss_fn:
-                        print('Loss: {:.6f}'.format(loss.data[0]))
-
-            if not train:
+                self._train_log(batch_idx, data, data_loader, loss)
+            else:
                 self.test_loss += loss.data[0]  # sum up batch loss
                 pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
                 self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
         if not train:
-            self.test_loss /= len(data_loader.dataset)
-            print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-                self.test_loss, self.correct, len(data_loader.dataset),
-                100. * self.correct / len(data_loader.dataset)))
+            self._test_log(data_loader)
+
+    def _test_log(self, data_loader):
+        self.test_loss /= len(data_loader.dataset)
+        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            self.test_loss, self.correct, len(data_loader.dataset),
+            100. * self.correct / len(data_loader.dataset)))
+
+    def _train_log(self, batch_idx, data, data_loader, loss):
+        if batch_idx % self.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)])'.format(
+                self.epoch, batch_idx * len(data), len(data_loader.dataset),
+                            100. * batch_idx / len(data_loader)))
+            if self.loss_fn:
+                print('Loss: {:.6f}'.format(loss.data[0]))

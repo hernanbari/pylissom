@@ -19,7 +19,7 @@ class Layer(torch.nn.Module):
     def _setup_variables(self):
         raise NotImplementedError
 
-    def custom_sigmoid(min_theta, max_theta, activation):
+    def custom_sigmoid(self, min_theta, max_theta, activation):
         activation = torch.nn.functional.threshold(activation, min_theta, value=0.0)
         activation.masked_fill_(
             mask=torch.gt(activation, max_theta),

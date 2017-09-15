@@ -4,28 +4,37 @@ from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 
 
 class CortexOptimizer(object):
+    # TODO: inherit from torch.optim.Optimizer
     def __init__(self, cortex_layer):
         self.cortex_layer = cortex_layer
 
-    def step(self, step):
+    def step(self):
         raise NotImplementedError
+
+    def zero_grad(self):
+        pass
 
 
 class CombinedCortexOptimizer(CortexOptimizer):
     optimizers = []
 
-    def step(self, step):
+    def step(self):
         for opt in self.optimizers:
-            opt.step(step)
+            opt.step()
 
 
 class SequentialOptimizer(object):
+    # TODO: inherit from torch.optim.Optimizer
     def __init__(self, *optimizers):
         self.optimizers = optimizers
 
-    def step(self, step):
+    def step(self):
         for opt in self.optimizers:
-            opt.step(step)
+            opt.step()
+
+    def zero_grad(self):
+        for opt in self.optimizers:
+            opt.zero_grad()
 
 
 class CortexHebbian(CortexOptimizer):
@@ -33,7 +42,7 @@ class CortexHebbian(CortexOptimizer):
         super().__init__(cortex_layer)
         self.learning_rate = learning_rate
 
-    def step(self, step):
+    def step(self):
         assert isinstance(self.cortex_layer, CortexLayer)
         self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.cortex_input,
                                self.cortex_layer.activation, self.learning_rate)
@@ -67,10 +76,12 @@ class CortexPruner(CortexOptimizer):
     def __init__(self, cortex_layer, pruning_step=2000):
         super().__init__(cortex_layer)
         self.pruning_step = pruning_step
+        self.step_counter = 0
 
-    def step(self, step):
-        if self.pruning_step == step:
+    def step(self):
+        if self.pruning_step % self.step_counter == 0:
             self.prune()
+        self.step_counter += 1
 
     def prune(self):
         raise NotImplementedError

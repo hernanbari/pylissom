@@ -53,21 +53,27 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+import ipdb;
+
+ipdb.set_trace()
+test_loader = get_dataset(train=False, args=args)
+train_loader = get_dataset(train=True, args=args)
+
 classes = 10
-input_shape = (28, 28) if not args.ck else (96, 96)
-batch_input_shape = torch.Size((1, int(np.prod(input_shape))))
+input_shape = (28, 28) if not args.dataset == 'ck' else (96, 96)
+batch_input_shape = torch.Size((args.batch_size, int(np.prod(input_shape))))
 model = None
 optimizer = None
 loss_fn = None
 
 if args.model == 'lgn' or args.model == 'lissom' or args.model == 'supervised':
     # LGN layer
-    lgn_shape = (28, 28) if not args.ck else (96, 96)
+    lgn_shape = input_shape
     model = LGNLayer(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised':
     # Cortex Layer
-    cortex_shape = (28, 28) if not args.ck else (96, 96)
+    cortex_shape = input_shape
     model = CortexLayer(input_shape, cortex_shape)
     optimizer = CortexHebbian(model)
 
@@ -78,9 +84,9 @@ if args.model == 'lissom' or args.model == 'supervised':
 
 if args.model == 'supervised' or args.model == 'control':
     if args.model == 'supervised':
-        net_input_shape = model.activation_shape
+        net_input_shape = model.activation_shape[1]
     elif args.model == 'control':
-        net_input_shape = batch_input_shape
+        net_input_shape = batch_input_shape[1]
 
     # 1 Layer Net
     net = torch.nn.Sequential(
@@ -88,7 +94,7 @@ if args.model == 'supervised' or args.model == 'control':
         torch.nn.LogSoftmax()
     )
     optimizer_nn = torch.optim.SGD(net.parameters(), lr=0.1)
-    loss_fn = torch.nn.functional.nll_loss
+    loss_fn = torch.nn.NLLLoss
 
     if args.model == 'control':
         model = net
@@ -109,8 +115,9 @@ if args.model == 'hlissom':
     raise NotImplementedError
 
 pipeline = Pipeline(model, optimizer, loss_fn)
-test_loader = get_dataset(train=False, args=args)
-train_loader = get_dataset(train=True, args=args)
+import ipdb;
+
+ipdb.set_trace()
 for epoch in range(1, args.epochs + 1):
     pipeline.train(train_data_loader=train_loader, epoch=epoch)
     pipeline.test(test_data_loader=test_loader)
