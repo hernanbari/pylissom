@@ -1,6 +1,52 @@
-import numpy as np
+import types
 
+import numpy as np
+from tensorboard import SummaryWriter
+
+from src.supervised_gcal.layer import Layer
 from torchvision import utils as vutils
+
+
+def image_decorator(Cls, logdir='runs'):
+    class ImagesWrapper(object):
+        def __init__(self, *args, **kwargs):
+            self.wrapped_layer = Cls(*args, **kwargs)
+            assert isinstance(self.wrapped_layer, Layer)
+            self.batch_idx = 0
+            self.epoch = 0
+
+        def __getattr__(self, name):
+            """
+            this is called whenever any attribute of a ImagesWrapper object is accessed. This function returns the
+            attribute from self.wrapped_layer (an instance of the decorated class).
+            """
+            return self.wrapped_layer.__getattribute__(name)
+
+        def forward(self, *args, **kwargs):
+            self.wrapped_layer.forward(*args, **kwargs)
+            if self.epoch != self.wrapped_layer.epoch:
+                self.epoch = self.wrapped_layer.epoch
+                self.batch_idx = 0
+            writer = SummaryWriter(log_dir=logdir+'/epoch_' + str(self.epoch))
+            import ipdb; ipdb.set_trace()
+            title = self.wrapped_layer.name
+            for mat in self.wrapped_layer.weights + [self.wrapped_layer.activation]:
+                image = images_matrix(mat)
+                title += '/foo'
+                writer.add_image(title, image, self.batch_idx)
+            writer.close()
+            self.batch_idx += 1
+
+    return ImagesWrapper
+
+
+def images_matrix(matrix):
+    neurons = matrix.shape[1]
+    input_neurons = matrix.shape[0]
+    weights_shape = (int(np.sqrt(input_neurons)), int(np.sqrt(input_neurons)))
+    reshaped_weights = matrix.t().contiguous().view((neurons, 1) + weights_shape)
+    im = vutils.make_grid(reshaped_weights, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=(0, 1))
+    return im
 
 
 def reshape_weights(input_shape, lissom_shape, weights, afferent=False):

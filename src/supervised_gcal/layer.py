@@ -9,12 +9,15 @@ from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, ge
 
 
 class Layer(torch.nn.Module):
-    def __init__(self, input_shape, self_shape):
+    def __init__(self, input_shape, self_shape, name=''):
         super().__init__()
+        self.name = name
         self.self_shape = self_shape
         self.input_shape = input_shape
         self.activation_shape = torch.Size((1, int(np.prod(self.self_shape))))
         self._setup_variables()
+        self.weights = []
+        self.epoch = 0
 
     def _setup_variables(self):
         raise NotImplementedError
@@ -27,6 +30,10 @@ class Layer(torch.nn.Module):
 
         activation.sub_(min_theta).div_(max_theta - min_theta)
         return activation
+
+    def train(self, mode=True):
+        self.epoch += 1
+        super().train(mode=mode)
 
 
 # Outside class only for caching purposes
