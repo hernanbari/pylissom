@@ -38,11 +38,18 @@ parser.add_argument('--model', choices=['lgn', 'cortex', 'lissom', 'supervised',
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
+parser.add_argument('--save_images', action='store_false', default=True,
+                    help='save images for tensorboard')
 
 args = parser.parse_args()
 
 if os.path.exists(args.logdir):
     shutil.rmtree(args.logdir)
+
+import src.supervised_gcal.utils.images as images
+
+images.logdir = args.logdir
+images.log_interval = args.log_interval
 
 if not args.ipdb:
     import ipdb
@@ -69,17 +76,23 @@ if args.model == 'lgn' or args.model == 'lissom' or args.model == 'supervised':
     # LGN layer
     lgn_shape = (args.shape, args.shape)
     model = LGNLayer(input_shape, lgn_shape, on=True)
+    if args.save_images:
+        model.register_forward_hook(images.generate_images)
 
 if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised':
     # Cortex Layer
     cortex_shape = (args.shape, args.shape)
     model = CortexLayer(input_shape, cortex_shape)
     optimizer = CortexHebbian(model.parameters(), cortex_layer=model)
+    if args.save_images:
+        model.register_forward_hook(images.generate_images)
 
 if args.model == 'lissom' or args.model == 'supervised':
     # Full Lissom
     model = FullLissom(input_shape, lgn_shape, cortex_shape)
     optimizer = CortexHebbian(model.parameters(), cortex_layer=model.v1)
+    if args.save_images:
+        model.register_forward_hook(images.generate_images)
 
 if args.model == 'supervised' or args.model == 'control':
     if args.model == 'supervised':
@@ -113,7 +126,7 @@ if args.model == 'supervised' or args.model == 'control':
 if args.model == 'hlissom':
     raise NotImplementedError
 
-pipeline = Pipeline(model, optimizer, loss_fn, cuda=args.cuda)
+pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, cuda=args.cuda)
 for epoch in range(1, args.epochs + 1):
     pipeline.train(train_data_loader=train_loader, epoch=epoch)
     pipeline.test(test_data_loader=test_loader)

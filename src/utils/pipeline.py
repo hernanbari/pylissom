@@ -37,6 +37,7 @@ class Pipeline(object):
 
     def _run(self, data_loader, train):
         for batch_idx, (data, target) in enumerate(data_loader):
+            loss = None
             if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data, volatile=not train), Variable(target)
@@ -49,7 +50,8 @@ class Pipeline(object):
                 if self.loss_fn:
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
-                self._train_log(batch_idx, data, data_loader, loss)
+                if batch_idx % self.log_interval == 0:
+                    self._train_log(batch_idx, data, data_loader, loss)
             else:
                 self.test_loss += loss.data[0]  # sum up batch loss
                 pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability

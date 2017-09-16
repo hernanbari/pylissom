@@ -6,7 +6,7 @@ class CortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
     def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=None,
                  excitatory_radius=8.0,
-                 inhibitory_radius=None, settling_steps=10, inhib_factor=1.5, excit_factor=1.05):
+                 inhibitory_radius=None, settling_steps=10, inhib_factor=1.5, excit_factor=1.05, name='cortex'):
         self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
@@ -15,7 +15,7 @@ class CortexLayer(Layer):
         self.excitatory_radius = excitatory_radius
         self.afferent_radius = afferent_radius
         self.min_theta = min_theta
-        super().__init__(input_shape, self_shape)
+        super().__init__(input_shape, self_shape, name)
 
     def _get_weight_variable(self, input_shape, weights_shape, radius):
         sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2
@@ -33,10 +33,13 @@ class CortexLayer(Layer):
         self.afferent_weights = self._get_weight_variable(input_shape=self.input_shape,
                                                           weights_shape=self.self_shape,
                                                           radius=self.inhibitory_radius)
+        self.weights += [('afferent_weights', self.afferent_weights),
+                         ('excitatory_weights', self.excitatory_weights),
+                         ('inhibitory_weights', self.inhibitory_weights)]
 
     def forward(self, cortex_input):
-        self.cortex_input = cortex_input
-        self.afferent_activation = torch.matmul(self.cortex_input, self.afferent_weights)
+        self.input = cortex_input
+        self.afferent_activation = torch.matmul(self.input, self.afferent_weights)
 
         current_activation = self.afferent_activation
         for _ in range(self.settling_steps):
