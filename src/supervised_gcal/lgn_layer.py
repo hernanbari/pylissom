@@ -1,9 +1,7 @@
 import torch
 from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
-from src.supervised_gcal.utils.images import image_decorator
 
 
-@image_decorator
 class LGNLayer(Layer):
     def __init__(self, input_shape, self_shape, on, sigma_center=0.4, sigma_sorround=1.2, min_theta=0.0, max_theta=1.0,
                  lgn_factor=1.0, radius=10, sparse=False, name='lgn_layer'):
@@ -34,13 +32,13 @@ class LGNLayer(Layer):
         self.weights = [('afferent_weights', self.afferent_weights)]
 
     def forward(self, lgn_input):
-        self.lgn_input = lgn_input
+        self.input = lgn_input
         if not self.sparse:
-            matmul = torch.matmul(self.lgn_input.data, self.afferent_weights)
+            matmul = torch.matmul(self.input.data, self.afferent_weights)
         else:
             # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
             # That's why it's reversed
-            matmul = torch.matmul(self.afferent_weights.t(), self.lgn_input.data.t()).t()
+            matmul = torch.matmul(self.afferent_weights.t(), self.input.data.t()).t()
 
         # Custom sigmoid returns a variable
         self.activation = self.custom_sigmoid(self.min_theta, self.max_theta,

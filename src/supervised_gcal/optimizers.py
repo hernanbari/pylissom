@@ -38,7 +38,7 @@ class CortexHebbian(CortexOptimizer):
         super().__init__(params, {'learning_rate': learning_rate})
 
     def step(self, **kwargs):
-        self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.cortex_input,
+        self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
                                self.cortex_layer.activation, self.learning_rate)
 
         self._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,

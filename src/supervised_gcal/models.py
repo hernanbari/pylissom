@@ -15,18 +15,20 @@ class FullLissom(torch.nn.Module):
             v1_params = {}
         self.input_shape = input_shape
         self.activation_shape = torch.Size((1, int(np.prod(v1_shape))))
-        on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
-        off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
-        v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
-
-        for key, module in [('on', on), ('off', off), ('v1', v1)]:
-            self.add_module(key, module)
+        self.on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
+        self.off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
+        self.v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
 
     def forward(self, retina):
         on_output = self.on(retina)
         off_output = self.off(retina)
         self.lgn_activation = on_output + off_output
         return self.v1(self.lgn_activation)
+
+    def register_forward_hook(self, hook):
+        self.on.register_forward_hook(hook)
+        self.off.register_forward_hook(hook)
+        self.v1.register_forward_hook(hook)
 
 
 # TODO: test and define an optimizer
