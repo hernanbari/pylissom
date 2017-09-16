@@ -14,10 +14,13 @@ class FullLissom(torch.nn.Module):
         if v1_params is None:
             v1_params = {}
         self.input_shape = input_shape
-        self.on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
-        self.off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
-        self.v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
         self.activation_shape = torch.Size((1, int(np.prod(v1_shape))))
+        on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
+        off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
+        v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
+
+        for key, module in [('on', on), ('off', off), ('v1', v1)]:
+            self.add_module(key, module)
 
     def forward(self, retina):
         on_output = self.on(retina)

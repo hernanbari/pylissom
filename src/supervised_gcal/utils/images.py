@@ -6,8 +6,10 @@ from tensorboard import SummaryWriter
 from src.supervised_gcal.layer import Layer
 from torchvision import utils as vutils
 
+logdir = 'runs'
 
-def image_decorator(Cls, logdir='runs'):
+
+def image_decorator(Cls, logdir=logdir):
     class ImagesWrapper(object):
         def __init__(self, *args, **kwargs):
             self.wrapped_layer = Cls(*args, **kwargs)
@@ -27,12 +29,11 @@ def image_decorator(Cls, logdir='runs'):
             if self.epoch != self.wrapped_layer.epoch:
                 self.epoch = self.wrapped_layer.epoch
                 self.batch_idx = 0
-            writer = SummaryWriter(log_dir=logdir+'/epoch_' + str(self.epoch))
-            import ipdb; ipdb.set_trace()
+            writer = SummaryWriter(log_dir=logdir + '/epoch_' + str(self.epoch))
             title = self.wrapped_layer.name
-            for mat in self.wrapped_layer.weights + [self.wrapped_layer.activation]:
+            for name, mat in self.wrapped_layer.weights + [('activation', self.wrapped_layer.activation.data.t())]:
                 image = images_matrix(mat)
-                title += '/foo'
+                title += '/' + name
                 writer.add_image(title, image, self.batch_idx)
             writer.close()
             self.batch_idx += 1

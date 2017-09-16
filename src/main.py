@@ -44,6 +44,10 @@ args = parser.parse_args()
 if os.path.exists(args.logdir):
     shutil.rmtree(args.logdir)
 
+import src.supervised_gcal.utils.images as images
+
+images.logdir = args.logdir
+
 if not args.ipdb:
     import ipdb
 

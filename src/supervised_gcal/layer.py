@@ -15,9 +15,9 @@ class Layer(torch.nn.Module):
         self.self_shape = self_shape
         self.input_shape = input_shape
         self.activation_shape = torch.Size((1, int(np.prod(self.self_shape))))
-        self._setup_variables()
         self.weights = []
         self.epoch = 0
+        self._setup_variables()
 
     def _setup_variables(self):
         raise NotImplementedError

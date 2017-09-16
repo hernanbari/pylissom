@@ -6,7 +6,7 @@ from src.supervised_gcal.utils.images import image_decorator
 @image_decorator
 class LGNLayer(Layer):
     def __init__(self, input_shape, self_shape, on, sigma_center=0.4, sigma_sorround=1.2, min_theta=0.0, max_theta=1.0,
-                 lgn_factor=1.0, radius=10, sparse=False, name=''):
+                 lgn_factor=1.0, radius=10, sparse=False, name='lgn_layer'):
         self.sparse = sparse
         self.radius = radius
         self.lgn_factor = lgn_factor
@@ -31,7 +31,7 @@ class LGNLayer(Layer):
         else:
             diff = (sigma_sorround_weights_matrix - sigma_center_weights_matrix).t()
         self.register_buffer(name='afferent_weights', tensor=diff)
-        self.weights.append(self.afferent_weights)
+        self.weights = [('afferent_weights', self.afferent_weights)]
 
     def forward(self, lgn_input):
         self.lgn_input = lgn_input

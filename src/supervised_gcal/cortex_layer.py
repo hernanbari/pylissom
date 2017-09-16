@@ -35,6 +35,9 @@ class CortexLayer(Layer):
         self.afferent_weights = self._get_weight_variable(input_shape=self.input_shape,
                                                           weights_shape=self.self_shape,
                                                           radius=self.inhibitory_radius)
+        self.weights += [('afferent_weights', self.afferent_weights),
+                         ('excitatory_weights', self.excitatory_weights),
+                         ('inhibitory_weights', self.inhibitory_weights)]
 
     def forward(self, cortex_input):
         self.cortex_input = cortex_input
