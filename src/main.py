@@ -34,7 +34,7 @@ parser.add_argument('--dataset', default='mnist', choices=['mnist', 'ck', 'numbe
                     help='which dataset iterate')
 parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
-parser.add_argument('--model', choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom'],
+parser.add_argument('--model', required=True, choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
@@ -52,9 +52,9 @@ images.logdir = args.logdir
 images.log_interval = args.log_interval
 
 if not args.ipdb:
-    import ipdb
+    import IPython.core.debugger as dbg
 
-    ipdb.set_trace = lambda: 0
+    dbg.Pdb.set_trace = lambda s: 0
 
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
