@@ -12,8 +12,8 @@ def generate_images(self, input, output):
     if self.batch_idx % log_interval != 0:
         return
     writer = SummaryWriter(log_dir=logdir + '/epoch_' + str(self.epoch))
-    for name, mat in self.weights + [('activation', self.activation.t()), ('input', input[0]), ('output', output.t()),
-                                     ('self.input', self.input)]:
+    for name, mat in self.weights + [('activation', self.activation.t()), ('input', input[0].t()), ('output', output.t()),
+                                     ('self.input', self.input.t())]:
         if isinstance(mat, torch.autograd.Variable):
             mat = mat.data
         image = images_matrix(mat)

@@ -4,7 +4,7 @@ from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
 
 class LGNLayer(Layer):
     def __init__(self, input_shape, self_shape, on, sigma_center=0.4, sigma_sorround=1.2, min_theta=0.0, max_theta=1.0,
-                 lgn_factor=1.0, radius=10, sparse=False, name='lgn_layer'):
+                 lgn_factor=1.0, radius=10, sparse=False, name=''):
         self.sparse = sparse
         self.radius = radius
         self.lgn_factor = lgn_factor
@@ -13,7 +13,7 @@ class LGNLayer(Layer):
         self.min_theta = min_theta
         self.sigma_sorround = sigma_sorround
         self.sigma_center = sigma_center
-        super().__init__(input_shape, self_shape, name)
+        super().__init__(input_shape, self_shape, 'on' if on else 'off')
 
     def _setup_variables(self):
         sigma_center_weights_matrix = get_gaussian_weights_variable(self.input_shape, self.self_shape,
