@@ -21,7 +21,7 @@ def get_dataset(train, args):
 
 
 class CKDataset(Dataset):
-    def __init__(self, train, path_images='/home/rosana/data/X.npy', path_labels='/home/rosana/data/y.npy',
+    def __init__(self, train, path_images='/home/hbari/data/X.npy', path_labels='/home/hbari/data/y.npy',
                  train_pct=0.25):
         self.train_pct = train_pct
         self.path_labels = path_labels
