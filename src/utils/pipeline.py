@@ -5,7 +5,8 @@ import torch.nn.functional as F
 
 
 class Pipeline(object):
-    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, cuda=False):
+    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, dataset_len=None, cuda=False):
+        self.dataset_len = dataset_len
         self.log_interval = log_interval
         self.loss_fn = loss_fn
         self.cuda = cuda
@@ -37,6 +38,8 @@ class Pipeline(object):
 
     def _run(self, data_loader, train):
         for batch_idx, (data, target) in enumerate(data_loader):
+            if self.dataset_len is not None and batch_idx > self.dataset_len:
+                break
             loss = None
             if self.cuda:
                 data, target = data.cuda(), target.cuda()

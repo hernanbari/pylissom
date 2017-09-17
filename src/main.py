@@ -40,6 +40,8 @@ parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
 parser.add_argument('--save_images', action='store_false', default=True,
                     help='save images for tensorboard')
+parser.add_argument('--dataset-len', type=int, default=None, metavar='N',
+                    help='max batch len')
 
 args = parser.parse_args()
 
@@ -126,7 +128,7 @@ if args.model == 'supervised' or args.model == 'control':
 if args.model == 'hlissom':
     raise NotImplementedError
 
-pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, cuda=args.cuda)
+pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len, cuda=args.cuda)
 for epoch in range(1, args.epochs + 1):
     pipeline.train(train_data_loader=train_loader, epoch=epoch)
     pipeline.test(test_data_loader=test_loader)

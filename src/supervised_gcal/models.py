@@ -26,9 +26,8 @@ class FullLissom(torch.nn.Module):
         return self.v1(self.lgn_activation)
 
     def register_forward_hook(self, hook):
-        self.on.register_forward_hook(hook)
-        self.off.register_forward_hook(hook)
-        self.v1.register_forward_hook(hook)
+        for m in self.children():
+            m.register_forward_hook(hook)
 
 
 # TODO: test and define an optimizer
