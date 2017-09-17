@@ -139,13 +139,14 @@ if args.lgn_grid_search:
                 model = FullLissom(input_shape, lgn_shape, (1, 1),
                                    lgn_params={'sigma_center': sigma_center, 'sigma_sorround': sigma_sorround,
                                                'radius': radius})
-                if args.save_images:
-                    model.register_forward_hook(images.generate_images)
-                    for m in model.children():
-                        m.batch_idx = counter
                 pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
                                     dataset_len=args.dataset_len,
                                     cuda=args.cuda)
+                if args.save_images:
+                    def hardcoded_counter(self, input, output):
+                        self.batch_idx = counter
+                        images.generate_images(self, input, output)
+                    model.register_forward_hook(hardcoded_counter)
                 pipeline.test(test_data_loader=test_loader)
                 print("Iteration", counter)
                 print(sigma_center, sigma_sorround, radius)
