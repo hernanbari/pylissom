@@ -36,7 +36,7 @@ class Pipeline(object):
 
     def _run(self, data_loader, train):
         for batch_idx, (data, target) in enumerate(data_loader):
-            if self.dataset_len is not None and batch_idx > self.dataset_len:
+            if self.dataset_len is not None and batch_idx >= self.dataset_len:
                 break
             loss = None
             if self.cuda:
