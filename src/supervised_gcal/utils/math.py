@@ -17,6 +17,7 @@ def euclidian_distances(x, y, mu_x, mu_y):
     """
     return np.sqrt(((x - mu_x) ** 2 + (y - mu_y) ** 2))
 
+
 def euclidean_distance_general(x, y):
     """
     This function implements the euclidean distance between two n-dimensional vectors as numpy arrays.
@@ -25,6 +26,7 @@ def euclidean_distance_general(x, y):
     :return: euclidean distance
     """
     return np.sqrt(np.sum((x - y) ** 2))
+
 
 def gaussian(x, y, mu_x, mu_y, sigma):
     """
@@ -51,4 +53,4 @@ def normalize(matrix, norm=1, axis=0):
     :param axis:  0 is column, 1 is row
     :return: a matrix normalized by columns or rows
     """
-    return matrix.div(matrix.norm(p=norm, dim=axis))
+    return matrix.div(matrix.norm(p=norm, dim=axis).unsqueeze(1))
