@@ -42,6 +42,8 @@ parser.add_argument('--save_images', action='store_false', default=True,
                     help='save images for tensorboard')
 parser.add_argument('--dataset-len', type=int, default=None, metavar='N',
                     help='max batch len')
+parser.add_argument('--lgn-grid-search', action='store_true', default=False,
+                    help='grid search of lgn')
 
 args = parser.parse_args()
 
@@ -128,13 +130,29 @@ if args.model == 'supervised' or args.model == 'control':
 if args.model == 'hlissom':
     raise NotImplementedError
 
-pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len, cuda=args.cuda)
+if args.lgn_grid_search:
+    counter = 0
+    for sigma_center in np.arange(0.1, 10, step=0.5):
+        for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
+            for radius in [3, 4, 5, 8, 10, 15, 20]:
+                lgn_shape = (args.shape, args.shape)
+                model = FullLissom(input_shape, lgn_shape, (1, 1),
+                                   lgn_params={'sigma_center': sigma_center, 'sigma_sorround': sigma_sorround,
+                                               'radius': radius})
+                if args.save_images:
+                    model.register_forward_hook(images.generate_images)
+                    for m in model.children():
+                        m.batch_idx = counter
+                pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
+                                    dataset_len=args.dataset_len,
+                                    cuda=args.cuda)
+                pipeline.test(test_data_loader=test_loader)
+                print("Iteration", counter)
+                print(sigma_center, sigma_sorround, radius)
+                counter += 1
+
+pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
+                    cuda=args.cuda)
 for epoch in range(1, args.epochs + 1):
     pipeline.train(train_data_loader=train_loader, epoch=epoch)
     pipeline.test(test_data_loader=test_loader)
-
-# TODO: Implement grid search and get_dataset(number_one)
-# for sigma_center in np.arange(0.1, 5, step=0.2):
-#     for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
-#         for radius in [3, 5, 8, 10, 15, 20]:
-#             pass

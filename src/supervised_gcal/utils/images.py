@@ -9,13 +9,13 @@ log_interval = 10
 
 
 def generate_images(self, input, output):
-    if not self.training:
-        return
     if self.batch_idx % log_interval != 0:
         self.batch_idx += 1
         return
-    writer = SummaryWriter(log_dir=logdir + '/epoch_' + str(self.epoch))
-    for name, mat in self.weights + [('activation', self.activation.t()), ('input', input[0].t()), ('output', output.t()),
+    writer = SummaryWriter(
+        log_dir=logdir + ('/train/' if self.training else '/test/') + 'epoch_' + str(self.epoch))
+    for name, mat in self.weights + [('activation', self.activation.t()), ('input', input[0].t()),
+                                     ('output', output.t()),
                                      ('self.input', self.input.t())]:
         if isinstance(mat, torch.autograd.Variable):
             mat = mat.data

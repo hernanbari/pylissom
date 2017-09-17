@@ -19,8 +19,6 @@ class Pipeline(object):
         self._run(train_data_loader, train=True)
 
     def test(self, test_data_loader):
-        if self.loss_fn is None:
-            return
         self.model.eval()
         self.test_loss = 0
         self.correct = 0
@@ -55,11 +53,11 @@ class Pipeline(object):
                 self.optimizer.step() if self.optimizer else None
                 if batch_idx % self.log_interval == 0:
                     self._train_log(batch_idx, data, data_loader, loss)
-            else:
+            elif self.loss_fn:
                 self.test_loss += loss.data[0]  # sum up batch loss
                 pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
                 self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
-        if not train:
+        if not train and self.loss_fn:
             self._test_log(data_loader)
 
     def _test_log(self, data_loader):

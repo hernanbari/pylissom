@@ -35,7 +35,7 @@ class Layer(torch.nn.Module):
     def train(self, mode=True):
         if mode:
             self.epoch += 1
-            self.batch_idx = 0
+        self.batch_idx = 0
         super().train(mode=mode)
 
 
