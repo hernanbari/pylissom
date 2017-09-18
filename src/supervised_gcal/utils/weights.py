@@ -3,6 +3,7 @@ This module contains functions that modify the weights of the neural network.
 """
 
 import numpy as np
+
 import torch
 from functools import lru_cache
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances
@@ -36,11 +37,15 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
 
 
 @lru_cache()
-def get_gaussian_weights(shape_source, shape_output, sigma):
+def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
     rows_source = shape_source[0]
     rows_output = shape_output[0]
     ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
     return ans
+
+
+def get_gaussian_weights(shape_source, shape_output, sigma):
+    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).clone()
 
 
 def apply_circular_mask_to_weights(matrix, radius):
@@ -63,23 +68,11 @@ def apply_circular_mask_to_weights(matrix, radius):
 
 def dense_weights_to_sparse(matrix):
     """
-
-    :param matrix:
-    :return:
+    Transforms a torch dense tensor to sparse
+    http://pytorch.org/docs/master/sparse.html
     """
-    indexes_columns = []
-    nnz_values = []
-    for weights in matrix:
-        nnz_idx = np.nonzero(weights)[0]
-        indexes_columns.append(nnz_idx)
-        nnz_values.append(weights[nnz_idx])
-    flatten_nnz_values = np.asarray(nnz_values).flatten()
-
-    flatten_idx_cols = np.asarray(indexes_columns).flatten()
-
-    indexes_rows = [[idx_r] * len(r[0]) for idx_r, r in enumerate(indexes_columns)]
-    flatten_idx_rows = np.asarray(indexes_rows).flatten()
-
-    tuple_flatten_indexes = np.array([flatten_idx_rows, flatten_idx_cols])
-    return torch.sparse.FloatTensor(torch.from_numpy(tuple_flatten_indexes), torch.from_numpy(flatten_nnz_values),
+    nnz_mask = matrix != 0
+    nnz_values = matrix[nnz_mask]
+    nnz_indexes = nnz_mask.nonzero()
+    return torch.sparse.FloatTensor(nnz_indexes.t(), nnz_values,
                                     torch.Size([int(matrix.shape[0]), int(matrix.shape[1])]))

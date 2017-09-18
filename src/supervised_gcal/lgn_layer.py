@@ -13,7 +13,7 @@ class LGNLayer(Layer):
         self.min_theta = min_theta
         self.sigma_sorround = sigma_sorround
         self.sigma_center = sigma_center
-        super().__init__(input_shape, self_shape, 'on' if on else 'off')
+        super().__init__(input_shape, self_shape, ('on' if on else 'off') if name == '' else name)
 
     def _setup_variables(self):
         sigma_center_weights_matrix = get_gaussian_weights_variable(self.input_shape, self.self_shape,
