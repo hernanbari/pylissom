@@ -29,7 +29,7 @@ def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
 
 
 def get_gaussian_weights(shape_source, shape_output, sigma):
-    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).copy()
+    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).clone()
 
 
 def apply_circular_mask_to_weights(matrix, radius):
