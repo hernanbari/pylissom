@@ -21,11 +21,15 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
 
 
 @lru_cache()
-def get_gaussian_weights(shape_source, shape_output, sigma):
+def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
     rows_source = shape_source[0]
     rows_output = shape_output[0]
     ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
     return ans
+
+
+def get_gaussian_weights(shape_source, shape_output, sigma):
+    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).copy()
 
 
 def apply_circular_mask_to_weights(matrix, radius):
