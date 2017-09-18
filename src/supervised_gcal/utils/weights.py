@@ -1,12 +1,27 @@
-from functools import lru_cache
+"""
+This module contains functions that modify the weights of the neural network.
+"""
 
 import numpy as np
-
 import torch
+from functools import lru_cache
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances
 
 
 def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **kwargs):
+    """
+    The goal of this function is to apply a function fn, to all the elements of an array of dimension
+    rows_dims_source x rows_dims_source (the lower array) centered on an element of the superior array.
+    The elements of the array would be the weights of the superior layer, with the inferior layer, i.e.,
+    it modifies the weights of each one of the neurons of the superior layer, with respect to all the neurons
+    of the inferior layer.
+    :param rows_dims_source: The dimension of the inferior array.
+    :param rows_dims_output: The dimension of the superior array.
+    :param fn: The function applied to the weights.
+    :param kwargs: The actual weights.
+    :return: An array containing the new weights of the superior layer.
+    PROBLEMAS? OJO QUE EL STEP PUEDE SER UN FLOAT
+    """
     dims = rows_dims_source ** 2
     step = rows_dims_source / rows_dims_output
     tmp_map = []
@@ -29,6 +44,13 @@ def get_gaussian_weights(shape_source, shape_output, sigma):
 
 
 def apply_circular_mask_to_weights(matrix, radius):
+    """
+    This functions applies a circular mask to a matrix of weights. The weights of the neurons that are
+    more far than the radius, will have its weight set to zero.
+    :param matrix: Tensor of weights. The rows are the neurons. The columns the weights of the neuron.
+    :param radius: The radius of neighborhood.
+    :return:
+    """
     if radius is None:
         return matrix
     orig_rows_dims_source = int(matrix.shape[1] ** 0.5)
@@ -40,6 +62,11 @@ def apply_circular_mask_to_weights(matrix, radius):
 
 
 def dense_weights_to_sparse(matrix):
+    """
+
+    :param matrix:
+    :return:
+    """
     indexes_columns = []
     nnz_values = []
     for weights in matrix:
@@ -56,5 +83,3 @@ def dense_weights_to_sparse(matrix):
     tuple_flatten_indexes = np.array([flatten_idx_rows, flatten_idx_cols])
     return torch.sparse.FloatTensor(torch.from_numpy(tuple_flatten_indexes), torch.from_numpy(flatten_nnz_values),
                                     torch.Size([int(matrix.shape[0]), int(matrix.shape[1])]))
-
-
