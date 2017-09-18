@@ -41,7 +41,7 @@ class Layer(torch.nn.Module):
 
 # Outside class only for caching purposes
 @lru_cache()
-def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
+def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=False):
     weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
                                                                             output_shape,
                                                                             sigma=sigma),
@@ -50,3 +50,7 @@ def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, spar
     if sparse:
         weights = dense_weights_to_sparse(weights)
     return weights
+
+
+def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
+    return get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=sparse).clone()

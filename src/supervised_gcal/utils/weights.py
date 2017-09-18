@@ -56,5 +56,3 @@ def dense_weights_to_sparse(matrix):
     tuple_flatten_indexes = np.array([flatten_idx_rows, flatten_idx_cols])
     return torch.sparse.FloatTensor(torch.from_numpy(tuple_flatten_indexes), torch.from_numpy(flatten_nnz_values),
                                     torch.Size([int(matrix.shape[0]), int(matrix.shape[1])]))
-
-

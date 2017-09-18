@@ -34,7 +34,8 @@ parser.add_argument('--dataset', default='mnist', choices=['mnist', 'ck', 'numbe
                     help='which dataset iterate')
 parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
-parser.add_argument('--model', required=True, choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom'],
+parser.add_argument('--model', required=True,
+                    choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom', 'lgn-grid-search'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
@@ -42,8 +43,6 @@ parser.add_argument('--save_images', action='store_false', default=True,
                     help='save images for tensorboard')
 parser.add_argument('--dataset-len', type=int, default=None, metavar='N',
                     help='max batch len')
-parser.add_argument('--lgn-grid-search', action='store_true', default=False,
-                    help='grid search of lgn')
 
 args = parser.parse_args()
 
@@ -130,7 +129,7 @@ if args.model == 'supervised' or args.model == 'control':
 if args.model == 'hlissom':
     raise NotImplementedError
 
-if args.lgn_grid_search:
+if args.model == 'lgn-grid-search':
     counter = 0
     for sigma_center in np.arange(0.1, 10, step=0.5):
         for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
@@ -146,6 +145,8 @@ if args.lgn_grid_search:
                     def hardcoded_counter(self, input, output):
                         self.batch_idx = counter
                         images.generate_images(self, input, output)
+
+
                     model.register_forward_hook(hardcoded_counter)
                 pipeline.test(test_data_loader=test_loader)
                 print("Iteration", counter)

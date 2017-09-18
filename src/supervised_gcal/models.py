@@ -1,5 +1,6 @@
-import torch
 import numpy as np
+
+import torch
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.optimizers import CortexHebbian, NeighborsDecay, ConnectionDeath, \
