@@ -44,7 +44,7 @@ def gaussian(x, y, mu_x, mu_y, sigma):
     return ans
 
 
-def normalize(matrix, norm=1, axis=0):
+def normalize(matrix, norm=1, axis=1):
     """
     This function implements a normalization of the row or column vectors of a matrix
     (by default, normalizes the columns and uses norm 1).
@@ -53,4 +53,6 @@ def normalize(matrix, norm=1, axis=0):
     :param axis:  0 is column, 1 is row
     :return: a matrix normalized by columns or rows
     """
-    return matrix.div(matrix.norm(p=norm, dim=axis).unsqueeze(1))
+    norm = matrix.norm(p=norm, dim=axis)
+    norm = norm if axis == 0 else norm.unsqueeze(1)
+    return matrix.div(norm)
