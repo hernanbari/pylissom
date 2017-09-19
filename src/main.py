@@ -68,7 +68,7 @@ if args.cuda:
 test_loader = get_dataset(train=False, args=args)
 train_loader = get_dataset(train=True, args=args)
 
-classes = 10
+classes = 10 if not args.dataset == 'ck ' else 7
 input_shape = (28, 28) if not args.dataset == 'ck' else (96, 96)
 batch_input_shape = torch.Size((args.batch_size, int(np.prod(input_shape))))
 model = None

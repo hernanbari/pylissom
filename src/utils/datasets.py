@@ -27,7 +27,8 @@ class CKDataset(Dataset):
         self.path_labels = path_labels
         self.path_images = path_images
         X = np.load(self.path_images)
-        y = np.load(self.path_labels)
+        # Substract 1 bc labels are 1-7 and need to start from 0
+        y = np.load(self.path_labels)-1
         # subjs = np.load('/home/rosana/data/subjs.npy')
 
         X, y = self.shuffle(X, y)
