@@ -59,7 +59,7 @@ if not args.ipdb:
 
     dbg.Pdb.set_trace = lambda s: 0
     import ipdb
-    ipdb.set_trace = 0
+    ipdb.set_trace = lambda: 0
 
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
