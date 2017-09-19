@@ -3,7 +3,7 @@ from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
 
 
 class LGNLayer(Layer):
-    def __init__(self, input_shape, self_shape, on, sigma_center=0.4, sigma_sorround=1.2, min_theta=0.0, max_theta=1.0,
+    def __init__(self, input_shape, self_shape, on, sigma_center=0.1, sigma_sorround=10, min_theta=0.0, max_theta=1.0,
                  lgn_factor=1.0, radius=10, sparse=False, name=''):
         self.sparse = sparse
         self.radius = radius
@@ -33,14 +33,16 @@ class LGNLayer(Layer):
 
     def forward(self, lgn_input):
         self.input = lgn_input
-        if not self.sparse:
-            matmul = torch.matmul(self.input.data, self.afferent_weights)
-        else:
-            # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
-            # That's why it's reversed
-            matmul = torch.matmul(self.afferent_weights.t(), self.input.data.t()).t()
-
+        matmul = self.matmul(self.input, self.afferent_weights)
         # Custom sigmoid returns a variable
         self.activation = self.custom_sigmoid(self.min_theta, self.max_theta,
                                               self.lgn_factor * matmul)
         return self.activation
+
+    def matmul(self, vector, matrix):
+        if not self.sparse:
+            return torch.matmul(vector.data, matrix)
+        else:
+            # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
+            # That's why it's reversed
+            return torch.matmul(matrix.t(), vector.data.t()).t()
