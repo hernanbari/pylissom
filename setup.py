@@ -25,7 +25,11 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='1.2.0',
 
-    description='A sample Python project', install_requires=['numpy', 'tensorflow']
+    description='A sample Python project',
+    install_requires=['numpy', 'torch', 'torchvision'],
+    extras_require={
+        'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
+    }
     # long_description=long_description,
     #
     # # The project's main homepage.
