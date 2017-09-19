@@ -30,11 +30,11 @@ class CortexLayer(Layer):
 
         self.excitatory_weights = self._get_weight_variable(input_shape=self.self_shape,
                                                             weights_shape=self.self_shape,
-                                                            radius=self.inhibitory_radius)
+                                                            radius=self.excitatory_radius)
 
         self.afferent_weights = self._get_weight_variable(input_shape=self.input_shape,
                                                           weights_shape=self.self_shape,
-                                                          radius=self.inhibitory_radius)
+                                                          radius=self.afferent_radius)
         self.weights += [('afferent_weights', self.afferent_weights),
                          ('excitatory_weights', self.excitatory_weights),
                          ('inhibitory_weights', self.inhibitory_weights)]
