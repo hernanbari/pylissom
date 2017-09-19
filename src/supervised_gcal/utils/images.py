@@ -15,9 +15,7 @@ def generate_images(self, input, output):
         return
     writer = SummaryWriter(log_dir=logdir + ('/train/' if self.training else '/test/') + 'epoch_' + str(self.epoch))
 
-    for name, mat in self.weights + [('activation', self.activation.t()), ('input', input[0].t()),
-                                     ('output', output.t()),
-                                     ('self.input', self.input.t())]:
+    for name, mat in self.weights + [('activation', self.activation.t()), ('input', self.input.t())]:
         if isinstance(mat, torch.autograd.Variable):
             mat = mat.data
         if isinstance(self, LGNLayer) and 'weights' in name:
