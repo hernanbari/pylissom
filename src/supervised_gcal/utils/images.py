@@ -18,6 +18,8 @@ def generate_images(self, input, output):
     for name, mat in self.weights + [('activation', self.activation.t()), ('input', self.input.t())]:
         if isinstance(mat, torch.autograd.Variable):
             mat = mat.data
+        if 'weights' in name and self.sparse:
+            mat = mat.to_dense()
         if isinstance(self, LGNLayer) and 'weights' in name:
             range = (-1, 1)
         else:
