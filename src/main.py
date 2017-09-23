@@ -88,14 +88,14 @@ if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised
     # Cortex Layer
     cortex_shape = (args.shape, args.shape)
     model = CortexLayer(input_shape, cortex_shape)
-    optimizer = CortexHebbian(model.parameters(), cortex_layer=model)
+    optimizer = CortexHebbian(cortex_layer=model)
     if args.save_images:
         model.register_forward_hook(images.generate_images)
 
 if args.model == 'lissom' or args.model == 'supervised':
     # Full Lissom
     model = FullLissom(input_shape, lgn_shape, cortex_shape)
-    optimizer = CortexHebbian(model.parameters(), cortex_layer=model.v1)
+    optimizer = CortexHebbian(cortex_layer=model.v1)
     if args.save_images:
         model.register_forward_hook(images.generate_images)
 
@@ -127,9 +127,6 @@ if args.model == 'supervised' or args.model == 'control':
             optimizer,
             optimizer_nn
         )
-
-if args.model == 'hlissom':
-    raise NotImplementedError
 
 if args.model == 'lgn-grid-search':
     counter = 0

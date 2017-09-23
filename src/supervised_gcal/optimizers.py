@@ -4,16 +4,10 @@ from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 
 
 class CortexOptimizer(torch.optim.Optimizer):
-    def step(self, closure):
-        raise NotImplementedError
-
-
-class CombinedCortexOptimizer(CortexOptimizer):
-    optimizers = []
-
-    def step(self, **kwargs):
-        for opt in self.optimizers:
-            opt.step()
+    def __init__(self, cortex_layer):
+        assert isinstance(cortex_layer, CortexLayer)
+        self.cortex_layer = cortex_layer
+        super().__init__(cortex_layer.parameters(), {})
 
 
 class SequentialOptimizer(object):
@@ -31,11 +25,9 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
-    def __init__(self, params, cortex_layer, learning_rate=0.005):
-        self.cortex_layer = cortex_layer
-        assert isinstance(self.cortex_layer, CortexLayer)
+    def __init__(self, cortex_layer, learning_rate=0.005):
         self.learning_rate = learning_rate
-        super().__init__(params, {'learning_rate': learning_rate})
+        super().__init__(cortex_layer=cortex_layer)
 
     def step(self, **kwargs):
         self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
@@ -48,7 +40,7 @@ class CortexHebbian(CortexOptimizer):
                                self.cortex_layer.activation, self.learning_rate)
 
     @staticmethod
-    def _hebbian_learning(weights, input, output, learning_rate, sum=True):
+    def _hebbian_learning(weights, input, output, learning_rate):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
         zero_mask = torch.gt(weights.data, 0).float()
@@ -56,12 +48,7 @@ class CortexHebbian(CortexOptimizer):
         delta = learning_rate * torch.matmul(torch.t(input.data), output.data)
         weights.data.add_(delta)
         weights.data.mul_(zero_mask)
-        if sum:
-            den = torch.norm(weights.data, p=1, dim=0)
-        else:
-            # L2 without input image normalization is garbage
-            # In spite of being used correctly, the activations are too low
-            den = torch.norm(weights.data, p=2, dim=0)
+        den = torch.norm(weights.data, p=1, dim=0)
         weights.data.div_(den)
         return
 
@@ -82,8 +69,8 @@ class CortexPruner(CortexOptimizer):
 
 
 class ConnectionDeath(CortexPruner):
-    def __init__(self, pruning_step, connection_death_threshold=1.0 / 400):
-        super().__init__(pruning_step)
+    def __init__(self, cortex_layer, pruning_step=2000, connection_death_threshold=1.0 / 400):
+        super().__init__(cortex_layer, pruning_step)
         self.connection_death_threshold = connection_death_threshold
 
     def prune(self):
@@ -92,8 +79,8 @@ class ConnectionDeath(CortexPruner):
 
 
 class NeighborsDecay(CortexPruner):
-    def __init__(self, pruning_step, decay_fn=linear_decay, final_epoch=8.0):
-        super().__init__(pruning_step)
+    def __init__(self, cortex_layer, pruning_step=2000, decay_fn=linear_decay, final_epoch=8.0):
+        super(NeighborsDecay, self).__init__(cortex_layer, pruning_step)
         self.decay_fn = decay_fn
         self.epoch = 1
         self.final_epoch = final_epoch
