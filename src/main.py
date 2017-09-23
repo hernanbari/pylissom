@@ -161,6 +161,9 @@ if args.model == 'lissom-grid-search':
         for excitatory_radius in [2, 4, 9, 14]:
             for inhib_factor in [1.0, 1.5, 3.0]:
                 for excit_factor in [1.0, 1.5, 3.0]:
+                    if excitatory_radius > afferent_radius:
+                        continue
+
                     lgn_shape = (args.shape, args.shape)
                     lissom_shape = (args.shape, args.shape)
                     inhibitory_radius = afferent_radius
