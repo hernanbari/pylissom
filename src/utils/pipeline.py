@@ -51,7 +51,7 @@ class Pipeline(object):
                 if self.loss_fn:
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
-                if batch_idx % self.log_interval == 0:
+                if self.epoch % self.log_interval == 0:
                     self._train_log(batch_idx, data, data_loader, loss)
             elif self.loss_fn:
                 self.test_loss += loss.data[0]  # sum up batch loss

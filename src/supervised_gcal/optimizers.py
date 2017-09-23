@@ -57,10 +57,10 @@ class CortexPruner(CortexOptimizer):
     def __init__(self, cortex_layer, pruning_step=2000):
         super().__init__(cortex_layer)
         self.pruning_step = pruning_step
-        self.step_counter = 0
+        self.step_counter = 1
 
     def step(self, **kwargs):
-        if self.pruning_step % self.step_counter == 0:
+        if self.step_counter % self.pruning_step == 0:
             self.prune()
         self.step_counter += 1
 
@@ -86,6 +86,7 @@ class NeighborsDecay(CortexPruner):
         self.final_epoch = final_epoch
 
     def prune(self):
+        import ipdb; ipdb.set_trace()
         self.decay_fn(self.cortex_layer.excitatory_weights, self.cortex_layer.excitatory_radius,
                       epoch=self.epoch, final_epoch=self.final_epoch)
         self.epoch += 1
