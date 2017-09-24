@@ -86,7 +86,6 @@ class NeighborsDecay(CortexPruner):
         self.final_epoch = final_epoch
 
     def prune(self):
-        import ipdb; ipdb.set_trace()
         self.decay_fn(self.cortex_layer.excitatory_weights, self.cortex_layer.excitatory_radius,
                       epoch=self.epoch, final_epoch=self.final_epoch)
         self.epoch += 1
