@@ -1,39 +1,38 @@
 from random import shuffle
 
 import numpy as np
+from sklearn.model_selection import KFold, GroupKFold
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
+from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms
 
 
 def get_dataset(train, args):
     kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
     if args.dataset == 'ck':
-        return torch.utils.data.DataLoader(CKDataset(train=train), batch_size=args.batch_size, shuffle=False,
-                                           **kwargs)
+        dataset = CKDataset()
+        return DataLoader(CKDataset(), batch_size=args.batch_size,
+                          sampler=train_test_CK_samplers(dataset, train),
+                          **kwargs)
     elif args.dataset == 'mnist':
-        return torch.utils.data.DataLoader(
+        return DataLoader(
             datasets.MNIST('../data', train=train, download=True, transform=transforms.ToTensor()),
-            batch_size=args.batch_size, shuffle=False, **kwargs)
+            batch_size=args.batch_size, **kwargs)
     elif args.dataset == 'number_one':
         raise NotImplementedError
 
 
 class CKDataset(Dataset):
-    def __init__(self, train, path_images='/home/hbari/data/X.npy', path_labels='/home/hbari/data/y.npy',
-                 train_pct=0.5):
-        self.train_pct = train_pct
+    def __init__(self, path_images='/home/hbari/data/X.npy', path_labels='/home/hbari/data/y.npy',
+                 path_subjects='/home/hbari/data/subjs.npy'):
         self.path_labels = path_labels
         self.path_images = path_images
-        X = np.load(self.path_images)
+        self.X = np.load(self.path_images)
         # Substract 1 bc labels are 1-7 and need to start from 0
-        y = np.load(self.path_labels)-1
-        # subjs = np.load('/home/rosana/data/subjs.npy')
-
-        X, y = self.shuffle(X, y)
-
-        self.X, self.y = self._split(X, y, train)
+        self.y = np.load(self.path_labels) - 1
+        self.subjs = np.load(path_subjects)
 
     def __getitem__(self, item):
         return torch.Tensor(self.X[item]), int(self.y[item])
@@ -41,15 +40,45 @@ class CKDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-    @staticmethod
-    def shuffle(X, y):
-        x_y = list(zip(X, y))
-        shuffle(list(x_y))
-        return zip(*x_y)
 
-    def _split(self, X, y, train):
-        train_len = int(len(X) * self.train_pct)
-        if train:
-            return X[:train_len], y[:train_len]
+def train_test_CK_samplers(ck_dataset, train, train_pct=0.5):
+    train_idxs, test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, pct=train_pct)
+    if train:
+        return SubsetRandomSampler(train_idxs)
+    else:
+        return SubsetRandomSampler(test_idxs)
+
+
+def subj_indep_train_test_samplers(subjs, pct):
+    set_subjs = list(set(subjs))
+    shuffle(set_subjs)
+    split = int(len(set_subjs) * pct)
+    train_subjs = set_subjs[:split]
+
+    train_idxs = []
+    test_idxs = []
+    for idx, subj in enumerate(subjs):
+        if subj in train_subjs:
+            train_idxs.append(idx)
         else:
-            return X[train_len:], y[train_len:]
+            test_idxs.append(idx)
+    return train_idxs, test_idxs
+
+
+class CVSubjectIndependent(object):
+    def __init__(self, ck_dataset, k=5):
+        other_idxs, self.test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, k - 1 / k)
+        self.folds = self._generate_folds(k - 1, ck_dataset, other_idxs)
+
+    def train_val_samplers(self):
+        return self.folds
+
+    def test_sampler(self):
+        return SubsetRandomSampler(self.test_idxs)
+
+    @staticmethod
+    def _generate_folds(k, ck_dataset, other_idxs):
+        kf = GroupKFold(n_splits=k)
+        return [(SubsetRandomSampler(train_index), SubsetRandomSampler(val_index)) for train_index, val_index in
+                kf.split(ck_dataset.X[other_idxs], ck_dataset.y[other_idxs],
+                         ck_dataset.subjs[other_idxs])]
