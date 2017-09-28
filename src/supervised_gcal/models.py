@@ -1,8 +1,10 @@
 import numpy as np
 
 import torch
+from src.main import args
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
+from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
 
 
 class FullLissom(torch.nn.Module):
@@ -51,3 +53,52 @@ class HLissom(torch.nn.Module):
         for layer in self.cortexes:
             self.activations.append(layer(self.activations[-1]))
         return self.activations[-1]
+
+
+def get_cortex(input_shape, cortex_shape):
+    # Cortex Layer
+    model = CortexLayer(input_shape, cortex_shape)
+    optimizer = SequentialOptimizer(
+        CortexHebbian(cortex_layer=model.v1),
+        NeighborsDecay(cortex_layer=model.v1,
+                       pruning_step=args.log_interval, final_epoch=args.epochs))
+    return model, optimizer
+
+
+def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch):
+    # Full Lissom
+    model = FullLissom(input_shape, lgn_shape, cortex_shape)
+    optimizer = SequentialOptimizer(
+        CortexHebbian(cortex_layer=model.v1),
+        NeighborsDecay(cortex_layer=model.v1,
+                       pruning_step=pruning_step, final_epoch=final_epoch))
+    return model, optimizer
+
+
+def get_net(net_input_shape, classes):
+    # 1 Layer Net
+    net = torch.nn.Sequential(
+        torch.nn.Linear(net_input_shape, classes),
+        torch.nn.LogSoftmax()
+    )
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
+    loss_fn = torch.nn.functional.nll_loss
+    return net, optimizer, loss_fn
+
+
+def get_supervised(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch, classes):
+    # Lissom
+    lissom, optimizer_lissom = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch)
+    # Net
+    net_input_shape = lissom.activation_shape[1]
+    net, optimizer_nn, loss_fn = get_net(net_input_shape, classes)
+    # Supervised Lissom
+    model = torch.nn.Sequential(
+        lissom,
+        net
+    )
+    optimizer = SequentialOptimizer(
+        optimizer_lissom,
+        optimizer_nn
+    )
+    return model, optimizer, loss_fn
