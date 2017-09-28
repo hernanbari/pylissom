@@ -11,8 +11,9 @@ from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.models import FullLissom
 from src.supervised_gcal.optimizers import CortexHebbian, SequentialOptimizer, NeighborsDecay
-from src.utils.datasets import get_dataset
+from src.utils.datasets import get_dataset, CKDataset, CVSubjectIndependent
 from src.utils.pipeline import Pipeline
+from torch.utils.data import DataLoader
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -36,7 +37,7 @@ parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
 parser.add_argument('--model', required=True,
                     choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'lgn-grid-search',
-                             'lissom-grid-search', 'supervised-grid-search'],
+                             'lissom-grid-search', 'supervised-grid-search', 'cv'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
@@ -69,9 +70,6 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-test_loader = get_dataset(train=False, args=args)
-train_loader = get_dataset(train=True, args=args)
-
 classes = 10 if not args.dataset == 'ck ' else 7
 input_shape = (28, 28) if not args.dataset == 'ck' else (96, 96)
 batch_input_shape = torch.Size((args.batch_size, int(np.prod(input_shape))))
@@ -79,14 +77,14 @@ model = None
 optimizer = None
 loss_fn = None
 
-if args.model == 'lgn' or args.model == 'lissom' or args.model == 'supervised':
+if args.model == 'lgn' or args.model == 'lissom' or args.model == 'supervised' or args.model == 'cv':
     # LGN layer
     lgn_shape = (args.shape, args.shape)
     model = LGNLayer(input_shape, lgn_shape, on=True)
     if args.save_images:
         model.register_forward_hook(images.generate_images)
 
-if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised':
+if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised' or args.model == 'cv':
     # Cortex Layer
     cortex_shape = (args.shape, args.shape)
     model = CortexLayer(input_shape, cortex_shape)
@@ -94,15 +92,18 @@ if args.model == 'cortex' or args.model == 'lissom' or args.model == 'supervised
     if args.save_images:
         model.register_forward_hook(images.generate_images)
 
-if args.model == 'lissom' or args.model == 'supervised':
+if args.model == 'lissom' or args.model == 'supervised' or args.model == 'cv':
     # Full Lissom
     model = FullLissom(input_shape, lgn_shape, cortex_shape)
-    optimizer = CortexHebbian(cortex_layer=model.v1)
+    optimizer = SequentialOptimizer(
+        CortexHebbian(cortex_layer=model.v1),
+        NeighborsDecay(cortex_layer=model.v1,
+                       pruning_step=args.log_interval, final_epoch=args.epochs))
     if args.save_images:
-        model.register_forward_hook(images.generate_images)
+        handles = model.register_forward_hook(images.generate_images)
 
-if args.model == 'supervised' or args.model == 'control':
-    if args.model == 'supervised':
+if args.model == 'supervised' or args.model == 'control' or args.model == 'cv':
+    if args.model == 'supervised' or args.model == 'cv':
         net_input_shape = model.activation_shape[1]
     elif args.model == 'control':
         net_input_shape = batch_input_shape[1]
@@ -118,7 +119,7 @@ if args.model == 'supervised' or args.model == 'control':
     if args.model == 'control':
         model = net
         optimizer = optimizer_nn
-    elif args.model == 'supervised':
+    elif args.model == 'supervised' or args.model == 'cv':
         # Supervised Lissom
         # Previous model and optimizer are Full Lissom
         model = torch.nn.Sequential(
@@ -132,6 +133,8 @@ if args.model == 'supervised' or args.model == 'control':
 
 if args.model == 'lgn-grid-search':
     counter = 0
+
+    test_loader = get_dataset(train=False, args=args)
     for sigma_center in np.arange(0.1, 10, step=0.5):
         for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
             for radius in [3, 4, 5, 8, 10, 15, 20]:
@@ -157,6 +160,7 @@ if args.model == 'lgn-grid-search':
 
 if args.model == 'lissom-grid-search':
     counter = 0
+    train_loader = get_dataset(train=True, args=args)
     for afferent_radius in [3, 5, 10, 15, 20]:
         for excitatory_radius in [2, 4, 9, 14]:
             for inhib_factor in [1.0, 1.5, 3.0]:
@@ -193,8 +197,11 @@ if args.model == 'lissom-grid-search':
                     counter += 1
     exit()
 
+# TODO: train lissom first and then net
 if args.model == 'supervised-grid-search':
     counter = 0
+    test_loader = get_dataset(train=False, args=args)
+    train_loader = get_dataset(train=True, args=args)
     params_names = ('afferent_radius', 'excitatory_radius', 'inhib_factor', 'excit_factor')
     for params_values in [(3, 2, 1, 1.5), (5, 2, 1, 1.5), (5, 4, 1, 1.5), (5, 4, 3, 3)]:
         params_dict = dict(zip(params_names, params_values))
@@ -238,6 +245,39 @@ if args.model == 'supervised-grid-search':
 
 pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
                     cuda=args.cuda)
-for epoch in range(1, args.epochs + 1):
-    pipeline.train(train_data_loader=train_loader, epoch=epoch)
+
+# TODO: train lissom first and then net
+if args.model == 'cv':
+    kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+    ck_dataset = CKDataset()
+    cv = CVSubjectIndependent(ck_dataset)
+    initial_state_dict = model.state_dict()
+    for fold, (train_sampler, val_sampler) in enumerate(cv.train_val_samplers()):
+        train_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
+        val_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=val_sampler, **kwargs)
+        if args.save_images:
+            for handle in handles:
+                handle.remove()
+            model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
+        for epoch in range(1, args.epochs + 1):
+            pipeline.train(train_data_loader=train_loader, epoch=epoch)
+            pipeline.test(test_data_loader=val_loader, epoch=epoch)
+        model.load_state_dict(initial_state_dict)
+        for m in list(model[0].modules())[1:]:
+            m.epoch = -1
+            m.batch_idx = 0
+    fold = 'test'
+    if args.save_images:
+        for handle in handles:
+            handle.remove()
+        model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
+    test_sampler = cv.test_sampler()
+    test_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=test_sampler, **kwargs)
     pipeline.test(test_data_loader=test_loader)
+
+else:
+    test_loader = get_dataset(train=False, args=args)
+    train_loader = get_dataset(train=True, args=args)
+    for epoch in range(1, args.epochs + 1):
+        pipeline.train(train_data_loader=train_loader, epoch)
+        pipeline.test(test_data_loader=test_loader)
