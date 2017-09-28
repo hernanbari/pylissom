@@ -67,7 +67,7 @@ def subj_indep_train_test_samplers(subjs, pct):
 
 class CVSubjectIndependent(object):
     def __init__(self, ck_dataset, k=5):
-        other_idxs, self.test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, k - 1 / k)
+        other_idxs, self.test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, 1 - 1 / k)
         self.folds = self._generate_folds(k - 1, ck_dataset, other_idxs)
 
     def train_val_samplers(self):
