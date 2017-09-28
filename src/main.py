@@ -215,7 +215,7 @@ if args.model == 'supervised-grid-search':
         )
         optimizer = SequentialOptimizer(
             CortexHebbian(cortex_layer=lissom.v1),
-            NeighborsDecay(cortex_layer=lissom.v1, pruning_step=args.log_interval, final_epoch=5),
+            NeighborsDecay(cortex_layer=lissom.v1, pruning_step=args.log_interval, final_epoch=args.epochs),
             torch.optim.SGD(net.parameters(), lr=0.1)
         )
         pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
