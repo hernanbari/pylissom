@@ -10,7 +10,7 @@ import torch
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.models import FullLissom
-from src.supervised_gcal.optimizers import CortexHebbian, SequentialOptimizer
+from src.supervised_gcal.optimizers import CortexHebbian, SequentialOptimizer, NeighborsDecay
 from src.utils.datasets import get_dataset
 from src.utils.pipeline import Pipeline
 
@@ -35,7 +35,8 @@ parser.add_argument('--dataset', default='mnist', choices=['mnist', 'ck', 'numbe
 parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
 parser.add_argument('--model', required=True,
-                    choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'hlissom', 'lgn-grid-search'],
+                    choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'lgn-grid-search',
+                             'lissom-grid-search'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
@@ -59,6 +60,7 @@ if not args.ipdb:
 
     dbg.Pdb.set_trace = lambda s: 0
     import ipdb
+
     ipdb.set_trace = lambda: 0
 
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -151,6 +153,45 @@ if args.model == 'lgn-grid-search':
                 print("Iteration", counter)
                 print(sigma_center, sigma_sorround, radius)
                 counter += 1
+    exit()
+
+if args.model == 'lissom-grid-search':
+    counter = 0
+    for afferent_radius in [3, 5, 10, 15, 20]:
+        for excitatory_radius in [2, 4, 9, 14]:
+            for inhib_factor in [1.0, 1.5, 3.0]:
+                for excit_factor in [1.0, 1.5, 3.0]:
+                    if excitatory_radius > afferent_radius:
+                        continue
+
+                    lgn_shape = (args.shape, args.shape)
+                    lissom_shape = (args.shape, args.shape)
+                    inhibitory_radius = afferent_radius
+                    params_list = [(name, eval(name)) for name in
+                                   ['afferent_radius', 'excitatory_radius',
+                                    'inhib_factor', 'excit_factor']]
+                    model = FullLissom(input_shape, lgn_shape, lissom_shape,
+                                       v1_params=dict(params_list))
+                    optimizer = SequentialOptimizer(
+                        CortexHebbian(cortex_layer=model.v1),
+                        NeighborsDecay(cortex_layer=model.v1, pruning_step=args.log_interval, final_epoch=5)
+                    )
+                    pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
+                                        dataset_len=args.dataset_len,
+                                        cuda=args.cuda)
+                    if args.save_images:
+                        def hardcoded_counter(self, input, output):
+                            self.batch_idx = counter
+                            images.generate_images(self, input, output)
+
+
+                        model.register_forward_hook(hardcoded_counter)
+                    for epoch in range(1, args.epochs + 1):
+                        pipeline.train(train_data_loader=train_loader, epoch=epoch)
+                    print("Iteration", counter)
+                    print(params_list)
+                    counter += 1
+    exit()
 
 pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
                     cuda=args.cuda)

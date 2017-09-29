@@ -16,7 +16,7 @@ class Layer(torch.nn.Module):
         self.input_shape = input_shape
         self.activation_shape = torch.Size((1, int(np.prod(self.self_shape))))
         self.weights = []
-        self.epoch = 0
+        self.epoch = -1
         self.batch_idx = 0
         self._setup_variables()
 
