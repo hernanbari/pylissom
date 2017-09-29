@@ -7,8 +7,8 @@ from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 def linear_decay(w, start, epoch, final_epoch):
     radius = start + epoch * (1.0 - start) / final_epoch
-    w.data = torch.Tensor(normalize(apply_circular_mask_to_weights(w.data.cpu().numpy(), radius=radius)))
-    w.data = w.data.cuda()
+    normalize(apply_circular_mask_to_weights(w.data.t_(), radius=radius))
+    w.data.t_()
     return
 
 

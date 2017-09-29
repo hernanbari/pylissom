@@ -3,8 +3,6 @@ import numpy as np
 import torch
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
-from src.supervised_gcal.optimizers import CortexHebbian, NeighborsDecay, ConnectionDeath, \
-    CombinedCortexOptimizer
 
 
 class FullLissom(torch.nn.Module):
@@ -51,7 +49,3 @@ class HLissom(torch.nn.Module):
         for layer in self.cortexes:
             self.activations.append(layer(self.activations[-1]))
         return self.activations[-1]
-
-
-class HebbianAndPruners(CombinedCortexOptimizer):
-    optimizers = [CortexHebbian, ConnectionDeath, NeighborsDecay]

@@ -21,7 +21,7 @@ class CortexLayer(Layer):
     def _get_weight_variable(self, input_shape, weights_shape, radius):
         sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2
         return torch.nn.Parameter(
-            get_gaussian_weights_variable(input_shape, weights_shape, sigma, radius, self.sparse).t())
+            get_gaussian_weights_variable(input_shape, weights_shape, 2, radius, self.sparse).t())
 
     def _setup_variables(self):
         self.inhibitory_weights = self._get_weight_variable(input_shape=self.self_shape,
@@ -30,11 +30,11 @@ class CortexLayer(Layer):
 
         self.excitatory_weights = self._get_weight_variable(input_shape=self.self_shape,
                                                             weights_shape=self.self_shape,
-                                                            radius=self.inhibitory_radius)
+                                                            radius=self.excitatory_radius)
 
         self.afferent_weights = self._get_weight_variable(input_shape=self.input_shape,
                                                           weights_shape=self.self_shape,
-                                                          radius=self.inhibitory_radius)
+                                                          radius=self.afferent_radius)
         self.weights += [('afferent_weights', self.afferent_weights),
                          ('excitatory_weights', self.excitatory_weights),
                          ('inhibitory_weights', self.inhibitory_weights)]
@@ -62,5 +62,9 @@ class CortexLayer(Layer):
         else:
             # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
             # That's why it's reversed
+            if isinstance(matrix, torch.autograd.Variable):
+                matrix = matrix.data
+            if isinstance(vector, torch.autograd.Variable):
+                vector = vector.data
             matmul = torch.matmul(matrix.t(), vector.t()).t()
         return matmul

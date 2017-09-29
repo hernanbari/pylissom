@@ -35,6 +35,7 @@ class Pipeline(object):
         return var
 
     def _run(self, data_loader, train):
+        corrects = 0
         for batch_idx, (data, target) in enumerate(data_loader):
             if self.dataset_len is not None and batch_idx >= self.dataset_len:
                 break
@@ -47,6 +48,8 @@ class Pipeline(object):
             output = self.model(data)
             if self.loss_fn:
                 loss = self.loss_fn(output, target)
+                if loss.data[0] == 0:
+                    corrects += 1
             if train:
                 if self.loss_fn:
                     loss.backward()
@@ -57,6 +60,7 @@ class Pipeline(object):
                 self.test_loss += loss.data[0]  # sum up batch loss
                 pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
                 self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        print('corrects', corrects)
         if not train and self.loss_fn:
             self._test_log(data_loader)
 
