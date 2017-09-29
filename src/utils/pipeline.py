@@ -61,7 +61,7 @@ class Pipeline(object):
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
                 if batch_idx % self.log_interval == 0:
-                    self._train_log(batch_idx, data, data_loader, loss)
+                    self._train_log(batch_idx, data_loader, loss)
             elif self.loss_fn:
                 self.test_loss += loss.data[0]  # sum up batch loss
 
@@ -80,7 +80,7 @@ class Pipeline(object):
     def accuracy(self, data_loader):
         return 100. * self.correct / len(data_loader)
 
-    def _train_log(self, batch_idx, data, data_loader, loss):
+    def _train_log(self, batch_idx, data_loader, loss):
         if batch_idx % self.log_interval == 0:
             print('Train Epoch: {} Iterations: {:.0f}%'.format(
                 self.epoch,
