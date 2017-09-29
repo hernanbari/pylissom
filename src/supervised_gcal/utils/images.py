@@ -9,11 +9,11 @@ logdir = 'runs'
 log_interval = 10
 
 
-def generate_images(self, input, output):
+def generate_images(self, input, output, prefix=''):
     if self.batch_idx % log_interval != 0:
         self.batch_idx += 1
         return
-    writer = SummaryWriter(log_dir=logdir + ('/train/' if self.training else '/test/') + 'epoch_' + str(self.epoch))
+    writer = get_writer(self.training, self.epoch, prefix)
 
     for name, mat in self.weights + [('activation', self.activation.t()), ('input', self.input.t())]:
         if isinstance(mat, torch.autograd.Variable):
@@ -29,6 +29,15 @@ def generate_images(self, input, output):
         writer.add_image(title, image, self.batch_idx)
     writer.close()
     self.batch_idx += 1
+
+
+def get_writer(train, epoch, prefix):
+    log_path = logdir \
+               + ('/' + prefix + '/' if prefix != '' else '') \
+               + ('/train/' if train else '/test/') \
+               + 'epoch_' + str(epoch)
+    writer = SummaryWriter(log_dir=log_path)
+    return writer
 
 
 def images_matrix(matrix, range):

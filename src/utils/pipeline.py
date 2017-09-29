@@ -1,11 +1,14 @@
 import torch
 import numpy as np
+
+from src.supervised_gcal.utils.images import get_writer
 from torch.autograd import Variable
 import torch.nn.functional as F
 
 
 class Pipeline(object):
-    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, dataset_len=None, cuda=False):
+    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, dataset_len=None, cuda=False, prefix=''):
+        self.prefix = prefix
         self.dataset_len = dataset_len
         self.log_interval = log_interval
         self.loss_fn = loss_fn
@@ -16,13 +19,13 @@ class Pipeline(object):
     def train(self, train_data_loader, epoch):
         self.model.train()
         self.epoch = epoch
-        self._run(train_data_loader, train=True)
+        return self._run(train_data_loader, train=True)
 
-    def test(self, test_data_loader):
+    def test(self, test_data_loader, epoch):
         self.model.eval()
+        self.epoch = epoch
         self.test_loss = 0
-        self.correct = 0
-        self._run(test_data_loader, train=False)
+        return self._run(test_data_loader, train=False)
 
     # TODO: check this
     @staticmethod
@@ -35,7 +38,8 @@ class Pipeline(object):
         return var
 
     def _run(self, data_loader, train):
-        corrects = 0
+        self.correct = 0
+        self.writer = get_writer(train=train, epoch=0, prefix=self.prefix)
         for batch_idx, (data, target) in enumerate(data_loader):
             if self.dataset_len is not None and batch_idx >= self.dataset_len:
                 break
@@ -48,32 +52,39 @@ class Pipeline(object):
             output = self.model(data)
             if self.loss_fn:
                 loss = self.loss_fn(output, target)
-                if loss.data[0] == 0:
-                    corrects += 1
+                pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+                self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
             if train:
+                self.writer.add_scalar('loss', loss.data[0],
+                                       global_step=batch_idx + len(data_loader) * (self.epoch - 1))
                 if self.loss_fn:
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
                 if batch_idx % self.log_interval == 0:
-                    self._train_log(batch_idx, data, data_loader, loss)
+                    self._train_log(batch_idx, data_loader, loss)
             elif self.loss_fn:
                 self.test_loss += loss.data[0]  # sum up batch loss
-                pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-                self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
-        print('corrects', corrects)
-        if not train and self.loss_fn:
-            self._test_log(data_loader)
+
+        if self.loss_fn:
+            if not train:
+                self._test_log(data_loader)
+            self.writer.add_scalar('accuracy', self.accuracy(data_loader), global_step=self.epoch-1)
+            return self.accuracy(data_loader)
+        return None
 
     def _test_log(self, data_loader):
         self.test_loss /= len(data_loader.dataset)
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            self.test_loss, self.correct, len(data_loader.dataset),
-            100. * self.correct / len(data_loader.dataset)))
+        print('\nTest set: Average loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
+            self.test_loss, self.accuracy(data_loader)))
 
-    def _train_log(self, batch_idx, data, data_loader, loss):
+    def accuracy(self, data_loader):
+        return 100. * self.correct / len(data_loader)
+
+    def _train_log(self, batch_idx, data_loader, loss):
         if batch_idx % self.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)])'.format(
-                self.epoch, batch_idx * len(data), len(data_loader.dataset),
-                            100. * batch_idx / len(data_loader)))
+            print('Train Epoch: {} Iterations: {:.0f}%'.format(
+                self.epoch,
+                100. * batch_idx / len(data_loader)))
             if self.loss_fn:
-                print('Loss: {:.6f}'.format(loss.data[0]))
+                print('Accuracy: {:.0f}% Loss: {:.6f}'.format(
+                    self.accuracy(data_loader), loss.data[0]))

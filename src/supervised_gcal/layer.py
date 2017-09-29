@@ -33,7 +33,7 @@ class Layer(torch.nn.Module):
         return activation
 
     def train(self, mode=True):
-        if mode:
+        if mode or self.epoch == -1:
             self.epoch += 1
         self.batch_idx = 0
         super().train(mode=mode)
