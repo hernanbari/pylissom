@@ -9,9 +9,9 @@ import numpy as np
 
 import torch
 from src.supervised_gcal.lgn_layer import LGNLayer
-from src.supervised_gcal.models import FullLissom, get_cortex, get_full_lissom, get_net, get_supervised
-from src.supervised_gcal.optimizers import CortexHebbian, SequentialOptimizer, NeighborsDecay
+from src.supervised_gcal.models import get_cortex, get_full_lissom, get_net, get_supervised
 from src.utils.datasets import get_dataset, CKDataset, CVSubjectIndependent
+from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
 from src.utils.pipeline import Pipeline
 from torch.utils.data import DataLoader
 
@@ -84,10 +84,10 @@ if args.model == 'lgn':
     model = LGNLayer(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex':
-    model, optimizer = get_cortex(input_shape, cortex_shape)
+    model, optimizer, _ = get_cortex(input_shape, cortex_shape)
 
 if args.model == 'lissom':
-    model, optimizer = get_full_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
+    model, optimizer, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
 
 handles = None
 if args.save_images and args.model in ['lgn', 'cortex', 'lissom']:
@@ -111,117 +111,22 @@ if args.model != 'cv' and 'grid-search' not in args.model:
     for epoch in range(1, args.epochs + 1):
         pipeline.train(train_data_loader=train_loader, epoch=epoch)
         pipeline.test(test_data_loader=test_loader, epoch=epoch)
+    exit()
 
+# TODO: test
 if args.model == 'lgn-grid-search':
-    counter = 0
-
-    test_loader = get_dataset(train=False, args=args)
-    for sigma_center in np.arange(0.1, 10, step=0.5):
-        for sigma_sorround in [1.5, 2, 3, 5, 8, 10]:
-            for radius in [3, 4, 5, 8, 10, 15, 20]:
-                lgn_shape = (args.shape, args.shape)
-                model = FullLissom(input_shape, lgn_shape, (1, 1),
-                                   lgn_params={'sigma_center': sigma_center, 'sigma_sorround': sigma_sorround,
-                                               'radius': radius})
-                pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
-                                    dataset_len=args.dataset_len,
-                                    cuda=args.cuda)
-                if args.save_images:
-                    def hardcoded_counter(self, input, output):
-                        self.batch_idx = counter
-                        images.generate_images(self, input, output)
-
-
-                    model.register_forward_hook(hardcoded_counter)
-                pipeline.test(test_data_loader=test_loader)
-                print("Iteration", counter)
-                print(sigma_center, sigma_sorround, radius)
-                counter += 1
+    run_lgn_grid_search(input_shape, lgn_shape, args)
     exit()
 
+# TODO: test
 if args.model == 'lissom-grid-search':
-    counter = 0
-    train_loader = get_dataset(train=True, args=args)
-    for afferent_radius in [3, 5, 10, 15, 20]:
-        for excitatory_radius in [2, 4, 9, 14]:
-            for inhib_factor in [1.0, 1.5, 3.0]:
-                for excit_factor in [1.0, 1.5, 3.0]:
-                    if excitatory_radius > afferent_radius:
-                        continue
-
-                    lgn_shape = (args.shape, args.shape)
-                    lissom_shape = (args.shape, args.shape)
-                    inhibitory_radius = afferent_radius
-                    params_list = [(name, eval(name)) for name in
-                                   ['afferent_radius', 'excitatory_radius',
-                                    'inhib_factor', 'excit_factor']]
-                    model = FullLissom(input_shape, lgn_shape, lissom_shape,
-                                       v1_params=dict(params_list))
-                    optimizer = SequentialOptimizer(
-                        CortexHebbian(cortex_layer=model.v1),
-                        NeighborsDecay(cortex_layer=model.v1, pruning_step=args.log_interval, final_epoch=5)
-                    )
-                    pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
-                                        dataset_len=args.dataset_len,
-                                        cuda=args.cuda)
-                    if args.save_images:
-                        def hardcoded_counter(self, input, output):
-                            self.batch_idx = counter
-                            images.generate_images(self, input, output)
-
-
-                        model.register_forward_hook(hardcoded_counter)
-                    for epoch in range(1, args.epochs + 1):
-                        pipeline.train(train_data_loader=train_loader, epoch=epoch)
-                    print("Iteration", counter)
-                    print(params_list)
-                    counter += 1
+    run_lissom_grid_search(input_shape, lgn_shape, cortex_shape, args)
     exit()
 
+# TODO: test
 # TODO: train lissom first and then net
 if args.model == 'supervised-grid-search':
-    counter = 0
-    test_loader = get_dataset(train=False, args=args)
-    train_loader = get_dataset(train=True, args=args)
-    params_names = ('afferent_radius', 'excitatory_radius', 'inhib_factor', 'excit_factor')
-    for params_values in [(3, 2, 1, 1.5), (5, 2, 1, 1.5), (5, 4, 1, 1.5), (5, 4, 3, 3)]:
-        params_dict = dict(zip(params_names, params_values))
-        lgn_shape = (args.shape, args.shape)
-        lissom_shape = (args.shape, args.shape)
-        inhibitory_radius = params_dict['afferent_radius']
-        lissom = FullLissom(input_shape, lgn_shape, lissom_shape,
-                            v1_params=params_dict)
-        net_input_shape = lissom.activation_shape[1]
-        net = torch.nn.Sequential(
-            torch.nn.Linear(net_input_shape, classes),
-            torch.nn.LogSoftmax()
-        )
-        loss_fn = torch.nn.functional.nll_loss
-        model = torch.nn.Sequential(
-            lissom,
-            net
-        )
-        optimizer = SequentialOptimizer(
-            CortexHebbian(cortex_layer=lissom.v1),
-            NeighborsDecay(cortex_layer=lissom.v1, pruning_step=args.log_interval, final_epoch=args.epochs),
-            torch.optim.SGD(net.parameters(), lr=0.1)
-        )
-        pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval,
-                            dataset_len=args.dataset_len,
-                            cuda=args.cuda)
-        if args.save_images:
-            def hardcoded_counter(self, input, output):
-                images.logdir = args.logdir + '/counter_' + str(counter)
-                images.generate_images(self, input, output)
-
-
-            lissom.register_forward_hook(hardcoded_counter)
-        for epoch in range(1, args.epochs + 1):
-            pipeline.train(train_data_loader=train_loader, epoch=epoch)
-            pipeline.test(test_data_loader=test_loader, epoch=epoch)
-        print("Iteration", counter)
-        print(params_dict)
-        counter += 1
+    run_supervised_grid_search(input_shape, lgn_shape, cortex_shape, args)
     exit()
 
 # TODO: train lissom first and then net

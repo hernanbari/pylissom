@@ -62,17 +62,18 @@ def get_cortex(input_shape, cortex_shape):
         CortexHebbian(cortex_layer=model.v1),
         NeighborsDecay(cortex_layer=model.v1,
                        pruning_step=args.log_interval, final_epoch=args.epochs))
-    return model, optimizer
+    return model, optimizer, None
 
 
-def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch):
+def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
+                    v1_params=None):
     # Full Lissom
-    model = FullLissom(input_shape, lgn_shape, cortex_shape)
+    model = FullLissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
     optimizer = SequentialOptimizer(
         CortexHebbian(cortex_layer=model.v1),
         NeighborsDecay(cortex_layer=model.v1,
                        pruning_step=pruning_step, final_epoch=final_epoch))
-    return model, optimizer
+    return model, optimizer, None
 
 
 def get_net(net_input_shape, classes):
@@ -86,9 +87,10 @@ def get_net(net_input_shape, classes):
     return net, optimizer, loss_fn
 
 
-def get_supervised(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch, classes):
+def get_supervised(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch, classes, v1_params=None):
     # Lissom
-    lissom, optimizer_lissom = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch)
+    lissom, optimizer_lissom, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch,
+                                                  v1_params=v1_params)
     # Net
     net_input_shape = lissom.activation_shape[1]
     net, optimizer_nn, loss_fn = get_net(net_input_shape, classes)
