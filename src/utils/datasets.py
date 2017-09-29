@@ -1,7 +1,6 @@
 from random import shuffle
 
 import numpy as np
-from sklearn.model_selection import KFold, GroupKFold
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -64,21 +63,3 @@ def subj_indep_train_test_samplers(subjs, pct):
             test_idxs.append(idx)
     return train_idxs, test_idxs
 
-
-class CVSubjectIndependent(object):
-    def __init__(self, ck_dataset, k=5):
-        other_idxs, self.test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, 1 - 1 / k)
-        self.folds = self._generate_folds(k - 1, ck_dataset, other_idxs)
-
-    def train_val_samplers(self):
-        return self.folds
-
-    def test_sampler(self):
-        return SubsetRandomSampler(self.test_idxs)
-
-    @staticmethod
-    def _generate_folds(k, ck_dataset, other_idxs):
-        kf = GroupKFold(n_splits=k)
-        return [(SubsetRandomSampler(train_index), SubsetRandomSampler(val_index)) for train_index, val_index in
-                kf.split(ck_dataset.X[other_idxs], ck_dataset.y[other_idxs],
-                         ck_dataset.subjs[other_idxs])]

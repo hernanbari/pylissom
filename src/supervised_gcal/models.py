@@ -1,7 +1,6 @@
 import numpy as np
 
 import torch
-from src.main import args
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
@@ -55,7 +54,7 @@ class HLissom(torch.nn.Module):
         return self.activations[-1]
 
 
-def get_cortex(input_shape, cortex_shape):
+def get_cortex(input_shape, cortex_shape, args):
     # Cortex Layer
     model = CortexLayer(input_shape, cortex_shape)
     optimizer = SequentialOptimizer(
@@ -79,7 +78,9 @@ def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, fin
 def get_net(net_input_shape, classes):
     # 1 Layer Net
     net = torch.nn.Sequential(
-        torch.nn.Linear(net_input_shape, classes),
+        torch.nn.Linear(net_input_shape, 20),
+        torch.nn.ReLU(),
+        torch.nn.Linear(20, classes),
         torch.nn.LogSoftmax()
     )
     optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
