@@ -49,10 +49,10 @@ def run_cross_validation(model_fn, ck_dataset, cv_sampler, args):
         if best_model is None or curr_accuracy > best_accuracy:
             best_model = copy.deepcopy(model.state_dict())
             best_accuracy = curr_accuracy
-    save_model(best_model)
     fold = 'test'
     model, optimizer, loss_fn = model_fn()
     model.load_state_dict(best_model)
+    save_model(model)
     if args.save_images:
         model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
     test_sampler = cv_sampler.test_sampler()
