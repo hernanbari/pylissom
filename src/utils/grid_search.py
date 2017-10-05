@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
-from src.supervised_gcal.models import get_full_lissom, get_supervised
+from src.supervised_gcal.models import get_full_lissom, get_supervised, get_cortex
 from src.supervised_gcal.utils import images as images
 from src.utils.datasets import get_dataset
 from src.utils.pipeline import Pipeline
@@ -45,6 +45,25 @@ def run_lgn_grid_search(input_shape, lgn_shape, args):
     param_grid = {'sigma_center': np.arange(0.1, 10, step=0.5),
                   'sigma_sorround': [1.5, 2, 3, 5, 8, 10],
                   'radius': [3, 4, 5, 8, 10, 15, 20]}
+    test_loader = get_dataset(train=False, args=args)
+    grid_search = GridSearch(model_fn, param_grid, test_loader=test_loader)
+    grid_search.run()
+
+
+def run_cortex_grid_search(input_shape, cortex_shape, args):
+    def model_fn(v1_params, counter):
+        lissom, optimizer, _ = get_cortex(input_shape, cortex_shape, v1_params=v1_params)
+
+        # def hardcoded_counter(self, input, output):
+        #     self.batch_idx = counter
+        #     images.generate_images(self, input, output)
+        #
+        # lissom.register_forward_hook(hardcoded_counter)
+        return lissom, optimizer, _
+
+    param_grid = {'min_theta': [0, 0.2, 0.5], 'max_theta': [0.6, 0.8, 1.0], 'afferent_radius': [5, 10, 15, 20],
+                  'excitatory_radius': [2, 5, 10, 15], 'inhibitory_radius': [5, 10, 15, 20, 25],
+                  'settling_steps': 10, 'inhib_factor': [1, 1.2, 1.5, 2.0, 3], 'excit_factor': [1, 1.2, 1.5, 2.0, 3]}
     test_loader = get_dataset(train=False, args=args)
     grid_search = GridSearch(model_fn, param_grid, test_loader=test_loader)
     grid_search.run()
