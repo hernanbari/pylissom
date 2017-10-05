@@ -54,13 +54,13 @@ class HLissom(torch.nn.Module):
         return self.activations[-1]
 
 
-def get_cortex(input_shape, cortex_shape, args):
+def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None, learning_rate=None):
     # Cortex Layer
-    model = CortexLayer(input_shape, cortex_shape)
+    model = CortexLayer(input_shape, cortex_shape, **v1_params)
     optimizer = SequentialOptimizer(
-        CortexHebbian(cortex_layer=model.v1),
-        NeighborsDecay(cortex_layer=model.v1,
-                       pruning_step=args.log_interval, final_epoch=args.epochs))
+    CortexHebbian(cortex_layer=model, learning_rate=learning_rate),
+        NeighborsDecay(cortex_layer=model,
+                       pruning_step=pruning_step, final_epoch=final_epoch))
     return model, optimizer, None
 
 
