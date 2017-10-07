@@ -24,6 +24,27 @@ class SequentialOptimizer(object):
             opt.zero_grad()
 
 
+class SimpleHebbian(CortexOptimizer):
+    def __init__(self, cortex_layer, weight, learning_rate):
+        super().__init__(cortex_layer)
+        self.learning_rate = learning_rate
+        self.weight = weight
+
+    def step(self, **kwargs):
+        if self.weight == 'afferent_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
+                                            self.cortex_layer.activation, self.learning_rate)
+        elif self.weight == 'excitatory_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,
+                                            self.cortex_layer.activation, self.learning_rate)
+
+        elif self.weight == 'inhibitory_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.inhibitory_weights, self.cortex_layer.activation,
+                                            self.cortex_layer.activation, self.learning_rate)
+        else:
+            raise RuntimeError('Wrong weights for SimpleHebbian')
+
+
 class CortexHebbian(CortexOptimizer):
     def __init__(self, cortex_layer, learning_rate=0.005):
         self.learning_rate = learning_rate
