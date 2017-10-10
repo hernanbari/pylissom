@@ -43,7 +43,7 @@ class CortexLayer(Layer):
         self.input = cortex_input
         self.afferent_activation = self.matmul(self.input, self.afferent_weights)
 
-        current_activation = self.custom_sigmoid(self.afferent_activation)
+        current_activation = self.custom_sigmoid(self.min_theta, self.max_theta, self.afferent_activation)
         for _ in range(self.settling_steps):
             self.excitatory_activation = self.matmul(current_activation, self.excitatory_weights)
             self.inhibitory_activation = self.matmul(current_activation, self.inhibitory_weights)
