@@ -42,6 +42,7 @@ def run_cross_validation(model_fn, ck_dataset, cv_sampler, args):
                             cuda=args.cuda, prefix='fold_' + str(fold))
         if args.save_images:
             model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
+        # TODO: Change epochs to 0
         for epoch in range(1, args.epochs + 1):
             pipeline.train(train_data_loader=train_loader, epoch=epoch)
             curr_accuracy = pipeline.test(test_data_loader=val_loader, epoch=epoch)

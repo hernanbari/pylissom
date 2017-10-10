@@ -2,6 +2,7 @@ import torch
 
 
 def save_model(model, optimizer=None, fname='best_model.pth.tar'):
+    # TODO: Add asserts of model is Module and optimizer is Optimizer
     state = {'model': model}
     if optimizer is not None:
         state.update({

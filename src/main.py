@@ -112,7 +112,7 @@ if not args.cv and 'grid-search' not in args.model:
     train_loader = get_dataset(train=True, args=args)
     pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
                         cuda=args.cuda)
-
+    # TODO: Change epochs to 0
     for epoch in range(1, args.epochs + 1):
         pipeline.train(train_data_loader=train_loader, epoch=epoch)
         pipeline.test(test_data_loader=test_loader, epoch=epoch)
