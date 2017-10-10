@@ -41,6 +41,8 @@ def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
     rows_source = shape_source[0]
     rows_output = shape_output[0]
     ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
+    uniform = torch.FloatTensor(ans.size()).uniform_(0, 1)
+    ans = ans * uniform
     return ans
 
 
