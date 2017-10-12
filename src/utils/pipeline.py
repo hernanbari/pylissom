@@ -29,7 +29,7 @@ class Pipeline(object):
 
     # TODO: check this
     @staticmethod
-    def _process_input(input, normalize=False):
+    def process_input(input, normalize=False):
         batch_input_shape = torch.Size((1, int(np.prod(input.shape))))
         var = input
         if normalize:
@@ -47,7 +47,7 @@ class Pipeline(object):
             if self.cuda:
                 data, target = data.cuda(), target.cuda()
             data, target = Variable(data, volatile=not train), Variable(target)
-            data = self._process_input(data)
+            data = self.process_input(data)
             self.optimizer.zero_grad() if self.optimizer else None
             output = self.model(data)
             if self.loss_fn:
