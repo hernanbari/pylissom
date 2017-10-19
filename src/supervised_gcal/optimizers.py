@@ -1,6 +1,7 @@
 import torch
 from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class CortexOptimizer(torch.optim.Optimizer):
@@ -24,6 +25,30 @@ class SequentialOptimizer(object):
             opt.zero_grad()
 
 
+class SimpleHebbian(CortexOptimizer):
+    def __init__(self, cortex_layer, weight, learning_rate):
+        super().__init__(cortex_layer)
+        self.learning_rate = learning_rate
+        self.weight = weight
+
+    def step(self, **kwargs):
+        if self.weight == 'afferent_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
+                                            self.cortex_layer.activation, self.learning_rate,
+                                            self.cortex_layer.afferent_radius)
+        elif self.weight == 'excitatory_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,
+                                            self.cortex_layer.activation, self.learning_rate,
+                                            self.cortex_layer.excitatory_radius)
+
+        elif self.weight == 'inhibitory_weights':
+            CortexHebbian._hebbian_learning(self.cortex_layer.inhibitory_weights, self.cortex_layer.activation,
+                                            self.cortex_layer.activation, self.learning_rate,
+                                            self.cortex_layer.inhibitory_radius)
+        else:
+            raise RuntimeError('Wrong weights for SimpleHebbian')
+
+
 class CortexHebbian(CortexOptimizer):
     def __init__(self, cortex_layer, learning_rate=0.005):
         self.learning_rate = learning_rate
@@ -31,23 +56,23 @@ class CortexHebbian(CortexOptimizer):
 
     def step(self, **kwargs):
         self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
-                               self.cortex_layer.activation, self.learning_rate)
+                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.afferent_radius)
 
         self._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,
-                               self.cortex_layer.activation, self.learning_rate)
+                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.excitatory_radius)
 
         self._hebbian_learning(self.cortex_layer.inhibitory_weights, self.cortex_layer.activation,
-                               self.cortex_layer.activation, self.learning_rate)
+                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.inhibitory_radius)
 
     @staticmethod
-    def _hebbian_learning(weights, input, output, learning_rate):
+    def _hebbian_learning(weights, input, output, learning_rate, radius):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
-        zero_mask = torch.gt(weights.data, 0).float()
 
         delta = learning_rate * torch.matmul(torch.t(input.data), output.data)
         weights.data.add_(delta)
-        weights.data.mul_(zero_mask)
+        apply_circular_mask_to_weights(weights.data.t_(), radius)
+        weights.data.t_()
         den = torch.norm(weights.data, p=1, dim=0)
         weights.data.div_(den)
         return
@@ -82,10 +107,8 @@ class NeighborsDecay(CortexPruner):
     def __init__(self, cortex_layer, pruning_step=2000, decay_fn=linear_decay, final_epoch=8.0):
         super(NeighborsDecay, self).__init__(cortex_layer, pruning_step)
         self.decay_fn = decay_fn
-        self.epoch = 1
         self.final_epoch = final_epoch
 
     def prune(self):
         self.decay_fn(self.cortex_layer.excitatory_weights, self.cortex_layer.excitatory_radius,
-                      epoch=self.epoch, final_epoch=self.final_epoch)
-        self.epoch += 1
+                      epoch=self.cortex_layer.epoch, final_epoch=self.final_epoch)

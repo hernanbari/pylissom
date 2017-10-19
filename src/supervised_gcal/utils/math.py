@@ -28,7 +28,7 @@ def euclidean_distance_general(x, y):
     return np.sqrt(np.sum((x - y) ** 2))
 
 
-def gaussian(x, y, mu_x, mu_y, sigma):
+def gaussian(x, y, mu_x, mu_y, sigma, sigma_y=None):
     """
     This function implements a circular gaussian function.
     :param x:
@@ -38,10 +38,12 @@ def gaussian(x, y, mu_x, mu_y, sigma):
     :param sigma:
     :return: Gaussian
     """
-    num = np.power(x - mu_x, 2) + np.power(y - mu_y, 2)
-    den = np.power(sigma, 2)
-    ans = np.float32(np.exp(-np.divide(num, den)))
-    return ans
+    if sigma_y is None:
+        sigma_y = sigma
+
+    x_w = np.divide(x - mu_x, sigma)
+    y_h = np.divide(y - mu_y, sigma_y)
+    return np.float32(np.exp(-0.5*x_w*x_w + -0.5*y_h*y_h))
 
 
 def normalize(matrix, norm=1, axis=1):

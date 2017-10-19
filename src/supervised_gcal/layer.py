@@ -24,12 +24,11 @@ class Layer(torch.nn.Module):
         raise NotImplementedError
 
     def custom_sigmoid(self, min_theta, max_theta, activation):
-        activation = torch.nn.functional.threshold(activation, min_theta, value=0.0)
-        activation.masked_fill_(
-            mask=torch.gt(activation, max_theta),
-            value=1)
-
+        mask_zeros = torch.le(activation, min_theta)
+        mask_ones = torch.ge(activation, max_theta)
         activation.sub_(min_theta).div_(max_theta - min_theta)
+        activation.masked_fill_(mask=mask_zeros, value=0)
+        activation.masked_fill_(mask=mask_ones, value=1)
         return activation
 
     def train(self, mode=True):

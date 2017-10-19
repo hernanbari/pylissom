@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import argparse
-import copy
 import os
 import shutil
 
@@ -10,10 +9,10 @@ import numpy as np
 import torch
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.models import get_cortex, get_full_lissom, get_net, get_supervised
-from src.utils.datasets import get_dataset, CKDataset, CVSubjectIndependent
+from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
+from src.utils.datasets import get_dataset, CKDataset
 from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
 from src.utils.pipeline import Pipeline
-from torch.utils.data import DataLoader
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -43,6 +42,8 @@ parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
 parser.add_argument('--save_images', action='store_false', default=True,
                     help='save images for tensorboard')
+parser.add_argument('--cv', action='store_true', default=False,
+                    help='Run cross validation')
 parser.add_argument('--dataset-len', type=int, default=None, metavar='N',
                     help='max batch len')
 
@@ -84,7 +85,7 @@ if args.model == 'lgn':
     model = LGNLayer(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex':
-    model, optimizer, _ = get_cortex(input_shape, cortex_shape)
+    model, optimizer, _ = get_cortex(input_shape, cortex_shape, args)
 
 if args.model == 'lissom':
     model, optimizer, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
@@ -96,21 +97,33 @@ if args.save_images and args.model in ['lgn', 'cortex', 'lissom']:
 if args.model == 'control':
     net_input_shape = batch_input_shape[1]
     model, optimizer, loss_fn = get_net(net_input_shape, classes)
+    model_fn = lambda: get_net(net_input_shape, classes)
 
 if args.model == 'supervised':
     model, optimizer, loss_fn = get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs,
                                                classes)
     model[0].register_forward_hook(images.generate_images)
+    model_fn = lambda: get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
+                                      args.epochs,
+                                      classes)
 
-if args.model != 'cv' and 'grid-search' not in args.model:
+if not args.cv and 'grid-search' not in args.model:
     test_loader = get_dataset(train=False, args=args)
     train_loader = get_dataset(train=True, args=args)
     pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
                         cuda=args.cuda)
-
+    # TODO: Change epochs to 0
     for epoch in range(1, args.epochs + 1):
         pipeline.train(train_data_loader=train_loader, epoch=epoch)
         pipeline.test(test_data_loader=test_loader, epoch=epoch)
+    exit()
+
+# TODO: train lissom first and then net
+if args.cv:
+    assert model_fn is not None, "Cross validation only with supervised or control models"
+    ck_dataset = CKDataset()
+    cv = CVSubjectIndependent(ck_dataset)
+    run_cross_validation(model_fn, ck_dataset, cv, args)
     exit()
 
 # TODO: test
@@ -127,43 +140,4 @@ if args.model == 'lissom-grid-search':
 # TODO: train lissom first and then net
 if args.model == 'supervised-grid-search':
     run_supervised_grid_search(input_shape, lgn_shape, cortex_shape, args)
-    exit()
-
-# TODO: train lissom first and then net
-if args.model == 'cv':
-
-    kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-    ck_dataset = CKDataset()
-    cv = CVSubjectIndependent(ck_dataset)
-    best_accuracy = 0
-    best_model = None
-    for fold, (train_sampler, val_sampler) in enumerate(cv.train_val_samplers()):
-        train_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
-        val_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=val_sampler, **kwargs)
-        model, optimizer, loss_fn = get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
-                                                   args.epochs,
-                                                   classes)
-        pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
-                            cuda=args.cuda, prefix='fold_' + str(fold))
-        if args.save_images:
-            model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
-        for epoch in range(1, args.epochs + 1):
-            pipeline.train(train_data_loader=train_loader, epoch=epoch)
-            curr_accuracy = pipeline.test(test_data_loader=val_loader, epoch=epoch)
-
-        if best_model is None or curr_accuracy > best_accuracy:
-            best_model = copy.deepcopy(model.state_dict())
-            best_accuracy = curr_accuracy
-    fold = 'test'
-    model, optimizer, loss_fn = get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
-                                               args.epochs,
-                                               classes)
-    model.load_state_dict(best_model)
-    if args.save_images:
-        model[0].register_forward_hook(lambda *x: images.generate_images(*x, prefix='fold_' + str(fold)))
-    test_sampler = cv.test_sampler()
-    test_loader = DataLoader(ck_dataset, batch_size=args.batch_size, sampler=test_sampler, **kwargs)
-    pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
-                        cuda=args.cuda, prefix='fold_' + str(fold))
-    pipeline.test(test_data_loader=test_loader, epoch=1)
     exit()
