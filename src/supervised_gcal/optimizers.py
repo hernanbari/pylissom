@@ -107,10 +107,8 @@ class NeighborsDecay(CortexPruner):
     def __init__(self, cortex_layer, pruning_step=2000, decay_fn=linear_decay, final_epoch=8.0):
         super(NeighborsDecay, self).__init__(cortex_layer, pruning_step)
         self.decay_fn = decay_fn
-        self.epoch = 1
         self.final_epoch = final_epoch
 
     def prune(self):
         self.decay_fn(self.cortex_layer.excitatory_weights, self.cortex_layer.excitatory_radius,
-                      epoch=self.epoch, final_epoch=self.final_epoch)
-        self.epoch += 1
+                      epoch=self.cortex_layer.epoch, final_epoch=self.final_epoch)
