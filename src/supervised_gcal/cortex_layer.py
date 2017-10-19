@@ -1,12 +1,19 @@
 import torch
 from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class CortexLayer(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, afferent_radius=5,
-                 excitatory_radius=2,
-                 inhibitory_radius=5, settling_steps=10, inhib_factor=1, excit_factor=1.5, sparse=False, name='cortex'):
+    def __init__(self, input_shape, self_shape,
+                 min_theta=0.0, max_theta=1.0,
+                 afferent_radius=5, excitatory_radius=2, inhibitory_radius=5,
+                 aff_factor=1, inhib_factor=1, excit_factor=1.5,
+                 afferent_normalization=False, afferent_normalization_factor=1.0,
+                 settling_steps=10, sparse=False, name='cortex'):
+        self.afferent_normalization_factor = afferent_normalization_factor
+        self.afferent_normalization = afferent_normalization
+        self.aff_factor = aff_factor
         self.sparse = sparse
         self.max_theta = max_theta
         self.excit_factor = excit_factor
@@ -41,7 +48,13 @@ class CortexLayer(Layer):
 
     def forward(self, cortex_input):
         self.input = cortex_input
-        self.afferent_activation = self.matmul(self.input, self.afferent_weights)
+        self.afferent_activation = self.aff_factor * self.matmul(self.input, self.afferent_weights)
+        if self.afferent_normalization:
+            reshaped_input = self.input.repeat(self.input.shape[1], 1)
+            masked_input = apply_circular_mask_to_weights(reshaped_input, self.afferent_radius)
+            sums = masked_input.sum(1).unsqueeze(1).t()
+            den = 1 + self.afferent_normalization_factor * sums
+            self.afferent_activation = self.afferent_activation / den
 
         current_activation = self.custom_sigmoid(self.min_theta, self.max_theta, self.afferent_activation)
         for _ in range(self.settling_steps):
