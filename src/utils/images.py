@@ -61,6 +61,13 @@ def generate_random_gaussians(size, count):
     ]
 
 
+def two_random_gaussians_generator(size, count):
+    stream_one = generate_random_gaussians(size, count)
+    stream_two = generate_random_gaussians(size, count)
+    for one, two in zip(stream_one, stream_two):
+        yield combine_matrices(one, two)
+
+
 def generate_random_faces(size, count):
     return [
         generate_three_dots(size,
@@ -78,6 +85,20 @@ def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
     eyes = combine_matrices(lefteye, righteye)
     face = combine_matrices(eyes, mouth)
     return rotate(face, orientation, mode='constant').astype(face.dtype)
+
+
+def faces_generator(size, num=1):
+    while True:
+        faces = [
+            generate_three_dots(size,
+                                mu_x=random.uniform(10, size - 10), mu_y=random.uniform(10, size - 10),
+                                sigma_x=3.0,
+                                orientation=random.uniform(-15, 15)
+                                )
+            for _ in range(num)
+        ]
+        combined = combine_matrices(faces)
+        yield combined
 
 
 def combine_matrices(*matrices):
