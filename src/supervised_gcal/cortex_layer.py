@@ -28,7 +28,7 @@ class CortexLayer(Layer):
         return torch.nn.Parameter(
             get_gaussian_weights_variable(input_shape, weights_shape, 2, radius, self.sparse).t())
 
-    def _setup_variables(self):
+    def _setup_weights(self):
         self.inhibitory_weights = self._get_weight_variable(input_shape=self.self_shape,
                                                             weights_shape=self.self_shape,
                                                             radius=self.inhibitory_radius)

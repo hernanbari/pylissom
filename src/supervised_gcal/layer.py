@@ -15,9 +15,9 @@ class Layer(torch.nn.Module):
         self.weights = []
         self.epoch = -1
         self.batch_idx = 0
-        self._setup_variables()
+        self._setup_weights()
 
-    def _setup_variables(self):
+    def _setup_weights(self):
         raise NotImplementedError
 
     @staticmethod

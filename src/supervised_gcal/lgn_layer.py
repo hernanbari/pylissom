@@ -15,7 +15,7 @@ class LGNLayer(Layer):
         name = ('on' if on else 'off') if name == '' else name
         super(LGNLayer).__init__(input_shape, self_shape, min_theta, max_theta, name)
 
-    def _setup_variables(self):
+    def _setup_weights(self):
         sigma_center_weights_matrix = get_gaussian_weights_variable(self.input_shape, self.self_shape,
                                                                     self.sigma_center,
                                                                     self.radius,
