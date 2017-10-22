@@ -1,6 +1,7 @@
 import numpy as np
+
 import torch
-from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
+from src.supervised_gcal.utils.functions import afferent_normalize, piecewise_sigmoid
 
 
 class Layer(torch.nn.Module):
@@ -27,15 +28,6 @@ class Layer(torch.nn.Module):
     def _setup_weights(self):
         raise NotImplementedError
 
-    @staticmethod
-    def piecewise_sigmoid(min_theta, max_theta, activation):
-        mask_zeros = torch.le(activation, min_theta)
-        mask_ones = torch.ge(activation, max_theta)
-        activation.sub_(min_theta).div_(max_theta - min_theta)
-        activation.masked_fill_(mask=mask_zeros, value=0)
-        activation.masked_fill_(mask=mask_ones, value=1)
-        return activation
-
     def train(self, mode=True):
         if mode or self.epoch == -1:
             self.epoch += 1
@@ -46,18 +38,10 @@ class Layer(torch.nn.Module):
         self.input = stimulus
         weighted_sum = self.strength * self.matmul(stimulus.data, self.weights.data)
         if self.afferent_normalization:
-            weighted_sum = self.afferent_normalize(stimulus, weighted_sum)
-        activation = self.piecewise_sigmoid(self.min_theta, self.max_theta, weighted_sum)
+            weighted_sum = afferent_normalize(self.radius, self.afferent_normalization_strength, stimulus, weighted_sum)
+        activation = piecewise_sigmoid(self.min_theta, self.max_theta, weighted_sum)
         self.activation = torch.autograd.Variable(activation)
         return self.activation
-
-    def afferent_normalize(self, stimulus, weighted_sum):
-        reshaped_input = stimulus.data.repeat(stimulus.data.shape[1], 1)
-        masked_input = apply_circular_mask_to_weights(reshaped_input, self.radius)
-        sums = masked_input.sum(1).unsqueeze(1).t()
-        den = 1 + self.afferent_normalization_strength * sums
-        weighted_sum = weighted_sum / den
-        return weighted_sum
 
     def matmul(self, vector, matrix):
         if not self.sparse:
