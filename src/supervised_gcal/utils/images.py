@@ -3,6 +3,7 @@ from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.lgn_layer import LGNLayer
+from src.utils.images import plot_array_matrix
 from torchvision import utils as vutils
 
 logdir = 'runs'
@@ -47,3 +48,34 @@ def images_matrix(matrix, range):
     reshaped_weights = matrix.t().contiguous().view((neurons, 1) + weights_shape)
     im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=range)
     return im
+
+
+def weights_to_numpy_matrix(weights, values_range):
+    grid = images_matrix(weights, values_range)
+    grid = grid.cpu() if grid.is_cuda else grid
+    return np.transpose(grid.numpy(), (1, 2, 0))
+
+
+def plot_layer_weights(layer):
+    values_range = (-1, 1) if isinstance(layer, LGNLayer) else (0, 1)
+    imgs = [weights_to_numpy_matrix(w, values_range) for w in layer.weights]
+    return plot_array_matrix(imgs)
+
+
+def tensor_to_numpy_matrix(tensor, shape):
+    tensor = tensor.cpu() if tensor.is_cuda else tensor
+    return np.reshape(tensor.numpy(), shape)
+
+
+def plot_layer_activation(layer):
+    inp_mat = tensor_to_numpy_matrix(layer.input.data, layer.input_shape)
+    act_mat = tensor_to_numpy_matrix(layer.activation.data, layer.self_shape)
+    return plot_array_matrix([inp_mat, act_mat])
+
+
+def plot_cortex_activations(cortex):
+    inp_act_plots = plot_layer_activation(cortex)
+    activations = [tensor_to_numpy_matrix(act, cortex.self_shape) for act in [cortex.afferent_activation,
+                                                                              cortex.inhibitory_activation,
+                                                                              cortex.excitatory_activation]]
+    return inp_act_plots + plot_array_matrix(activations)
