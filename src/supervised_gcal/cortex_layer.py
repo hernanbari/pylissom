@@ -3,7 +3,7 @@ from src.supervised_gcal.layer import Layer
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, get_gaussian_weights_variable
 
 
-class CortexLayer(Layer):
+class ReducedLissom(Layer):
     # The relationship between the excitatoriy radius, inhib_factor and excit_fator is really important for patchy map
     def __init__(self, input_shape, self_shape,
                  min_theta=0.0, max_theta=1.0,
@@ -21,7 +21,7 @@ class CortexLayer(Layer):
         self.inhibitory_radius = inhibitory_radius
         self.excitatory_radius = excitatory_radius
         self.afferent_radius = afferent_radius
-        super(CortexLayer).__init__(input_shape, self_shape, min_theta, max_theta, name)
+        super(ReducedLissom).__init__(input_shape, self_shape, min_theta, max_theta, name)
 
     def _get_weight_variable(self, input_shape, weights_shape, radius):
         sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2

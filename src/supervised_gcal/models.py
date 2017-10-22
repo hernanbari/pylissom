@@ -1,12 +1,12 @@
 import numpy as np
 
 import torch
-from src.supervised_gcal.cortex_layer import CortexLayer
+from src.supervised_gcal.cortex_layer import ReducedLissom
 from src.supervised_gcal.lgn_layer import LGNLayer
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
 
 
-class FullLissom(torch.nn.Module):
+class Lissom(torch.nn.Module):
     def __init__(self, input_shape, lgn_shape, v1_shape, lgn_params=None, v1_params=None):
         super().__init__()
         if lgn_params is None:
@@ -17,7 +17,7 @@ class FullLissom(torch.nn.Module):
         self.activation_shape = torch.Size((1, int(np.prod(v1_shape))))
         self.on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
         self.off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
-        self.v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
+        self.v1 = ReducedLissom(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
 
     def forward(self, retina):
         on_output = self.on(retina)
@@ -40,12 +40,12 @@ class HLissom(torch.nn.Module):
             lgn_params = {}
         if v1_params is None:
             v1_params = {}
-        self.full_lissom = FullLissom(input_shape, lgn_shape, v1_shape, lgn_params, v1_params)
+        self.full_lissom = Lissom(input_shape, lgn_shape, v1_shape, lgn_params, v1_params)
         self.cortexes = [self.full_lissom.v1]
 
     def add_cortex_layer(self, cortex_shape):
         last_shape = self.cortexes[-1].shape
-        self.cortexes.append(CortexLayer(input_shape=last_shape, self_shape=cortex_shape))
+        self.cortexes.append(ReducedLissom(input_shape=last_shape, self_shape=cortex_shape))
 
     def forward(self, retina):
         self.activations = [self.full_lissom(retina)]
@@ -56,7 +56,7 @@ class HLissom(torch.nn.Module):
 
 def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None, learning_rate=None):
     # Cortex Layer
-    model = CortexLayer(input_shape, cortex_shape, **v1_params)
+    model = ReducedLissom(input_shape, cortex_shape, **v1_params)
     optimizer = SequentialOptimizer(
     CortexHebbian(cortex_layer=model, learning_rate=learning_rate),
         NeighborsDecay(cortex_layer=model,
@@ -67,7 +67,7 @@ def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v
 def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
                     v1_params=None):
     # Full Lissom
-    model = FullLissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
+    model = Lissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
     optimizer = SequentialOptimizer(
         CortexHebbian(cortex_layer=model.v1),
         NeighborsDecay(cortex_layer=model.v1,
