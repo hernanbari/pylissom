@@ -54,7 +54,7 @@ class HLissom(torch.nn.Module):
         return self.activations[-1]
 
 
-def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None, learning_rate=None):
+def get_reduced_lissom(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None, learning_rate=None):
     # Cortex Layer
     model = ReducedLissom(input_shape, cortex_shape, **v1_params)
     optimizer = SequentialOptimizer(
@@ -64,8 +64,8 @@ def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v
     return model, optimizer, None
 
 
-def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
-                    v1_params=None):
+def get_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
+               v1_params=None):
     # Full Lissom
     model = Lissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
     optimizer = SequentialOptimizer(
@@ -90,8 +90,8 @@ def get_net(net_input_shape, classes):
 
 def get_supervised(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch, classes, v1_params=None):
     # Lissom
-    lissom, optimizer_lissom, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch,
-                                                  v1_params=v1_params)
+    lissom, optimizer_lissom, _ = get_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch,
+                                             v1_params=v1_params)
     # Net
     net_input_shape = lissom.activation_shape[1]
     net, optimizer_nn, loss_fn = get_net(net_input_shape, classes)

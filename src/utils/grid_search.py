@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
-from src.supervised_gcal.models import get_full_lissom, get_supervised, get_cortex
+from src.supervised_gcal.models import get_lissom, get_supervised, get_reduced_lissom
 from src.supervised_gcal.utils import images as images
 from src.utils.datasets import get_dataset
 from src.utils.pipeline import Pipeline
@@ -34,7 +34,7 @@ class GridSearch(object):
 
 def run_lgn_grid_search(input_shape, lgn_shape, args):
     def model_fn(lgn_params, counter):
-        lissom, optimizer, _ = get_full_lissom(input_shape, lgn_shape, (1, 1), lgn_params=lgn_params)
+        lissom, optimizer, _ = get_lissom(input_shape, lgn_shape, (1, 1), lgn_params=lgn_params)
 
         def hardcoded_counter(self, input, output):
             self.batch_idx = counter
@@ -53,7 +53,7 @@ def run_lgn_grid_search(input_shape, lgn_shape, args):
 
 def run_cortex_grid_search(input_shape, cortex_shape, args):
     def model_fn(v1_params, counter):
-        lissom, optimizer, _ = get_cortex(input_shape, cortex_shape, v1_params=v1_params)
+        lissom, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape, v1_params=v1_params)
 
         # def hardcoded_counter(self, input, output):
         #     self.batch_idx = counter
@@ -73,9 +73,9 @@ def run_cortex_grid_search(input_shape, cortex_shape, args):
 def run_lissom_grid_search(input_shape, lgn_shape, cortex_shape, args):
     def model_fn(v1_params, counter):
         v1_params['inhibitory_radius'] = v1_params['afferent_radius']
-        lissom, optimizer, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=args.log_interval,
-                                               final_epoch=args.epochs,
-                                               v1_params=v1_params)
+        lissom, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=args.log_interval,
+                                          final_epoch=args.epochs,
+                                          v1_params=v1_params)
 
         def hardcoded_counter(self, input, output):
             self.batch_idx = counter

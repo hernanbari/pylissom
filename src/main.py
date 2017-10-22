@@ -8,7 +8,7 @@ import numpy as np
 
 import torch
 from src.supervised_gcal.lgn_layer import LGNLayer
-from src.supervised_gcal.models import get_cortex, get_full_lissom, get_net, get_supervised
+from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised
 from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
 from src.utils.datasets import get_dataset, CKDataset
 from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
@@ -85,10 +85,10 @@ if args.model == 'lgn':
     model = LGNLayer(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex':
-    model, optimizer, _ = get_cortex(input_shape, cortex_shape, args)
+    model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape, args)
 
 if args.model == 'lissom':
-    model, optimizer, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
+    model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
 
 handles = None
 if args.save_images and args.model in ['lgn', 'cortex', 'lissom']:
