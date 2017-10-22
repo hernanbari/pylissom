@@ -3,8 +3,10 @@ import torch
 
 
 class Layer(torch.nn.Module):
-    def __init__(self, input_shape, self_shape, min_theta, max_theta, strength, sparse=False, name=''):
+    def __init__(self, input_shape, self_shape, min_theta, max_theta, strength, radius,
+                 sparse=False, name=''):
         super(Layer).__init__()
+        self.radius = radius
         self.sparse = sparse
         self.strength = strength
         self.max_theta = max_theta
