@@ -54,7 +54,7 @@ class CortexLayer(Layer):
             den = 1 + self.afferent_normalization_factor * sums
             self.afferent_activation = self.afferent_activation / den
 
-        current_activation = self.custom_sigmoid(self.min_theta, self.max_theta, self.afferent_activation)
+        current_activation = self.piecewise_sigmoid(self.min_theta, self.max_theta, self.afferent_activation)
         for _ in range(self.settling_steps):
             self.excitatory_activation = self.matmul(current_activation, self.excitatory_weights)
             self.inhibitory_activation = self.matmul(current_activation, self.inhibitory_weights)
@@ -63,7 +63,7 @@ class CortexLayer(Layer):
                               + self.excit_factor * self.excitatory_activation \
                               - self.inhib_factor * self.inhibitory_activation
 
-            current_activation = self.custom_sigmoid(self.min_theta, self.max_theta, sum_activations)
+            current_activation = self.piecewise_sigmoid(self.min_theta, self.max_theta, sum_activations)
         self.activation = current_activation
         return self.activation
 

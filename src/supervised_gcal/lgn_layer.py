@@ -34,8 +34,8 @@ class LGNLayer(Layer):
     def forward(self, lgn_input):
         self.input = lgn_input
         matmul = self.matmul(self.input, self.afferent_weights)
-        self.activation = torch.autograd.Variable(self.custom_sigmoid(self.min_theta, self.max_theta,
-                                                                      self.lgn_factor * matmul))
+        self.activation = torch.autograd.Variable(self.piecewise_sigmoid(self.min_theta, self.max_theta,
+                                                                         self.lgn_factor * matmul))
         return self.activation
 
     def matmul(self, vector, matrix):

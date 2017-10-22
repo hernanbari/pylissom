@@ -21,7 +21,7 @@ class Layer(torch.nn.Module):
         raise NotImplementedError
 
     @staticmethod
-    def custom_sigmoid(min_theta, max_theta, activation):
+    def piecewise_sigmoid(min_theta, max_theta, activation):
         mask_zeros = torch.le(activation, min_theta)
         mask_ones = torch.ge(activation, max_theta)
         activation.sub_(min_theta).div_(max_theta - min_theta)
