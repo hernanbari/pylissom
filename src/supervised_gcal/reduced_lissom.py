@@ -66,16 +66,3 @@ class ReducedLissom(Layer):
             current_activation = self.piecewise_sigmoid(self.min_theta, self.max_theta, sum_activations)
         self.activation = current_activation
         return self.activation
-
-    def matmul(self, vector, matrix):
-        if not self.sparse:
-            matmul = torch.matmul(vector, matrix)
-        else:
-            # Pytorch implements sparse matmul only sparse x dense -> sparse and sparse x dense -> dense,
-            # That's why it's reversed
-            if isinstance(matrix, torch.autograd.Variable):
-                matrix = matrix.data
-            if isinstance(vector, torch.autograd.Variable):
-                vector = vector.data
-            matmul = torch.matmul(matrix.t(), vector.t()).t()
-        return matmul

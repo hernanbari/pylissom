@@ -25,5 +25,4 @@ class LGNLayer(Layer):
             diff = (sigma_center_weights_matrix - sigma_surround_weights_matrix).t()
         else:
             diff = (sigma_surround_weights_matrix - sigma_center_weights_matrix).t()
-        self.register_buffer(name='afferent_weights', tensor=diff)
-        self.weights = [('afferent_weights', self.afferent_weights)]
+        self.weights = diff

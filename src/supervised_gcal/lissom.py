@@ -1,7 +1,7 @@
 import numpy as np
 
 import torch
-from src.supervised_gcal.cortex_layer import ReducedLissom
+from src.supervised_gcal.reduced_lissom import ReducedLissom
 from src.supervised_gcal.lgn_layer import LGNLayer
 
 

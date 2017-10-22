@@ -1,5 +1,5 @@
 import torch
-from src.supervised_gcal.cortex_layer import ReducedLissom
+from src.supervised_gcal.reduced_lissom import ReducedLissom
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 

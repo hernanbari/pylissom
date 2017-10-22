@@ -1,5 +1,5 @@
 import torch
-from src.supervised_gcal.cortex_layer import ReducedLissom
+from src.supervised_gcal.reduced_lissom import ReducedLissom
 from src.supervised_gcal.lissom import Lissom
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
 
