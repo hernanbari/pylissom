@@ -1,9 +1,10 @@
 import numpy as np
 import torch
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class Layer(torch.nn.Module):
-    def __init__(self, input_shape, self_shape, min_theta, max_theta, strength, radius,
+    def __init__(self, input_shape, self_shape, min_theta, max_theta, strength, radius, afferent_normalization=False,
                  sparse=False, name=''):
         super(Layer).__init__()
         self.radius = radius
@@ -20,6 +21,7 @@ class Layer(torch.nn.Module):
         self.batch_idx = 0
         self.input = None
         self.activation = None
+        self.afferent_normalization = afferent_normalization
         self._setup_weights()
 
     def _setup_weights(self):
@@ -43,9 +45,19 @@ class Layer(torch.nn.Module):
     def forward(self, stimulus):
         self.input = stimulus
         weighted_sum = self.strength * self.matmul(stimulus.data, self.weights.data)
+        if self.afferent_normalization:
+            weighted_sum = self.afferent_normalize(stimulus, weighted_sum)
         activation = self.piecewise_sigmoid(self.min_theta, self.max_theta, weighted_sum)
         self.activation = torch.autograd.Variable(activation)
         return self.activation
+
+    def afferent_normalize(self, stimulus, weighted_sum):
+        reshaped_input = stimulus.data.repeat(stimulus.data.shape[1], 1)
+        masked_input = apply_circular_mask_to_weights(reshaped_input, self.radius)
+        sums = masked_input.sum(1).unsqueeze(1).t()
+        den = 1 + self.afferent_normalization_strength * sums
+        weighted_sum = weighted_sum / den
+        return weighted_sum
 
     def matmul(self, vector, matrix):
         if not self.sparse:
