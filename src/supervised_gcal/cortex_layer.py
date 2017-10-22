@@ -15,15 +15,13 @@ class CortexLayer(Layer):
         self.afferent_normalization = afferent_normalization
         self.aff_factor = aff_factor
         self.sparse = sparse
-        self.max_theta = max_theta
         self.excit_factor = excit_factor
         self.inhib_factor = inhib_factor
         self.settling_steps = settling_steps
         self.inhibitory_radius = inhibitory_radius
         self.excitatory_radius = excitatory_radius
         self.afferent_radius = afferent_radius
-        self.min_theta = min_theta
-        super().__init__(input_shape, self_shape, name)
+        super(CortexLayer).__init__(input_shape, self_shape, min_theta, max_theta, name)
 
     def _get_weight_variable(self, input_shape, weights_shape, radius):
         sigma = (radius / 5 if radius / 5 > 1 else 1) if radius is not None else 2
