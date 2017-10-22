@@ -1,5 +1,6 @@
 import torch
-from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
+from src.supervised_gcal.layer import Layer
+from src.supervised_gcal.utils.weights import get_gaussian_weights_variable
 
 
 class LGNLayer(Layer):

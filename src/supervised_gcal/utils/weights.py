@@ -6,7 +6,7 @@ import numpy as np
 
 import torch
 from functools import lru_cache
-from src.supervised_gcal.utils.math import gaussian, euclidian_distances
+from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
 
 
 def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **kwargs):
@@ -41,8 +41,6 @@ def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
     rows_source = shape_source[0]
     rows_output = shape_output[0]
     ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
-    uniform = torch.FloatTensor(ans.size()).uniform_(0, 1)
-    ans = ans * uniform
     return ans
 
 
@@ -82,3 +80,19 @@ def dense_weights_to_sparse(matrix):
         return torch.cuda.sparse.FloatTensor(*params)
     else:
         return torch.sparse.FloatTensor(*params)
+
+
+@lru_cache()
+def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=False):
+    weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
+                                                                            output_shape,
+                                                                            sigma=sigma),
+                                                       radius=radius),
+                        axis=1)
+    if sparse:
+        weights = dense_weights_to_sparse(weights)
+    return weights
+
+
+def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
+    return get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=sparse).clone()

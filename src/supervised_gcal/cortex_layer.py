@@ -1,6 +1,6 @@
 import torch
-from src.supervised_gcal.layer import Layer, get_gaussian_weights_variable
-from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
+from src.supervised_gcal.layer import Layer
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, get_gaussian_weights_variable
 
 
 class CortexLayer(Layer):
