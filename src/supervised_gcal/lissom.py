@@ -7,7 +7,7 @@ from src.supervised_gcal.lgn_layer import LGNLayer
 
 class Lissom(torch.nn.Module):
     def __init__(self, input_shape, lgn_shape, v1_shape, lgn_params=None, v1_params=None):
-        super(Lissom).__init__()
+        super(Lissom, self).__init__()
         if lgn_params is None:
             lgn_params = {}
         if v1_params is None:

@@ -5,9 +5,9 @@ from src.supervised_gcal.utils.functions import afferent_normalize, piecewise_si
 
 
 class Layer(torch.nn.Module):
-    def __init__(self, input_shape, self_shape, min_theta, max_theta, strength, radius, afferent_normalization=False,
-                 sparse=False, name=''):
-        super(Layer).__init__()
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, strength=1.0, radius=1.0,
+                 afferent_normalization=False, sparse=False, name=''):
+        super(Layer, self).__init__()
         self.radius = radius
         self.sparse = sparse
         self.strength = strength

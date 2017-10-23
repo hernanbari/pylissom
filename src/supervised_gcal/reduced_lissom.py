@@ -4,10 +4,16 @@ from src.supervised_gcal.utils.functions import piecewise_sigmoid
 
 
 class ReducedLissom(torch.nn.Module):
-    def __init__(self, min_theta, max_theta, input_shape, self_shape,
-                 afferent_params, excitatory_params, inhibitory_params,
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0,
+                 afferent_params=None, excitatory_params=None, inhibitory_params=None,
                  settling_steps=10):
-        super(ReducedLissom).__init__()
+        super(ReducedLissom, self).__init__()
+        if inhibitory_params is None:
+            inhibitory_params = {}
+        if excitatory_params is None:
+            excitatory_params = {}
+        if afferent_params is None:
+            afferent_params = {}
         self.max_theta = max_theta
         self.min_theta = min_theta
         self.settling_steps = settling_steps
