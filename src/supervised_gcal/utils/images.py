@@ -3,7 +3,7 @@ from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.lgn_layer import LGNLayer
-from src.utils.images import plot_array_matrix
+from src.utils.images import plot_array_matrix, plot_dict_matrix
 from torchvision import utils as vutils
 
 logdir = 'runs'
@@ -56,10 +56,12 @@ def weights_to_numpy_matrix(weights, values_range):
     return np.transpose(grid.numpy(), (1, 2, 0))
 
 
-def plot_layer_weights(layer):
+def plot_layer_weights(layer, prefix=''):
     values_range = (-1, 1) if isinstance(layer, LGNLayer) else (0, 1)
-    imgs = [weights_to_numpy_matrix(w, values_range) for w in layer.weights]
-    return plot_array_matrix(imgs)
+    plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer._parameters.items()})
+    for k, c in layer.named_children():
+        plot_layer_weights(c, prefix=k+'.')
+    return
 
 
 def tensor_to_numpy_matrix(tensor, shape):
@@ -67,10 +69,16 @@ def tensor_to_numpy_matrix(tensor, shape):
     return np.reshape(tensor.numpy(), shape)
 
 
-def plot_layer_activation(layer):
-    inp_mat = tensor_to_numpy_matrix(layer.input.data, layer.input_shape)
-    act_mat = tensor_to_numpy_matrix(layer.activation.data, layer.self_shape)
-    return plot_array_matrix([inp_mat, act_mat])
+def plot_layer_activation(layer, prefix=''):
+    try:
+        inp_mat = tensor_to_numpy_matrix(layer.input.data, layer.input_shape)
+        act_mat = tensor_to_numpy_matrix(layer.activation.data, layer.self_shape)
+        plot_dict_matrix(dict([(prefix+'input', inp_mat), (prefix+'activation', act_mat)]))
+    except Exception:
+        pass
+    for k, c in layer.named_children():
+        plot_layer_activation(c, prefix=k+'.')
+    return
 
 
 def plot_cortex_activations(cortex):

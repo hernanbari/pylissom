@@ -124,3 +124,9 @@ def plot_matrix(img):
 def plot_array_matrix(imgs):
     for i in imgs:
         plot_matrix(i)
+
+
+def plot_dict_matrix(imgs):
+    for k, i in imgs.items():
+        plt.title(k)
+        plot_matrix(i)
