@@ -1,5 +1,5 @@
 import torch
-from src.supervised_gcal.layer import SimpleLayer
+from src.supervised_gcal.layers.simple_layer import SimpleLayer
 from src.supervised_gcal.utils.weights import get_gaussian_weights_variable
 
 

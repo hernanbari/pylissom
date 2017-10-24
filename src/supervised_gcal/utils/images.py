@@ -2,7 +2,7 @@ import numpy as np
 from tensorboard import SummaryWriter
 
 import torch
-from src.supervised_gcal.lgn_layer import LGNLayer
+from src.supervised_gcal.layers.lgn_layer import LGNLayer
 from src.utils.images import plot_array_matrix, plot_dict_matrix
 from torchvision import utils as vutils
 

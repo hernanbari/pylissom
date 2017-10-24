@@ -1,6 +1,6 @@
 import torch
-from src.supervised_gcal.reduced_lissom import ReducedLissom
-from src.supervised_gcal.lissom import Lissom
+from src.supervised_gcal.layers.lissom import Lissom
+from src.supervised_gcal.layers.reduced_lissom import ReducedLissom
 
 
 # TODO: test and define an optimizer

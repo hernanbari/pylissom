@@ -1,5 +1,5 @@
 import torch
-from src.supervised_gcal.cortex_layer import CortexLayer
+from src.supervised_gcal.layers.cortex_layer import CortexLayer
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 

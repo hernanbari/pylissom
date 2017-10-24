@@ -1,6 +1,6 @@
-from src.supervised_gcal.layer import AbstractLayer
-from src.supervised_gcal.lgn_layer import LGNLayer
-from src.supervised_gcal.reduced_lissom import ReducedLissom
+from src.supervised_gcal.layers.abstract_layer import AbstractLayer
+from src.supervised_gcal.layers.lgn_layer import LGNLayer
+from src.supervised_gcal.layers.reduced_lissom import ReducedLissom
 
 
 class Lissom(AbstractLayer):

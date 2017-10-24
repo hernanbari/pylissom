@@ -1,5 +1,5 @@
-from src.supervised_gcal.cortex_layer import CortexLayer
-from src.supervised_gcal.layer import AbstractLayer
+from src.supervised_gcal.layers.cortex_layer import CortexLayer
+from src.supervised_gcal.layers.abstract_layer import AbstractLayer
 from src.supervised_gcal.utils.functions import piecewise_sigmoid
 
 
