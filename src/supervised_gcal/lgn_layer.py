@@ -1,9 +1,9 @@
 import torch
-from src.supervised_gcal.layer import Layer
+from src.supervised_gcal.layer import SimpleLayer
 from src.supervised_gcal.utils.weights import get_gaussian_weights_variable
 
 
-class LGNLayer(Layer):
+class LGNLayer(SimpleLayer):
     def __init__(self, on, input_shape, self_shape, sigma_center=0.1, sigma_surround=10, **kwargs):
         self.on = on
         self.sigma_surround = sigma_surround
@@ -23,4 +23,4 @@ class LGNLayer(Layer):
             diff = (sigma_center_weights_matrix - sigma_surround_weights_matrix).t()
         else:
             diff = (sigma_surround_weights_matrix - sigma_center_weights_matrix).t()
-        self.weights = torch.autograd.Variable(diff)
+        self.weights = torch.nn.Parameter(diff)

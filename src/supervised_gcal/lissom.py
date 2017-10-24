@@ -1,28 +1,30 @@
-import numpy as np
-
-import torch
-from src.supervised_gcal.reduced_lissom import ReducedLissom
+from src.supervised_gcal.layer import AbstractLayer
 from src.supervised_gcal.lgn_layer import LGNLayer
+from src.supervised_gcal.reduced_lissom import ReducedLissom
 
 
-class Lissom(torch.nn.Module):
-    def __init__(self, input_shape, lgn_shape, v1_shape, lgn_params=None, v1_params=None):
-        super(Lissom, self).__init__()
+class Lissom(AbstractLayer):
+    def __init__(self,  input_shape, self_shape, lgn_shape, lgn_params=None, v1_params=None):
+        self.lgn_shape = lgn_shape
         if lgn_params is None:
-            lgn_params = {}
+            self.lgn_params = {}
         if v1_params is None:
-            v1_params = {}
-        self.input_shape = input_shape
-        self.activation_shape = torch.Size((1, int(np.prod(v1_shape))))
-        self.on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
-        self.off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
-        self.v1 = ReducedLissom(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
+            self.v1_params = {}
+        self.lgn_activation = None
+        super(Lissom, self).__init__(input_shape, self_shape)
+
+    def _setup_weights(self):
+        self.on = LGNLayer(input_shape=self.input_shape, self_shape=self.lgn_shape, on=True, **self.lgn_params)
+        self.off = LGNLayer(input_shape=self.input_shape, self_shape=self.lgn_shape, on=False, **self.lgn_params)
+        self.v1 = ReducedLissom(input_shape=self.lgn_shape, self_shape=self.self_shape, **self.v1_params)
 
     def forward(self, retina):
+        self.input = retina
         on_output = self.on(retina)
         off_output = self.off(retina)
         self.lgn_activation = on_output + off_output
-        return self.v1(self.lgn_activation)
+        self.activation = self.v1(self.lgn_activation)
+        return self.activation
 
     def register_forward_hook(self, hook):
         handles = []

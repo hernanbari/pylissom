@@ -4,25 +4,16 @@ import torch
 from src.supervised_gcal.utils.functions import afferent_normalize, piecewise_sigmoid
 
 
-class Layer(torch.nn.Module):
-    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, strength=1.0, radius=1.0,
-                 afferent_normalization=False, sparse=False, name=''):
-        super(Layer, self).__init__()
-        self.radius = radius
-        self.sparse = sparse
-        self.strength = strength
-        self.max_theta = max_theta
-        self.min_theta = min_theta
-        self.name = name
+class AbstractLayer(torch.nn.Module):
+    def __init__(self, input_shape, self_shape):
+        super(AbstractLayer, self).__init__()
         self.self_shape = self_shape
         self.input_shape = input_shape
         self.activation_shape = torch.Size((1, int(np.prod(self.self_shape))))
-        self.weights = None
-        self.epoch = -1
-        self.batch_idx = 0
         self.input = None
         self.activation = None
-        self.afferent_normalization = afferent_normalization
+        self.epoch = -1
+        self.batch_idx = 0
         self._setup_weights()
 
     def _setup_weights(self):
@@ -33,6 +24,20 @@ class Layer(torch.nn.Module):
             self.epoch += 1
         self.batch_idx = 0
         super(self).train(mode=mode)
+
+
+class SimpleLayer(AbstractLayer):
+    def __init__(self, input_shape, self_shape, min_theta=0.0, max_theta=1.0, strength=1.0, radius=1.0,
+                 afferent_normalization=False, sparse=False, name=''):
+        self.sparse = sparse
+        self.radius = radius
+        self.strength = strength
+        self.name = name
+        self.weights = None
+        self.afferent_normalization = afferent_normalization
+        self.max_theta = max_theta
+        self.min_theta = min_theta
+        super(SimpleLayer, self).__init__(input_shape, self_shape)
 
     def forward(self, stimulus):
         self.input = stimulus
