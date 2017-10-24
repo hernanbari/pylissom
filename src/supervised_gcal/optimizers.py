@@ -1,14 +1,14 @@
 import torch
-from src.supervised_gcal.reduced_lissom import ReducedLissom
+from src.supervised_gcal.cortex_layer import CortexLayer
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class CortexOptimizer(torch.optim.Optimizer):
     def __init__(self, cortex_layer):
-        assert isinstance(cortex_layer, ReducedLissom)
+        assert isinstance(cortex_layer, CortexLayer)
         self.cortex_layer = cortex_layer
-        super().__init__(cortex_layer.parameters(), {})
+        super(CortexOptimizer, self).__init__(cortex_layer.parameters(), {})
 
 
 class SequentialOptimizer(object):
@@ -25,47 +25,17 @@ class SequentialOptimizer(object):
             opt.zero_grad()
 
 
-class SimpleHebbian(CortexOptimizer):
-    def __init__(self, cortex_layer, weight, learning_rate):
-        super().__init__(cortex_layer)
-        self.learning_rate = learning_rate
-        self.weight = weight
-
-    def step(self, **kwargs):
-        if self.weight == 'afferent_weights':
-            CortexHebbian._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
-                                            self.cortex_layer.activation, self.learning_rate,
-                                            self.cortex_layer.afferent_radius)
-        elif self.weight == 'excitatory_weights':
-            CortexHebbian._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,
-                                            self.cortex_layer.activation, self.learning_rate,
-                                            self.cortex_layer.excitatory_radius)
-
-        elif self.weight == 'inhibitory_weights':
-            CortexHebbian._hebbian_learning(self.cortex_layer.inhibitory_weights, self.cortex_layer.activation,
-                                            self.cortex_layer.activation, self.learning_rate,
-                                            self.cortex_layer.inhibitory_radius)
-        else:
-            raise RuntimeError('Wrong weights for SimpleHebbian')
-
-
 class CortexHebbian(CortexOptimizer):
-    def __init__(self, cortex_layer, learning_rate=0.005):
+    def __init__(self, cortex_layer, learning_rate):
+        super(CortexHebbian, self).__init__(cortex_layer)
         self.learning_rate = learning_rate
-        super().__init__(cortex_layer=cortex_layer)
 
     def step(self, **kwargs):
-        self._hebbian_learning(self.cortex_layer.afferent_weights, self.cortex_layer.input,
-                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.afferent_radius)
-
-        self._hebbian_learning(self.cortex_layer.excitatory_weights, self.cortex_layer.activation,
-                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.excitatory_radius)
-
-        self._hebbian_learning(self.cortex_layer.inhibitory_weights, self.cortex_layer.activation,
-                               self.cortex_layer.activation, self.learning_rate, self.cortex_layer.inhibitory_radius)
+        self.hebbian_learning(self.cortex_layer.weights, self.cortex_layer.input, self.cortex_layer.activation,
+                              self.learning_rate, self.cortex_layer.radius)
 
     @staticmethod
-    def _hebbian_learning(weights, input, output, learning_rate, radius):
+    def hebbian_learning(weights, input, output, learning_rate, radius):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
 
@@ -80,7 +50,7 @@ class CortexHebbian(CortexOptimizer):
 
 class CortexPruner(CortexOptimizer):
     def __init__(self, cortex_layer, pruning_step=2000):
-        super().__init__(cortex_layer)
+        super(CortexPruner, self).__init__(cortex_layer)
         self.pruning_step = pruning_step
         self.step_counter = 1
 
@@ -95,7 +65,7 @@ class CortexPruner(CortexOptimizer):
 
 class ConnectionDeath(CortexPruner):
     def __init__(self, cortex_layer, pruning_step=2000, connection_death_threshold=1.0 / 400):
-        super().__init__(cortex_layer, pruning_step)
+        super(ConnectionDeath, self).__init__(cortex_layer, pruning_step)
         self.connection_death_threshold = connection_death_threshold
 
     def prune(self):
