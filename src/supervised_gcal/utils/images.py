@@ -3,7 +3,8 @@ from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.layers.lgn_layer import LGNLayer
-from src.utils.images import plot_array_matrix, plot_dict_matrix
+from src.supervised_gcal.layers.modules.simple import DifferenceOfGaussiansLinear
+from src.utils.images import plot_array_matrix, plot_dict_matrix, plot_matrix
 from torchvision import utils as vutils
 
 logdir = 'runs'
@@ -42,11 +43,12 @@ def get_writer(train, epoch, prefix):
 
 
 def images_matrix(matrix, range):
-    neurons = matrix.shape[1]
-    input_neurons = matrix.shape[0]
-    weights_shape = (int(np.sqrt(input_neurons)), int(np.sqrt(input_neurons)))
-    reshaped_weights = matrix.t().contiguous().view((neurons, 1) + weights_shape)
-    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=range)
+    out_features = matrix.shape[0]
+    in_features = matrix.shape[1]
+    weights_shape = (int(np.sqrt(in_features)), int(np.sqrt(in_features)))
+    reshaped_weights = matrix.contiguous().view((out_features, 1) + weights_shape)
+    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=range,
+                          pad_value=0.5 if range[0] >= 0 else 0)
     return im
 
 
@@ -57,10 +59,10 @@ def weights_to_numpy_matrix(weights, values_range):
 
 
 def plot_layer_weights(layer, prefix=''):
-    values_range = (-1, 1) if isinstance(layer, LGNLayer) else (0, 1)
-    plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer._parameters.items()})
+    values_range = (-1, 1) if isinstance(layer, DifferenceOfGaussiansLinear) else (0, 1)
+    plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
     for k, c in layer.named_children():
-        plot_layer_weights(c, prefix=k+'.')
+        plot_layer_weights(c, prefix=k + '.')
     return
 
 
@@ -69,15 +71,20 @@ def tensor_to_numpy_matrix(tensor, shape):
     return np.reshape(tensor.numpy(), shape)
 
 
+def plot_tensor(tensor, shape):
+    img = tensor_to_numpy_matrix(tensor, shape)
+    plot_matrix(img)
+
+
 def plot_layer_activation(layer, prefix=''):
     try:
         inp_mat = tensor_to_numpy_matrix(layer.input.data, layer.input_shape)
         act_mat = tensor_to_numpy_matrix(layer.activation.data, layer.self_shape)
-        plot_dict_matrix(dict([(prefix+'input', inp_mat), (prefix+'activation', act_mat)]))
+        plot_dict_matrix(dict([(prefix + 'input', inp_mat), (prefix + 'activation', act_mat)]))
     except Exception:
         pass
     for k, c in layer.named_children():
-        plot_layer_activation(c, prefix=k+'.')
+        plot_layer_activation(c, prefix=k + '.')
     return
 
 
