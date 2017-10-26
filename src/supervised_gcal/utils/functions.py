@@ -41,3 +41,15 @@ def piecewise_sigmoid(min_theta, max_theta, input):
     input.masked_fill_(mask=mask_zeros, value=0)
     input.masked_fill_(mask=mask_ones, value=1)
     return input
+
+
+def check_compatible_mul(module_one, module_two):
+    if module_one.out_features != module_two.in_features:
+        raise ValueError(
+            "Matmul: {}.out_features doesn't match {}.in_features".format(str(module_one), str(module_two)))
+
+
+def check_compatible_add(module_one, module_two):
+    if module_one.out_features != module_two.out_features:
+        raise ValueError(
+            "Add: {}.out_features doesn't match {}.out_features".format(str(module_one), str(module_two)))
