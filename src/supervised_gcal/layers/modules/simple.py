@@ -4,6 +4,7 @@ from src.supervised_gcal.utils.weights import get_gaussian_weights
 
 
 class GaussianLinear(torch.nn.Linear):
+    # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, sigma=1.0):
         super(GaussianLinear, self).__init__(in_features, out_features, bias=False)
         self.sigma = sigma
@@ -13,6 +14,7 @@ class GaussianLinear(torch.nn.Linear):
 
 
 class GaussianCloudLinear(torch.nn.Linear):
+    # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, sigma=1.0):
         super(GaussianCloudLinear, self).__init__(in_features, out_features, bias=False)
         self.sigma = sigma
@@ -24,6 +26,7 @@ class GaussianCloudLinear(torch.nn.Linear):
 
 
 class DifferenceOfGaussiansLinear(torch.nn.Linear):
+    # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, on, sigma_surround, sigma_center=1.0):
         super(DifferenceOfGaussiansLinear, self).__init__(in_features, out_features, bias=False)
         self.on = on

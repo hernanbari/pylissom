@@ -9,7 +9,7 @@ from functools import lru_cache
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
 
 
-def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **kwargs):
+def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     """
     The goal of this function is to apply a function fn, to all the elements of an array of dimension
     rows_dims_source x rows_dims_source (the lower array) centered on an element of the superior array.
@@ -23,12 +23,14 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
     :return: An array containing the new weights of the superior layer.
     PROBLEMAS? OJO QUE EL STEP PUEDE SER UN FLOAT
     """
-    dims = rows_dims_source ** 2
-    step = rows_dims_source / rows_dims_output
+    # ASSUMES SQUARE MAPS
+    rows_dims_source = int(in_features ** 0.5)
+    rows_dims_output = int(out_features ** 0.5)
+    dims = in_features
     tmp_map = []
-    for i in np.arange(0, rows_dims_source, step):
-        for j in np.arange(0, rows_dims_source, step):
-            weights_matrix = np.fromfunction(function=lambda x, y: fn(x, y, int(i), int(j), **kwargs),
+    for i in np.linspace(0, rows_dims_source-1, rows_dims_output):
+        for j in np.linspace(0, rows_dims_source-1, rows_dims_output):
+            weights_matrix = np.fromfunction(function=lambda x, y: fn(x, y, i, j, **kwargs),
                                              shape=(rows_dims_source, rows_dims_source), dtype=int)
             weights_row = np.reshape(weights_matrix, dims)
             tmp_map.append(weights_row)
@@ -37,15 +39,13 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
 
 
 @lru_cache()
-def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
-    rows_source = shape_source[0]
-    rows_output = shape_output[0]
-    ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
+def get_gaussian_weights_wrapped(in_features, out_features, sigma):
+    ans = torch.from_numpy(apply_fn_to_weights_between_maps(in_features, out_features, gaussian, sigma=sigma))
     return ans
 
 
-def get_gaussian_weights(shape_source, shape_output, sigma):
-    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).clone()
+def get_gaussian_weights(in_features, out_features, sigma):
+    return get_gaussian_weights_wrapped(in_features, out_features, sigma).clone()
 
 
 def apply_circular_mask_to_weights(matrix, radius):
