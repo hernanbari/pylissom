@@ -5,14 +5,16 @@ from src.supervised_gcal.layers.modules.complex import NormalizeDecorator, Circu
 from src.supervised_gcal.layers.modules.simple import GaussianCloudLinear, DifferenceOfGaussiansLinear, \
     PiecewiseSigmoid
 from src.supervised_gcal.utils.functions import check_compatible_mul, check_compatible_add
+from src.supervised_gcal.utils.math import normalize
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class Cortex(GaussianCloudLinear):
     def __init__(self, in_features, out_features, radius, sigma=None):
         super(Cortex, self).__init__(in_features, out_features, sigma=sigma)
-        self.weight = NormalizeDecorator(
-            CircularMaskDecorator(self.weight.data,
-                                  r=radius))
+        self.weight.data = normalize(
+            apply_circular_mask_to_weights(self.weight.data,
+                                           radius=radius))
 
 
 class AfferentNormCortex(torch.nn.Sequential):

@@ -2,10 +2,11 @@
 This module contains functions that modify the weights of the neural network.
 """
 
+from functools import lru_cache
+
 import numpy as np
 
 import torch
-from functools import lru_cache
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
 
 
@@ -28,8 +29,8 @@ def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     rows_dims_output = int(out_features ** 0.5)
     dims = in_features
     tmp_map = []
-    for i in np.linspace(0, rows_dims_source-1, rows_dims_output):
-        for j in np.linspace(0, rows_dims_source-1, rows_dims_output):
+    for i in np.linspace(0, rows_dims_source - 1, rows_dims_output):
+        for j in np.linspace(0, rows_dims_source - 1, rows_dims_output):
             weights_matrix = np.fromfunction(function=lambda x, y: fn(x, y, i, j, **kwargs),
                                              shape=(rows_dims_source, rows_dims_source), dtype=int)
             weights_row = np.reshape(weights_matrix, dims)
@@ -58,9 +59,8 @@ def apply_circular_mask_to_weights(matrix, radius):
     """
     if radius is None:
         return matrix
-    orig_rows_dims_source = int(matrix.shape[1] ** 0.5)
-    orig_rows_dims_output = int(matrix.shape[0] ** 0.5)
-    distances = apply_fn_to_weights_between_maps(orig_rows_dims_source, orig_rows_dims_output, euclidian_distances)
+    distances = apply_fn_to_weights_between_maps(in_features=matrix.shape[1], out_features=matrix.shape[0],
+                                                 fn=euclidian_distances)
     mask = distances > radius
     tensor = torch.from_numpy(mask.astype('uint8'))
     matrix.masked_fill_(tensor.cuda() if matrix.is_cuda else tensor, 0)
