@@ -39,9 +39,9 @@ class DiffOfGaussians(DifferenceOfGaussiansLinear):
         self.radius = radius
         self.out_features = out_features
         self.in_features = in_features
-        self.weight = NormalizeDecorator(
-            CircularMaskDecorator(self.weight.data,
-                                  r=radius))
+        self.weight.data = normalize(
+            apply_circular_mask_to_weights(self.weight.data,
+                                           radius=radius))
 
 
 class LGN(torch.nn.Sequential):
