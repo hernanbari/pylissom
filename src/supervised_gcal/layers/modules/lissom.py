@@ -9,7 +9,7 @@ from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class Cortex(GaussianCloudLinear):
-    def __init__(self, in_features, out_features, radius, sigma=None):
+    def __init__(self, in_features, out_features, radius, sigma=1.0):
         super(Cortex, self).__init__(in_features, out_features, sigma=sigma)
         self.weight.data = normalize(
             apply_circular_mask_to_weights(self.weight.data,
@@ -17,7 +17,7 @@ class Cortex(GaussianCloudLinear):
 
 
 class AfferentNormCortex(torch.nn.Sequential):
-    def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=None,
+    def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=1.0,
                  cortex_cls=Cortex, aff_norm_cls=AfferentNorm):
         self.sigma = sigma
         self.aff_norm_strength = aff_norm_strength
@@ -32,7 +32,7 @@ class AfferentNormCortex(torch.nn.Sequential):
 
 class DiffOfGaussians(DifferenceOfGaussiansLinear):
     def __init__(self, in_features, out_features, on, radius, sigma_surround,
-                 sigma_center=None):
+                 sigma_center=1.0):
         super(DiffOfGaussians, self).__init__(in_features=in_features, out_features=out_features, on=on,
                                               sigma_surround=sigma_surround, sigma_center=sigma_center)
         self.radius = radius
@@ -45,7 +45,7 @@ class DiffOfGaussians(DifferenceOfGaussiansLinear):
 
 class LGN(torch.nn.Sequential):
     def __init__(self, in_features, out_features, on, radius, sigma_surround,
-                 sigma_center=None, min_theta=None, max_theta=None,
+                 sigma_center=1.0, min_theta=0.0, max_theta=1.0,
                  diff_of_gauss_cls=DiffOfGaussians, pw_sigmoid_cls=PiecewiseSigmoid):
         self.max_theta = max_theta
         self.min_theta = min_theta
