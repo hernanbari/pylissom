@@ -1,5 +1,4 @@
 import torch
-from src.supervised_gcal.utils.functions import afferent_normalize
 from src.supervised_gcal.utils.math import normalize
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
@@ -38,24 +37,3 @@ class NormalizeDecorator(ModuleDecorator):
         normalize(matrix=self.weight.data)
 
 
-class AfferentNorm(torch.nn.Module):
-    def __init__(self, strength, radius):
-        super(AfferentNorm, self).__init__()
-        self.radius = radius
-        self.strength = strength
-
-    def forward(self, afferent_input, activation):
-        return afferent_normalize(strength=self.strength,
-                                  afferent_input=afferent_input,
-                                  activation=activation,
-                                  radius=self.radius)
-
-
-class CircularMask(torch.nn.Module):
-    def __init__(self, radius):
-        super(CircularMask, self).__init__()
-        self.radius = radius
-
-    def forward(self, input):
-        # TODO: change to not in_place
-        apply_circular_mask_to_weights(matrix=input, radius=self.radius)

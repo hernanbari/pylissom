@@ -1,6 +1,6 @@
 import torch
-from src.supervised_gcal.utils.functions import piecewise_sigmoid
-from src.supervised_gcal.utils.weights import get_gaussian_weights
+from src.supervised_gcal.utils.functions import piecewise_sigmoid, afferent_normalize
+from src.supervised_gcal.utils.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
 
 class GaussianLinear(torch.nn.Linear):
@@ -51,3 +51,26 @@ class PiecewiseSigmoid(torch.nn.Module):
 
     def forward(self, input):
         return piecewise_sigmoid(min_theta=self.min_theta, max_theta=self.max_theta, input=input)
+
+
+class AfferentNorm(torch.nn.Module):
+    def __init__(self, strength, radius):
+        super(AfferentNorm, self).__init__()
+        self.radius = radius
+        self.strength = strength
+
+    def forward(self, afferent_input, activation):
+        return afferent_normalize(strength=self.strength,
+                                  afferent_input=afferent_input,
+                                  activation=activation,
+                                  radius=self.radius)
+
+
+class CircularMask(torch.nn.Module):
+    def __init__(self, radius):
+        super(CircularMask, self).__init__()
+        self.radius = radius
+
+    def forward(self, input):
+        # TODO: change to not in_place
+        apply_circular_mask_to_weights(matrix=input, radius=self.radius)

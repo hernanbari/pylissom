@@ -1,9 +1,8 @@
 from collections import OrderedDict
 
 import torch
-from src.supervised_gcal.layers.modules.complex import NormalizeDecorator, CircularMaskDecorator, AfferentNorm
 from src.supervised_gcal.layers.modules.simple import GaussianCloudLinear, DifferenceOfGaussiansLinear, \
-    PiecewiseSigmoid
+    PiecewiseSigmoid, AfferentNorm
 from src.supervised_gcal.utils.functions import check_compatible_mul, check_compatible_add
 from src.supervised_gcal.utils.math import normalize
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
