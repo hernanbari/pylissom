@@ -59,15 +59,16 @@ def weights_to_numpy_matrix(weights, values_range):
     return np.transpose(grid.numpy(), (1, 2, 0))
 
 
-def plot_layer_weights(layer, use_range=True, prefix=''):
+def plot_layer_weights(layer, use_range=True, recursive=False, prefix=''):
     if use_range:
         values_range = (-1, 1) if isinstance(layer, DifferenceOfGaussiansLinear) \
                                   or isinstance(layer, DiffOfGaussians) else (0, 1)
     else:
         values_range = None
     plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
-    for k, c in layer.named_children():
-        plot_layer_weights(c, prefix=k + '.')
+    if recursive:
+        for k, c in layer.named_children():
+            plot_layer_weights(c, prefix=k + '.')
     return
 
 
