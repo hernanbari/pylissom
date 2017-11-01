@@ -50,7 +50,13 @@ class PiecewiseSigmoid(torch.nn.Module):
         self.min_theta = min_theta
 
     def forward(self, input):
+        # TODO: add inplace option
         return piecewise_sigmoid(min_theta=self.min_theta, max_theta=self.max_theta, input=input)
+
+    def __repr__(self):
+        return self.__class__.__name__ + ' (' \
+               + str(self.min_theta) \
+               + ', ' + str(self.max_theta) + ')'
 
 
 class AfferentNorm(torch.nn.Module):
@@ -60,10 +66,16 @@ class AfferentNorm(torch.nn.Module):
         self.strength = strength
 
     def forward(self, afferent_input, activation):
+        # TODO: add inplace option
         return afferent_normalize(strength=self.strength,
                                   afferent_input=afferent_input,
                                   activation=activation,
                                   radius=self.radius)
+
+    def __repr__(self):
+        return self.__class__.__name__ + ' (' \
+               + str(self.radius) \
+               + ', ' + str(self.strength) + ')'
 
 
 class CircularMask(torch.nn.Module):
@@ -72,5 +84,9 @@ class CircularMask(torch.nn.Module):
         self.radius = radius
 
     def forward(self, input):
-        # TODO: change to not in_place
+        # TODO: add inplace option
         apply_circular_mask_to_weights(matrix=input, radius=self.radius)
+
+    def __repr__(self):
+        return self.__class__.__name__ + ' (' \
+               + str(self.radius) + ')'
