@@ -3,6 +3,7 @@ from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.layers.lgn_layer import LGNLayer
+from src.supervised_gcal.layers.modules.lissom import DiffOfGaussians
 from src.supervised_gcal.layers.modules.simple import DifferenceOfGaussiansLinear
 from src.utils.images import plot_array_matrix, plot_dict_matrix, plot_matrix
 from torchvision import utils as vutils
@@ -42,13 +43,13 @@ def get_writer(train, epoch, prefix):
     return writer
 
 
-def images_matrix(matrix, range):
+def images_matrix(matrix, range=None):
     out_features = matrix.shape[0]
     in_features = matrix.shape[1]
     weights_shape = (int(np.sqrt(in_features)), int(np.sqrt(in_features)))
     reshaped_weights = matrix.contiguous().view((out_features, 1) + weights_shape)
     im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=range,
-                          pad_value=0.5 if range[0] >= 0 else 0)
+                          pad_value=0.5 if range is not None and range[0] >= 0 else 0)
     return im
 
 
@@ -58,8 +59,12 @@ def weights_to_numpy_matrix(weights, values_range):
     return np.transpose(grid.numpy(), (1, 2, 0))
 
 
-def plot_layer_weights(layer, prefix=''):
-    values_range = (-1, 1) if isinstance(layer, DifferenceOfGaussiansLinear) else (0, 1)
+def plot_layer_weights(layer, use_range=True, prefix=''):
+    if use_range:
+        values_range = (-1, 1) if isinstance(layer, DifferenceOfGaussiansLinear) \
+                                  or isinstance(layer, DiffOfGaussians) else (0, 1)
+    else:
+        values_range = None
     plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
     for k, c in layer.named_children():
         plot_layer_weights(c, prefix=k + '.')
