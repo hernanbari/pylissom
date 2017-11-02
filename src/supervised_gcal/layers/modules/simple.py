@@ -25,24 +25,6 @@ class GaussianCloudLinear(torch.nn.Linear):
         self.weight = torch.nn.Parameter(weight * uniform_noise)
 
 
-class DifferenceOfGaussiansLinear(torch.nn.Linear):
-    # ASSUMES SQUARE MAPS
-    def __init__(self, in_features, out_features, on, sigma_surround, sigma_center=1.0):
-        super(DifferenceOfGaussiansLinear, self).__init__(in_features, out_features, bias=False)
-        self.on = on
-        self.sigma_surround = sigma_surround
-        self.sigma_center = sigma_center
-        sigma_center_weights_matrix = get_gaussian_weights(in_features, out_features,
-                                                           sigma_center)
-        sigma_surround_weights_matrix = get_gaussian_weights(in_features, out_features,
-                                                             sigma_surround)
-        if on:
-            diff = sigma_center_weights_matrix - sigma_surround_weights_matrix
-        else:
-            diff = sigma_surround_weights_matrix - sigma_center_weights_matrix
-        self.weight = torch.nn.Parameter(diff)
-
-
 class PiecewiseSigmoid(torch.nn.Module):
     def __init__(self, min_theta=0.0, max_theta=1.0):
         super(PiecewiseSigmoid, self).__init__()
@@ -78,6 +60,7 @@ class AfferentNorm(torch.nn.Module):
                + ', ' + str(self.strength) + ')'
 
 
+# TODO: check if used
 class CircularMask(torch.nn.Module):
     def __init__(self, radius):
         super(CircularMask, self).__init__()
@@ -90,3 +73,22 @@ class CircularMask(torch.nn.Module):
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
                + str(self.radius) + ')'
+
+
+class UnnormalizedDifferenceOfGaussiansLinear(torch.nn.Linear):
+    # Not used in lissom, only for example
+    # ASSUMES SQUARE MAPS
+    def __init__(self, in_features, out_features, on, sigma_surround, sigma_center=1.0):
+        super(UnnormalizedDifferenceOfGaussiansLinear, self).__init__(in_features, out_features, bias=False)
+        self.on = on
+        self.sigma_surround = sigma_surround
+        self.sigma_center = sigma_center
+        sigma_center_weights_matrix = get_gaussian_weights(in_features, out_features,
+                                                           sigma_center)
+        sigma_surround_weights_matrix = get_gaussian_weights(in_features, out_features,
+                                                             sigma_surround)
+        if on:
+            diff = sigma_center_weights_matrix - sigma_surround_weights_matrix
+        else:
+            diff = sigma_surround_weights_matrix - sigma_center_weights_matrix
+        self.weight = torch.nn.Parameter(diff)

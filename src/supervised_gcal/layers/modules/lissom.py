@@ -1,11 +1,10 @@
 from collections import OrderedDict
 
 import torch
-from src.supervised_gcal.layers.modules.simple import GaussianCloudLinear, DifferenceOfGaussiansLinear, \
-    PiecewiseSigmoid, AfferentNorm
+from src.supervised_gcal.layers.modules.simple import GaussianCloudLinear, PiecewiseSigmoid, AfferentNorm
 from src.supervised_gcal.utils.functions import check_compatible_mul, check_compatible_add
 from src.supervised_gcal.utils.math import normalize
-from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
+from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, get_gaussian_weights
 
 
 class Cortex(GaussianCloudLinear):
@@ -30,23 +29,31 @@ class AfferentNormCortex(torch.nn.Sequential):
         super(AfferentNormCortex, self).__init__(layers)
 
 
-class DiffOfGaussians(DifferenceOfGaussiansLinear):
-    def __init__(self, in_features, out_features, on, radius, sigma_surround,
-                 sigma_center=1.0):
-        super(DiffOfGaussians, self).__init__(in_features=in_features, out_features=out_features, on=on,
-                                              sigma_surround=sigma_surround, sigma_center=sigma_center)
-        self.radius = radius
-        self.out_features = out_features
-        self.in_features = in_features
-        self.weight.data = normalize(
-            apply_circular_mask_to_weights(self.weight.data,
-                                           radius=radius))
+class DifferenceOfGaussiansLinear(torch.nn.Linear):
+    # ASSUMES SQUARE MAPS
+    # Order of diff(normalize(mask(gaussian)))) is important
+    def __init__(self, in_features, out_features, on, radius, sigma_surround, sigma_center=1.0):
+        super(DifferenceOfGaussiansLinear, self).__init__(in_features, out_features, bias=False)
+        self.on = on
+        self.sigma_surround = sigma_surround
+        self.sigma_center = sigma_center
+        sigma_center_weights_matrix = normalize(
+            apply_circular_mask_to_weights(get_gaussian_weights(in_features, out_features,
+                                                                sigma_center), radius=radius))
+        sigma_surround_weights_matrix = normalize(
+            apply_circular_mask_to_weights(get_gaussian_weights(in_features, out_features,
+                                                                sigma_surround), radius=radius))
+        if on:
+            diff = sigma_center_weights_matrix - sigma_surround_weights_matrix
+        else:
+            diff = sigma_surround_weights_matrix - sigma_center_weights_matrix
+        self.weight = torch.nn.Parameter(diff)
 
 
 class LGN(torch.nn.Sequential):
     def __init__(self, in_features, out_features, on, radius, sigma_surround,
                  sigma_center=1.0, min_theta=0.0, max_theta=1.0,
-                 diff_of_gauss_cls=DiffOfGaussians, pw_sigmoid_cls=PiecewiseSigmoid):
+                 diff_of_gauss_cls=DifferenceOfGaussiansLinear, pw_sigmoid_cls=PiecewiseSigmoid):
         self.max_theta = max_theta
         self.min_theta = min_theta
         layers = OrderedDict({
