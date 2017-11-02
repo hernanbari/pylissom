@@ -79,7 +79,7 @@ class ReducedLissom(torch.nn.Module):
         self.piecewise_sigmoid = PiecewiseSigmoid(min_theta=min_theta, max_theta=max_theta)
 
     def forward(self, cortex_input):
-        afferent_activation = self.piecewise_sigmoid(self.afferent_module(self.input))
+        afferent_activation = self.piecewise_sigmoid(self.afferent_module(cortex_input))
         current_activation = afferent_activation.clone()
         for _ in range(self.settling_steps):
             excitatory_activation = self.excitatory_module(current_activation)
