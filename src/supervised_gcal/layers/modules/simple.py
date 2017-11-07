@@ -12,6 +12,9 @@ class GaussianLinear(torch.nn.Linear):
                                                               out_features=out_features,
                                                               sigma=sigma))
 
+    def __repr__(self):
+        return self.__class__.__name__ + ' (' \
+               + 'sigma=' + str(self.sigma) + ')'
 
 class GaussianCloudLinear(torch.nn.Linear):
     # ASSUMES SQUARE MAPS
@@ -37,8 +40,8 @@ class PiecewiseSigmoid(torch.nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.min_theta) \
-               + ', ' + str(self.max_theta) + ')'
+               + 'min_theta=' + str(self.min_theta) \
+               + ', ' + 'max_theta=' + str(self.max_theta) + ')'
 
 
 class AfferentNorm(torch.nn.Module):
@@ -56,8 +59,8 @@ class AfferentNorm(torch.nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.radius) \
-               + ', ' + str(self.strength) + ')'
+               + 'radius=' + str(self.radius) \
+               + ', ' + 'strength=' + str(self.strength) + ')'
 
 
 # TODO: check if used
@@ -72,7 +75,7 @@ class CircularMask(torch.nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.radius) + ')'
+               + 'radius=' + str(self.radius) + ')'
 
 
 class UnnormalizedDifferenceOfGaussiansLinear(torch.nn.Linear):

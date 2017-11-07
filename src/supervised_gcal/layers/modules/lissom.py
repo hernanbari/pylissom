@@ -10,9 +10,14 @@ from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights, ge
 class Cortex(GaussianCloudLinear):
     def __init__(self, in_features, out_features, radius, sigma=1.0):
         super(Cortex, self).__init__(in_features, out_features, sigma=sigma)
+        self.radius = radius
         self.weight.data = normalize(
             apply_circular_mask_to_weights(self.weight.data,
                                            radius=radius))
+
+    def __repr__(self):
+        super_repr = super(Cortex, self).__repr__()[:-1]
+        return super_repr + ', ' + 'radius=' + str(self.radius) + ')'
 
 
 class AfferentNormCortex(torch.nn.Sequential):
@@ -48,6 +53,15 @@ class DifferenceOfGaussiansLinear(torch.nn.Linear):
         else:
             diff = sigma_surround_weights_matrix - sigma_center_weights_matrix
         self.weight = torch.nn.Parameter(diff)
+
+    def __repr__(self):
+        super_repr = super(DifferenceOfGaussiansLinear, self).__repr__()[:-1]
+        return super_repr \
+               + ', ' + 'sigma_surround=' + str(self.sigma_surround) \
+               + ', ' + 'sigma_center=' + str(self.sigma_center) \
+               + ', ' + 'radius=' + str(self.radius) \
+               + ', ' + 'on=' + str(self.on) \
+               + ')'
 
 
 class LGN(torch.nn.Sequential):
@@ -94,6 +108,15 @@ class ReducedLissom(torch.nn.Module):
 
             current_activation = self.piecewise_sigmoid(sum_activations)
         return current_activation
+
+    def __repr__(self):
+        super_repr = super(ReducedLissom, self).__repr__()[:-1]
+        return super_repr \
+               + ', ' + 'settling_steps=' + str(self.settling_steps) \
+               + ', ' + 'afferent_strength=' + str(self.afferent_strength) \
+               + ', ' + 'excitatory_strength=' + str(self.excitatory_strength) \
+               + ', ' + 'inhibitory_strength=' + str(self.inhibitory_strength) \
+               + ')'
 
 
 class Lissom(torch.nn.Module):
