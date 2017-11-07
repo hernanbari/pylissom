@@ -3,7 +3,8 @@ from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.layers.lgn_layer import LGNLayer
-from src.supervised_gcal.layers.modules.lissom import DiffOfGaussians, DifferenceOfGaussiansLinear
+from src.supervised_gcal.layers.modules.lissom import DifferenceOfGaussiansLinear
+from src.supervised_gcal.layers.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
 from src.utils.images import plot_array_matrix, plot_dict_matrix, plot_matrix
 from torchvision import utils as vutils
 
@@ -61,7 +62,7 @@ def weights_to_numpy_matrix(weights, values_range):
 def plot_layer_weights(layer, use_range=True, recursive=False, prefix=''):
     if use_range:
         values_range = (-1, 1) if isinstance(layer, DifferenceOfGaussiansLinear) \
-                                  or isinstance(layer, DiffOfGaussians) else (0, 1)
+                                  or isinstance(layer, UnnormalizedDifferenceOfGaussiansLinear) else (0, 1)
     else:
         values_range = None
     plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
