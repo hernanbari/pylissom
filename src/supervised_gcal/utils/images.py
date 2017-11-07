@@ -77,9 +77,9 @@ def tensor_to_numpy_matrix(tensor, shape):
     return np.reshape(tensor.numpy(), shape)
 
 
-def plot_tensor(tensor, shape):
+def plot_tensor(tensor, shape, vmin=0, vmax=1):
     img = tensor_to_numpy_matrix(tensor, shape)
-    plot_matrix(img)
+    plot_matrix(img, vmin, vmax)
 
 
 def plot_layer_activation(layer, prefix=''):
