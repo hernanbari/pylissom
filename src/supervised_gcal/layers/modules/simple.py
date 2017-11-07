@@ -16,16 +16,13 @@ class GaussianLinear(torch.nn.Linear):
         return self.__class__.__name__ + ' (' \
                + 'sigma=' + str(self.sigma) + ')'
 
-class GaussianCloudLinear(torch.nn.Linear):
+
+class GaussianCloudLinear(GaussianLinear):
     # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, sigma=1.0):
-        super(GaussianCloudLinear, self).__init__(in_features, out_features, bias=False)
-        self.sigma = sigma
-        weight = get_gaussian_weights(in_features=in_features,
-                                      out_features=out_features,
-                                      sigma=sigma)
-        uniform_noise = torch.FloatTensor(weight.size()).uniform_(0, 1)
-        self.weight = torch.nn.Parameter(weight * uniform_noise)
+        super(GaussianCloudLinear, self).__init__(in_features, out_features, sigma=sigma)
+        uniform_noise = torch.FloatTensor(self.weight.data.size()).uniform_(0, 1)
+        self.weight.data.mul_(uniform_noise)
 
 
 class PiecewiseSigmoid(torch.nn.Module):
