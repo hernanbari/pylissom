@@ -66,7 +66,9 @@ class LGN(torch.nn.Sequential):
 
 class ReducedLissom(torch.nn.Module):
     def __init__(self, afferent_module, excitatory_module, inhibitory_module,
-                 min_theta=1.0, max_theta=1.0, settling_steps=10):
+                 min_theta=1.0, max_theta=1.0, settling_steps=10,
+                 afferent_strength=1.0, excitatory_strength=1.0, inhibitory_strength=1.0,
+                 pw_sigmoid_cls=PiecewiseSigmoid):
         super(ReducedLissom, self).__init__()
         check_compatible_mul(afferent_module, inhibitory_module)
         check_compatible_mul(afferent_module, excitatory_module)
@@ -76,14 +78,17 @@ class ReducedLissom(torch.nn.Module):
         self.max_theta = max_theta
         self.min_theta = min_theta
         self.settling_steps = settling_steps
-        self.piecewise_sigmoid = PiecewiseSigmoid(min_theta=min_theta, max_theta=max_theta)
+        self.inhibitory_strength = inhibitory_strength
+        self.excitatory_strength = excitatory_strength
+        self.afferent_strength = afferent_strength
+        self.piecewise_sigmoid = pw_sigmoid_cls(min_theta=min_theta, max_theta=max_theta)
 
     def forward(self, cortex_input):
-        afferent_activation = self.piecewise_sigmoid(self.afferent_module(cortex_input))
-        current_activation = afferent_activation.clone()
+        afferent_activation = self.afferent_strength * self.afferent_module(cortex_input)
+        current_activation = self.piecewise_sigmoid(afferent_activation)
         for _ in range(self.settling_steps):
-            excitatory_activation = self.excitatory_module(current_activation)
-            inhibitory_activation = self.inhibitory_module(current_activation)
+            excitatory_activation = self.excitatory_strength * self.excitatory_module(current_activation)
+            inhibitory_activation = self.afferent_strength * self.inhibitory_module(current_activation)
 
             sum_activations = afferent_activation + excitatory_activation - inhibitory_activation
 
