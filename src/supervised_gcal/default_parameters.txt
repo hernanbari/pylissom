@@ -6,6 +6,7 @@ radius_inhibitory = cortical_density / 4 - 1
 radius_gaussian_afferent = radius_afferent / 1.3
 radius_gaussian_excitatory = 0.78 * radius_excitatory
 radius_gaussian_inhibitory = 2.08 * radius_inhibitory
+# LGN
 scale_afferent = radius_afferent / 6.5  # radius_afferent_reference
 radius_center_gaussian = 0.5*scale_afferent*retinal_density/lgn_density
 radius_surround_gaussian = 4*radius_center_gaussian
@@ -17,7 +18,7 @@ max_theta = min_theta + 0.55
 # Scaling
 afferent_factor = 1.0
 excitatory_factor = 0.9
-lateral_factor = 0.9
+inhibitory_factor = 0.9
 lgn_factor = 2.33 / 1 (brightness scale of the retina, contrast of fully bright stimulus)
 
 # Input
