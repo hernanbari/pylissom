@@ -82,16 +82,25 @@ def plot_tensor(tensor, shape, vmin=0, vmax=1):
     plot_matrix(img, vmin, vmax)
 
 
-def plot_layer_activation(layer, prefix=''):
+def simple_plot_layer_activation(layer, prefix=''):
     try:
-        inp_mat = tensor_to_numpy_matrix(layer.input.data, layer.input_shape)
-        act_mat = tensor_to_numpy_matrix(layer.activation.data, layer.self_shape)
-        plot_dict_matrix(dict([(prefix + 'input', inp_mat), (prefix + 'activation', act_mat)]))
+        input_rows = int(layer.in_features ** 0.5)
+        output_rows = int(layer.out_features ** 0.5)
+        inp_mat = tensor_to_numpy_matrix(layer.input.data, (input_rows, input_rows))
+        act_mat = tensor_to_numpy_matrix(layer.output.data, (output_rows, output_rows))
+        plot_dict_matrix(dict([(prefix + '.' + 'input', inp_mat), (prefix + '.' + 'activation', act_mat)]))
     except Exception:
         pass
-    for k, c in layer.named_children():
-        plot_layer_activation(c, prefix=k + '.')
-    return
+
+
+def named_apply(module, fn, prefix):
+    for k, m in module.named_children():
+        named_apply(m, fn, prefix + '.' + k)
+    fn(module, prefix)
+
+
+def plot_layer_activation(layer, prefix=''):
+    named_apply(layer, simple_plot_layer_activation, prefix)
 
 
 def plot_cortex_activations(cortex):
