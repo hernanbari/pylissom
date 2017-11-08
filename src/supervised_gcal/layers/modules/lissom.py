@@ -150,3 +150,16 @@ class Lissom(torch.nn.Module):
         return super_repr \
                + ', ' + str(self.in_features) + ' -> ' + str(self.out_features) \
                + ')'
+
+
+def register_recursive_forward_hook(module, hook):
+    return [m.register_forward_hook(hook) for m in module.modules()]
+
+
+def input_output_hook(module, input, output):
+    module.input = input[0].clone()
+    module.output = output.clone()
+
+
+def register_recursive_input_output_hook(module):
+    return register_recursive_forward_hook(module, input_output_hook)
