@@ -17,7 +17,9 @@ class Cortex(GaussianCloudLinear):
 
     def __repr__(self):
         super_repr = super(Cortex, self).__repr__()[:-1]
-        return super_repr + ', ' + 'radius=' + str(self.radius) + ')'
+        return super_repr \
+               + ', ' + 'radius=' + str(self.radius) \
+               + ')'
 
 
 class AfferentNormCortex(torch.nn.Sequential):
@@ -87,6 +89,8 @@ class ReducedLissom(torch.nn.Module):
         super(ReducedLissom, self).__init__()
         check_compatible_mul(afferent_module, inhibitory_module)
         check_compatible_mul(afferent_module, excitatory_module)
+        self.in_features = afferent_module.in_features
+        self.out_features = afferent_module.out_features
         self.inhibitory_module = inhibitory_module
         self.excitatory_module = excitatory_module
         self.afferent_module = afferent_module
@@ -113,8 +117,11 @@ class ReducedLissom(torch.nn.Module):
     def __repr__(self):
         super_repr = super(ReducedLissom, self).__repr__()[:-1]
         return super_repr \
+               + ', ' + str(self.in_features) + ' -> ' + str(self.out_features) \
                + ', ' + 'settling_steps=' + str(self.settling_steps) \
                + ', ' + 'afferent_strength=' + str(self.afferent_strength) \
+               + ', ' + 'excitatory_strength=' + str(self.excitatory_strength) \
+               + ', ' + 'inhibitory_strength=' + str(self.inhibitory_strength) \
                + ', ' + 'excitatory_strength=' + str(self.excitatory_strength) \
                + ', ' + 'inhibitory_strength=' + str(self.inhibitory_strength) \
                + ')'
@@ -128,6 +135,8 @@ class Lissom(torch.nn.Module):
         self.v1 = v1
         self.off = off
         self.on = on
+        self.in_features = on.in_features
+        self.out_features = v1.out_features
 
     def forward(self, input):
         on_output = self.on(input)
@@ -135,3 +144,9 @@ class Lissom(torch.nn.Module):
         lgn_activation = on_output + off_output
         activation = self.v1(lgn_activation)
         return activation
+
+    def __repr__(self):
+        super_repr = super(Lissom, self).__repr__()[:-1]
+        return super_repr \
+               + ', ' + str(self.in_features) + ' -> ' + str(self.out_features) \
+               + ')'
