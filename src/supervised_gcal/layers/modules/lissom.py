@@ -42,6 +42,7 @@ class DifferenceOfGaussiansLinear(torch.nn.Linear):
         self.on = on
         self.sigma_surround = sigma_surround
         self.sigma_center = sigma_center
+        self.radius = radius
         sigma_center_weights_matrix = normalize(
             apply_circular_mask_to_weights(get_gaussian_weights(in_features, out_features,
                                                                 sigma_center), radius=radius))
