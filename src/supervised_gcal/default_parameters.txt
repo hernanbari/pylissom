@@ -19,7 +19,7 @@ max_theta = min_theta + 0.55
 afferent_factor = 1.0
 excitatory_factor = 0.9
 inhibitory_factor = 0.9
-lgn_factor = 2.33 / 1 (brightness scale of the retina, contrast of fully bright stimulus)
+lgn_factor = 2.33 / 1 #  (brightness scale of the retina, contrast of fully bright stimulus)
 
 # Input
 
@@ -33,7 +33,7 @@ t_death_threshold = training_iterations
 
 # REFERENCE VALUES
 cortical_density = 142
-lgn_density = 24 = 142
+lgn_density = 24
 retinal_density = 24
 radius_afferent = 6.5
 radius_excitatory = 19.5
