@@ -5,10 +5,10 @@ from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
 
 class CortexOptimizer(torch.optim.Optimizer):
-    def __init__(self, cortex_layer):
-        assert isinstance(cortex_layer, Cortex)
-        self.cortex_layer = cortex_layer
-        super(CortexOptimizer, self).__init__(cortex_layer.parameters(), {})
+    def __init__(self, cortex):
+        assert isinstance(cortex, Cortex)
+        self.cortex = cortex
+        super(CortexOptimizer, self).__init__(cortex.parameters(), {})
 
 
 class SequentialOptimizer(object):
@@ -26,14 +26,14 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
-    def __init__(self, cortex_layer, learning_rate):
-        super(CortexHebbian, self).__init__(cortex_layer)
+    def __init__(self, cortex, learning_rate):
+        super(CortexHebbian, self).__init__(cortex)
         self.learning_rate = learning_rate
-        self.handles = register_recursive_input_output_hook(cortex_layer)
+        self.handles = register_recursive_input_output_hook(cortex)
 
     def step(self, **kwargs):
-        self.hebbian_learning(self.cortex_layer.weight, self.cortex_layer.input, self.cortex_layer.output,
-                              self.learning_rate, self.cortex_layer.radius)
+        self.hebbian_learning(self.cortex.weight, self.cortex.input, self.cortex.output,
+                              self.learning_rate, self.cortex.radius)
 
     @staticmethod
     def hebbian_learning(weights, input, output, learning_rate, radius):
@@ -48,8 +48,8 @@ class CortexHebbian(CortexOptimizer):
 
 
 class CortexPruner(CortexOptimizer):
-    def __init__(self, cortex_layer, pruning_step=2000):
-        super(CortexPruner, self).__init__(cortex_layer)
+    def __init__(self, cortex, pruning_step=2000):
+        super(CortexPruner, self).__init__(cortex)
         self.pruning_step = pruning_step
         self.step_counter = 1
 
@@ -63,21 +63,21 @@ class CortexPruner(CortexOptimizer):
 
 
 class ConnectionDeath(CortexPruner):
-    def __init__(self, cortex_layer, pruning_step=2000, connection_death_threshold=1.0 / 400):
-        super(ConnectionDeath, self).__init__(cortex_layer, pruning_step)
+    def __init__(self, cortex, pruning_step=2000, connection_death_threshold=1.0 / 400):
+        super(ConnectionDeath, self).__init__(cortex, pruning_step)
         self.connection_death_threshold = connection_death_threshold
 
     def prune(self):
         map(lambda w: kill_neurons(w, self.connection_death_threshold),
-            [self.cortex_layer.excitatory_weights, self.cortex_layer.inhibitory_weights])
+            [self.cortex.excitatory_weights, self.cortex.inhibitory_weights])
 
 
 class NeighborsDecay(CortexPruner):
-    def __init__(self, cortex_layer, pruning_step=2000, decay_fn=linear_decay, final_epoch=8.0):
-        super(NeighborsDecay, self).__init__(cortex_layer, pruning_step)
+    def __init__(self, cortex, pruning_step=2000, decay_fn=linear_decay, final_epoch=8.0):
+        super(NeighborsDecay, self).__init__(cortex, pruning_step)
         self.decay_fn = decay_fn
         self.final_epoch = final_epoch
 
     def prune(self):
-        self.decay_fn(self.cortex_layer.excitatory_weights, self.cortex_layer.excitatory_radius,
-                      epoch=self.cortex_layer.epoch, final_epoch=self.final_epoch)
+        self.decay_fn(self.cortex.excitatory_weights, self.cortex.excitatory_radius,
+                      epoch=self.cortex.epoch, final_epoch=self.final_epoch)

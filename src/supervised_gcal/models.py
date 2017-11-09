@@ -9,8 +9,8 @@ def get_reduced_lissom(input_shape, cortex_shape, pruning_step=None, final_epoch
     # Cortex Layer
     model = ReducedLissom(input_shape, cortex_shape, **v1_params)
     optimizer = SequentialOptimizer(
-        CortexHebbian(cortex_layer=model, learning_rate=learning_rate),
-        NeighborsDecay(cortex_layer=model,
+        CortexHebbian(cortex=model, learning_rate=learning_rate),
+        NeighborsDecay(cortex=model,
                        pruning_step=pruning_step, final_epoch=final_epoch))
     return model, optimizer, None
 
@@ -20,8 +20,8 @@ def get_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_ep
     # Full Lissom
     model = Lissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
     optimizer = SequentialOptimizer(
-        CortexHebbian(cortex_layer=model.v1),
-        NeighborsDecay(cortex_layer=model.v1,
+        CortexHebbian(cortex=model.v1),
+        NeighborsDecay(cortex=model.v1,
                        pruning_step=pruning_step, final_epoch=final_epoch))
     return model, optimizer, None
 
