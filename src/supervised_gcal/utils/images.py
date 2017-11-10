@@ -65,7 +65,7 @@ def plot_layer_weights(layer, use_range=True, recursive=False, prefix=''):
                                   or isinstance(layer, UnnormalizedDifferenceOfGaussiansLinear) else (0, 1)
     else:
         values_range = None
-    plot_dict_matrix({prefix + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
+    plot_dict_matrix({prefix + '.' + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
     if recursive:
         for k, c in layer.named_children():
             plot_layer_weights(c, prefix=k + '.')
