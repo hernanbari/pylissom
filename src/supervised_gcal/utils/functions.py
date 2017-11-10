@@ -25,6 +25,7 @@ class TimeIt(object):
         print(t1 - self.t0)
 
 
+# TODO: test
 def afferent_normalize(radius, strength, afferent_input, activation):
     reshaped_input = afferent_input.data.repeat(afferent_input.data.shape[1], 1)
     masked_input = apply_circular_mask_to_weights(reshaped_input, radius)

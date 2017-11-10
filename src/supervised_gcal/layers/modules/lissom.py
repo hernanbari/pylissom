@@ -22,6 +22,7 @@ class Cortex(GaussianCloudLinear):
                + ')'
 
 
+# TODO: test
 class AfferentNormCortex(torch.nn.Sequential):
     def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=1.0,
                  cortex_cls=Cortex, aff_norm_cls=AfferentNorm):

@@ -10,6 +10,7 @@ import torch
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
 
 
+# TODO: use pytorch, not numpy
 def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     """
     The goal of this function is to apply a function fn, to all the elements of an array of dimension
@@ -67,6 +68,7 @@ def apply_circular_mask_to_weights(matrix, radius):
     return matrix
 
 
+# TODO: remove if not used
 def dense_weights_to_sparse(matrix):
     """
     Transforms a torch dense tensor to sparse
@@ -82,6 +84,7 @@ def dense_weights_to_sparse(matrix):
         return torch.sparse.FloatTensor(*params)
 
 
+# TODO: remove if not used
 @lru_cache()
 def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=False):
     weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
@@ -94,5 +97,6 @@ def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radi
     return weights
 
 
+# TODO: remove if not used
 def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
     return get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=sparse).clone()

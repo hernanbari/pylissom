@@ -64,7 +64,7 @@ class AfferentNorm(torch.nn.Module):
                + ')'
 
 
-# TODO: check if used
+# TODO: test, remove if not used
 class CircularMask(torch.nn.Module):
     def __init__(self, radius):
         super(CircularMask, self).__init__()

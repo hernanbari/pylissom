@@ -6,6 +6,7 @@ import numpy as np
 import torch
 
 
+# TODO: use pytorch lib
 def euclidian_distances(x, y, mu_x, mu_y):
     """
     This function implements the euclidean distance between two 2-dimensional vectors.
@@ -18,6 +19,7 @@ def euclidian_distances(x, y, mu_x, mu_y):
     return np.sqrt(((x - mu_x) ** 2 + (y - mu_y) ** 2))
 
 
+# TODO: use pytorch lib
 def euclidean_distance_general(x, y):
     """
     This function implements the euclidean distance between two n-dimensional vectors as numpy arrays.
@@ -43,9 +45,10 @@ def gaussian(x, y, mu_x, mu_y, sigma, sigma_y=None):
 
     x_w = np.divide(x - mu_x, sigma)
     y_h = np.divide(y - mu_y, sigma_y)
-    return np.float32(np.exp(-0.5*x_w*x_w + -0.5*y_h*y_h))
+    return np.float32(np.exp(-0.5 * x_w * x_w + -0.5 * y_h * y_h))
 
 
+# TODO: use pytorch lib
 def normalize(matrix, norm=1, axis=1):
     """
     This function implements a normalization of the row or column vectors of a matrix
