@@ -1,5 +1,5 @@
 import torch
-from src.supervised_gcal.layers.modules.lissom import register_recursive_input_output_hook, Cortex
+from src.supervised_gcal.modules.lissom import register_recursive_input_output_hook, Cortex
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
 
