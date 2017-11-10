@@ -7,7 +7,7 @@ import shutil
 import numpy as np
 
 import torch
-from src.supervised_gcal.layers.lgn_layer import LGNLayer
+from src.supervised_gcal.layers.modules.lissom import LGN
 from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised
 from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
 from src.utils.datasets import get_dataset, CKDataset
@@ -82,7 +82,7 @@ cortex_shape = (args.shape, args.shape)
 
 if args.model == 'lgn':
     # LGN layer
-    model = LGNLayer(input_shape, lgn_shape, on=True)
+    model = LGN(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex':
     model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape, args)
