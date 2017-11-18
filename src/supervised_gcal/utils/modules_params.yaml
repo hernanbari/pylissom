@@ -1,0 +1,22 @@
+#lgn_density: &lgn_density 24
+#cortical_density: &cortical_density 24
+rlissom:
+  afferent_module:
+    radius_afferent: &radius_afferent !eval [*lgn_density, / 4 + 0.5]
+    radius_gaussian_afferent: !eval [*radius_afferent, / 1.3]
+
+  excitatory_module:
+    radius_excitatory: &radius_excitatory !eval [*cortical_density, / 10]
+    radius_gaussian_excitatory: !eval [0.78 *, *radius_excitatory]
+
+  inhibitory_module:
+    radius_inhibitory: &radius_inhibitory !eval [*cortical_density, / 4 - 1]
+    radius_gaussian_inhibitory: !eval [2.08 *, *radius_inhibitory]
+  # Activation
+  min_theta: &min_theta 0.083
+  max_theta: !eval [*min_theta, + 0.55]
+  settling_steps: 9
+  # Scaling
+  afferent_factor: 1.0
+  excitatory_factor: 0.9
+  inhibitory_factor: 0.9
