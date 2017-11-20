@@ -1,23 +1,47 @@
 import torch
-from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom
+
+from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom, Cortex
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
+from supervised_gcal.utils.config import global_config
 
 
-def get_reduced_lissom(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None,
-                       learning_rate=None):
-    # Cortex Layer
-    model = ReducedLissom(input_shape, cortex_shape, **v1_params)
+def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
+                       rlissom_params='rlissom', optim_params='optim', cfg_path=None):
+    config = global_config(infile=cfg_path).eval_dict()
+    if not isinstance(retinal_density, int):
+        retinal_density = config[retinal_density]['retinal_density']
+    if not isinstance(cortical_density, int):
+        cortical_density = config[cortical_density]['cortical_density']
+
+    in_features = retinal_density ** 2
+    out_features = cortical_density ** 2
+    rlissom_params = config[rlissom_params]
+
+    afferent_module = Cortex(in_features, out_features, **(rlissom_params['afferent_module']))
+    excitatory_module = Cortex(out_features, out_features, **(rlissom_params['excitatory_module']))
+    inhibitory_module = Cortex(out_features, out_features, **(rlissom_params['inhibitory_module']))
+    model = ReducedLissom(afferent_module, excitatory_module, inhibitory_module, **(rlissom_params['others']))
+
+    optim_params = config[optim_params]
     optimizer = SequentialOptimizer(
-        CortexHebbian(cortex=model, learning_rate=learning_rate),
-        NeighborsDecay(cortex=model,
-                       pruning_step=pruning_step, final_epoch=final_epoch))
+        CortexHebbian(cortex=afferent_module, **(optim_params['afferent'])),
+        CortexHebbian(cortex=excitatory_module, **(optim_params['excitatory'])),
+        CortexHebbian(cortex=inhibitory_module, **(optim_params['inhibitory'])),
+    )
     return model, optimizer, None
 
 
 def get_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
                v1_params=None):
     # Full Lissom
-    model = Lissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
+    on = LGN(self, in_features, out_features, on, radius, sigma_surround,
+             sigma_center=1.0, min_theta=0.0, max_theta=1.0, strength=1.0,
+             diff_of_gauss_cls=DifferenceOfGaussiansLinear, pw_sigmoid_cls=PiecewiseSigmoid)
+    off = LGN(self, in_features, out_features, on, radius, sigma_surround,
+              sigma_center=1.0, min_theta=0.0, max_theta=1.0, strength=1.0,
+              diff_of_gauss_cls=DifferenceOfGaussiansLinear, pw_sigmoid_cls=PiecewiseSigmoid)
+    v1, _, _ = get_reduced_lissom()
+    model = Lissom(on, off, v1)
     optimizer = SequentialOptimizer(
         CortexHebbian(cortex=model.v1),
         NeighborsDecay(cortex=model.v1,
