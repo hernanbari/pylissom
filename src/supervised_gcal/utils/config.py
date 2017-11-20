@@ -1,11 +1,19 @@
 import configobj
+import os
 import yaml
 from configobj import ConfigObj
 
+here = os.path.abspath(os.path.dirname(__file__))
 
-class GlobalConfigYaml(object):
-    def __init__(self, cfg_path='modules_params.yaml', **kwargs):
-        self.cfg_path = cfg_path
+
+class EvalConf(object):
+    def eval_dict(self):
+        raise NotImplementedError
+
+
+class EvalConfigYaml(EvalConf):
+    def __init__(self, infile=os.path.join(here, 'modules_params.yaml'), user_values=None):
+        self.infile = infile
 
         def join_and_eval_constructor(loader, node):
             seq = loader.construct_sequence(node)
@@ -13,10 +21,13 @@ class GlobalConfigYaml(object):
             return eval(str_seq)
 
         yaml.add_constructor('!eval', join_and_eval_constructor)
-        with open(cfg_path) as f:
+        with open(infile) as f:
             config = f.read()
-        anchors = self.anchors(kwargs)
-        self.obj = yaml.load(anchors + config)
+        anchors = self.anchors(user_values)
+        self.conf = yaml.load(anchors + config)
+
+    def eval_dict(self):
+        return self.conf
 
     def anchors(self, kwargs):
         base_str = '{anchor}: &{anchor} {value}\n'
@@ -26,12 +37,13 @@ class GlobalConfigYaml(object):
         return text
 
 
-class GlobalConfig(ConfigObj):
-    def __init__(self, infile='modules_params.ini', user_values=None, **kwargs):
+class EvalConfigObj(ConfigObj, EvalConf):
+    def __init__(self, infile=None, user_values=None, **kwargs):
+        infile = os.path.join(here, 'modules_params.ini') if infile is None else infile
         usr = ConfigObj(infile=user_values)
         defaults = ConfigObj(infile)
         defaults.merge(usr)
-        super(GlobalConfig, self).__init__(infile=defaults.dict(), interpolation='template', **kwargs)
+        super(EvalConfigObj, self).__init__(infile=defaults.dict(), interpolation='template', **kwargs)
 
     def eval_dict(self):
         return self.recursive_eval(self.dict())
@@ -50,8 +62,13 @@ class GlobalConfig(ConfigObj):
 
         for k, value in section.items():
             if isinstance(value, dict):
-                section[k] = GlobalConfig.recursive_eval(value)
+                section[k] = EvalConfigObj.recursive_eval(value)
                 continue
 
             section[k] = try_eval(value)
         return section
+
+
+def global_config(conf_obj=True, *args, **kwargs):
+    return EvalConfigObj(*args, **kwargs) if conf_obj else EvalConfigYaml(*args, **kwargs)
+
