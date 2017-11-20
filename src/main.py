@@ -79,6 +79,7 @@ optimizer = None
 loss_fn = None
 lgn_shape = args.shape
 cortex_shape = args.shape
+model_fn = None
 
 if args.model == 'lgn':
     # LGN layer
@@ -97,15 +98,22 @@ if args.save_images and args.model in ['lgn', 'rlissom', 'lissom']:
 if args.model == 'control':
     net_input_shape = batch_input_shape[1]
     model, optimizer, loss_fn = get_net(net_input_shape, classes)
-    model_fn = lambda: get_net(net_input_shape, classes)
+
+
+    def model_fn():
+        return get_net(net_input_shape, classes)
 
 if args.model == 'supervised':
     model, optimizer, loss_fn = get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs,
                                                classes)
-    model[0].register_forward_hook(images.generate_images)
-    model_fn = lambda: get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
-                                      args.epochs,
-                                      classes)
+    if args.save_images:
+        model[0].register_forward_hook(images.generate_images)
+
+
+    def model_fn():
+        return get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
+                              args.epochs,
+                              classes)
 
 if not args.cv and 'grid-search' not in args.model:
     test_loader = get_dataset(train=False, args=args)
@@ -120,7 +128,8 @@ if not args.cv and 'grid-search' not in args.model:
 
 # TODO: train lissom first and then net
 if args.cv:
-    assert model_fn is not None, "Cross validation only with supervised or control models"
+    if model_fn is None:
+        raise ValueError("Cross validation only with supervised or control models")
     ck_dataset = CKDataset()
     cv = CVSubjectIndependent(ck_dataset)
     run_cross_validation(model_fn, ck_dataset, cv, args)
