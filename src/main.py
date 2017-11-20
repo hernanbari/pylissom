@@ -72,20 +72,20 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 classes = 10 if not args.dataset == 'ck ' else 7
-input_shape = (28, 28) if not args.dataset == 'ck' else (96, 96)
+input_shape = 28 if not args.dataset == 'ck' else 96
 batch_input_shape = torch.Size((args.batch_size, int(np.prod(input_shape))))
 model = None
 optimizer = None
 loss_fn = None
-lgn_shape = (args.shape, args.shape)
-cortex_shape = (args.shape, args.shape)
+lgn_shape = args.shape
+cortex_shape = args.shape
 
 if args.model == 'lgn':
     # LGN layer
     model = LGN(input_shape, lgn_shape, on=True)
 
 if args.model == 'cortex':
-    model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape, args)
+    model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape)
 
 if args.model == 'lissom':
     model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
@@ -111,7 +111,7 @@ if not args.cv and 'grid-search' not in args.model:
     test_loader = get_dataset(train=False, args=args)
     train_loader = get_dataset(train=True, args=args)
     pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
-                        cuda=args.cuda)
+                        cuda=args.cuda, use_writer=False)
     # TODO: Change epochs to 0
     for epoch in range(1, args.epochs + 1):
         pipeline.train(train_data_loader=train_loader, epoch=epoch)

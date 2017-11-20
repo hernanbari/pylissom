@@ -21,7 +21,7 @@ class GridSearch(object):
     def run(self):
         for counter, params in self.param_grid:
             model, optimizer, loss_fn = self.model_fn(params, counter)
-            pipeline = Pipeline(model, optimizer, loss_fn, **self.kwargs)
+            pipeline = Pipeline(model, optimizer, loss_fn)
             # TODO: Change epochs to 0
             for epoch in range(self.epochs + 1):
                 if self.train_loader is not None:
