@@ -1,6 +1,6 @@
 import numpy as np
 from src.supervised_gcal.modules.lissom import DifferenceOfGaussiansLinear
-from tensorboard import SummaryWriter
+# from tensorboard import SummaryWriter
 
 import torch
 from src.supervised_gcal.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
@@ -11,35 +11,35 @@ logdir = 'runs'
 log_interval = 10
 
 
-def generate_images(self, input, output, prefix=''):
-    if self.batch_idx % log_interval != 0:
-        self.batch_idx += 1
-        return
-    writer = get_writer(self.training, self.epoch, prefix)
-
-    for name, mat in self.weights + [('activation', self.activation.t()), ('input', self.input.t())]:
-        if isinstance(mat, torch.autograd.Variable):
-            mat = mat.data
-        if 'weights' in name and self.sparse:
-            mat = mat.to_dense()
-        if isinstance(self, LGNLayer) and 'weights' in name:
-            range = (-1, 1)
-        else:
-            range = (0, 1)
-        image = images_matrix(mat, range)
-        title = self.name + '_' + name
-        writer.add_image(title, image, self.batch_idx)
-    writer.close()
-    self.batch_idx += 1
-
-
-def get_writer(train, epoch, prefix):
-    log_path = logdir \
-               + ('/' + prefix + '/' if prefix != '' else '') \
-               + ('/train/' if train else '/test/') \
-               + 'epoch_' + str(epoch)
-    writer = SummaryWriter(log_dir=log_path)
-    return writer
+# def generate_images(self, input, output, prefix=''):
+#     if self.batch_idx % log_interval != 0:
+#         self.batch_idx += 1
+#         return
+#     writer = get_writer(self.training, self.epoch, prefix)
+#
+#     for name, mat in self.weights + [('activation', self.activation.t()), ('input', self.input.t())]:
+#         if isinstance(mat, torch.autograd.Variable):
+#             mat = mat.data
+#         if 'weights' in name and self.sparse:
+#             mat = mat.to_dense()
+#         if isinstance(self, LGNLayer) and 'weights' in name:
+#             range = (-1, 1)
+#         else:
+#             range = (0, 1)
+#         image = images_matrix(mat, range)
+#         title = self.name + '_' + name
+#         writer.add_image(title, image, self.batch_idx)
+#     writer.close()
+#     self.batch_idx += 1
+#
+#
+# def get_writer(train, epoch, prefix):
+#     log_path = logdir \
+#                + ('/' + prefix + '/' if prefix != '' else '') \
+#                + ('/train/' if train else '/test/') \
+#                + 'epoch_' + str(epoch)
+#     writer = SummaryWriter(log_dir=log_path)
+#     return writer
 
 
 def images_matrix(matrix, range=None):
@@ -102,9 +102,9 @@ def plot_layer_activation(layer, prefix=''):
     named_apply(layer, simple_plot_layer_activation, prefix)
 
 
-def plot_cortex_activations(cortex):
-    inp_act_plots = plot_layer_activation(cortex)
-    activations = [tensor_to_numpy_matrix(act, cortex.self_shape) for act in [cortex.afferent_activation,
-                                                                              cortex.inhibitory_activation,
-                                                                              cortex.excitatory_activation]]
-    return inp_act_plots + plot_array_matrix(activations)
+# def plot_cortex_activations(cortex):
+#     inp_act_plots = plot_layer_activation(cortex)
+#     activations = [tensor_to_numpy_matrix(act, cortex.self_shape) for act in [cortex.afferent_activation,
+#                                                                               cortex.inhibitory_activation,
+#                                                                               cortex.excitatory_activation]]
+#     return inp_act_plots + plot_array_matrix(activations)

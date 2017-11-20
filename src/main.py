@@ -40,7 +40,7 @@ parser.add_argument('--model', required=True,
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
-parser.add_argument('--save_images', action='store_false', default=True,
+parser.add_argument('--save_images', action='store_true', default=False,
                     help='save images for tensorboard')
 parser.add_argument('--cv', action='store_true', default=False,
                     help='Run cross validation')
