@@ -140,8 +140,6 @@ class ReducedLissom(torch.nn.Module):
                + ', ' + 'afferent_strength=' + str(self.afferent_strength) \
                + ', ' + 'excitatory_strength=' + str(self.excitatory_strength) \
                + ', ' + 'inhibitory_strength=' + str(self.inhibitory_strength) \
-               + ', ' + 'excitatory_strength=' + str(self.excitatory_strength) \
-               + ', ' + 'inhibitory_strength=' + str(self.inhibitory_strength) \
                + ')'
 
 
