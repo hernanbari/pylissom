@@ -1,22 +1,55 @@
-#lgn_density: &lgn_density 24
-#cortical_density: &cortical_density 24
+lgn_density: &lgn_density 24
+cortical_density: &cortical_density 24
+retinal_density: &retinal_density 24
+iterations = 20000
+inhibitory_connection_death_threshold = 0.00005
+#radius_afferent = 6.5
+#radius_excitatory = 19.5
+#radius_inhibitory = 47.5
+
 rlissom:
-  afferent_module:
-    radius_afferent: &radius_afferent !eval [*lgn_density, / 4 + 0.5]
-    radius_gaussian_afferent: !eval [*radius_afferent, / 1.3]
+  afferent_module: &afferent_module
+    radius: &radius_afferent !eval [*lgn_density, / 4 + 0.5]
+    sigma: !eval [*radius_afferent, / 1.3]
 
   excitatory_module:
-    radius_excitatory: &radius_excitatory !eval [*cortical_density, / 10]
-    radius_gaussian_excitatory: !eval [0.78 *, *radius_excitatory]
+    radius: &radius_excitatory !eval [*cortical_density, / 10]
+    sigma: !eval [0.78 *, *radius_excitatory]
 
   inhibitory_module:
-    radius_inhibitory: &radius_inhibitory !eval [*cortical_density, / 4 - 1]
-    radius_gaussian_inhibitory: !eval [2.08 *, *radius_inhibitory]
-  # Activation
-  min_theta: &min_theta 0.083
-  max_theta: !eval [*min_theta, + 0.55]
-  settling_steps: 9
-  # Scaling
-  afferent_factor: 1.0
-  excitatory_factor: 0.9
-  inhibitory_factor: 0.9
+    radius: &radius_inhibitory !eval [*cortical_density, / 4 - 1]
+    sigma: !eval [2.08 *, *radius_inhibitory]
+
+  others:
+    # Activation
+    min_theta: &min_theta 0.083
+    max_theta: !eval [*min_theta, + 0.55]
+    settling_steps: 9
+
+    # Scaling
+    afferent_factor: 1.0
+    excitatory_factor: 0.9
+    inhibitory_factor: 0.9
+
+lgn:
+scale_afferent: !eval [*radius_afferent, / 6.5]
+sigma_center:  !eval [0.5 * , *scale_afferent, * , *retinal_density, / , *lgn_density]
+sigma_surround: !eval [4 * ,*sigma_center]
+radius: !eval [4.7 * , *sigma_surround]
+min_theta: 0.0
+max_theta: 1.0
+strength: 2.33
+
+optim:
+  afferent:
+    learning_rate: !eval [0.0070 / 2]
+  excitatory:
+    learning_rate: !eval [0.002*(19.5**2) / (, *radius_excitatory,  ** 2)]
+  inhibitory:
+    learning_rate: !eval [0.00025*(47.5 **2) / (, *radius_inhibitory, ** 2)]
+
+
+## Learning
+#iterations = 20000/2
+#inhibitory_connection_death_threshold = 2 * 0.00005 * (47.5 **2) / radius_inhibitory**2
+#t_death_threshold = training_iterations
