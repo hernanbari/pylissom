@@ -35,7 +35,7 @@ parser.add_argument('--dataset', default='mnist', choices=['mnist', 'ck', 'numbe
 parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
 parser.add_argument('--model', required=True,
-                    choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'lgn-grid-search',
+                    choices=['lgn', 'rlissom', 'lissom', 'supervised', 'control', 'lgn-grid-search',
                              'lissom-grid-search', 'supervised-grid-search', 'cv'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
@@ -84,14 +84,14 @@ if args.model == 'lgn':
     # LGN layer
     model = LGN(input_shape, lgn_shape, on=True)
 
-if args.model == 'cortex':
+if args.model == 'rlissom':
     model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape)
 
 if args.model == 'lissom':
-    model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
+    model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape)
 
 handles = None
-if args.save_images and args.model in ['lgn', 'cortex', 'lissom']:
+if args.save_images and args.model in ['lgn', 'rlissom', 'lissom']:
     handles = model.register_forward_hook(images.generate_images)
 
 if args.model == 'control':
