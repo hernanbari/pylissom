@@ -31,21 +31,30 @@ def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
     return model, optimizer, None
 
 
-def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_density='DEFAULT',
-               lgn_params='lgn', rlissom_params='rlissom', optim_params='optim', cfg_path=None):
+def get_lgn(retinal_density='DEFAULT', lgn_density='DEFAULT', on=False,
+            lgn_params='lgn', cfg_path=None):
     config = global_config(infile=cfg_path).eval_dict()
     if not isinstance(retinal_density, int):
         retinal_density = config[retinal_density]['retinal_density']
     if not isinstance(lgn_density, int):
         lgn_density = config[lgn_density]['lgn_density']
-    # Full Lissom
+    # LGN
 
     in_features = retinal_density ** 2
     out_features = lgn_density ** 2
 
     lgn_params = config[lgn_params]
-    on = LGN(in_features, out_features, on=True, **lgn_params)
-    off = LGN(in_features, out_features, on=False, **lgn_params)
+    lgn = LGN(in_features, out_features, on=on, **lgn_params)
+    return lgn
+
+
+def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_density='DEFAULT',
+               lgn_params='lgn', rlissom_params='rlissom', optim_params='optim', cfg_path=None):
+    # Full Lissom
+    on = get_lgn(retinal_density, lgn_density, True,
+                 lgn_params, cfg_path)
+    off = get_lgn(retinal_density, lgn_density, False,
+                  lgn_params, cfg_path)
     v1, optimizer, _ = get_reduced_lissom(retinal_density, cortical_density, rlissom_params, optim_params, cfg_path)
     model = Lissom(on, off, v1)
     return model, optimizer, None

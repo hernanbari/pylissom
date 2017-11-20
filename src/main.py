@@ -8,7 +8,7 @@ import numpy as np
 
 import torch
 from src.supervised_gcal.modules.lissom import LGN
-from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised
+from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
 from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
 from src.utils.datasets import get_dataset, CKDataset
 from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
@@ -83,7 +83,7 @@ model_fn = None
 
 if args.model == 'lgn':
     # LGN layer
-    model = LGN(input_shape, lgn_shape, on=True)
+    model = get_lgn(input_shape, lgn_shape, True)
 
 if args.model == 'rlissom':
     model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape)
