@@ -84,7 +84,6 @@ class LGN(torch.nn.Sequential):
     def __init__(self, in_features, out_features, on, radius, sigma_surround,
                  sigma_center=1.0, min_theta=0.0, max_theta=1.0, strength=1.0,
                  diff_of_gauss_cls=DifferenceOfGaussiansLinear, pw_sigmoid_cls=PiecewiseSigmoid):
-        self.strength = strength
         self.max_theta = max_theta
         self.min_theta = min_theta
         self.in_features = in_features
@@ -94,7 +93,7 @@ class LGN(torch.nn.Sequential):
             'diff_of_gaussians': diff_of_gauss_cls(in_features=in_features, out_features=out_features, on=on,
                                                    radius=radius, sigma_center=sigma_center,
                                                    sigma_surround=sigma_surround),
-            'strength': Mul(self.strength),
+            'strength': Mul(strength),
             'piecewise_sigmoid': pw_sigmoid_cls(min_theta=min_theta, max_theta=max_theta)})
         super(LGN, self).__init__(layers)
 
