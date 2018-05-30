@@ -1,6 +1,6 @@
 source sync_files/raw_sync_path
-if [[  -z  $nikola_path ]]; then
-    echo "Error set variable  nikola_path on file raw_sync_path"
+if [[  -z  $cerebro_path ]]; then
+    echo "Error set variable  cerebro_path on file raw_sync_path"
 else
     echo Starting...
     date
@@ -12,7 +12,7 @@ else
     find . -not -path "./venv*" -not -path "./resources/caches*" -not -path "./torch*" -not -path "./pytorch" | grep ipynb$ >> sync_files/files
 
 
-    rsync -r --partial --files-from=sync_files/files --rsh=ssh . hbari@nikola.dc.uba.ar:$nikola_path
+    rsync -r --partial --files-from=sync_files/files --rsh=ssh . hbari@cerebro.dc.uba.ar:$cerebro_path
     echo Ended
     date
 fi
