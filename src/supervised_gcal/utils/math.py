@@ -58,6 +58,5 @@ def normalize(matrix, norm=1, axis=1):
     :param axis:  0 is column, 1 is row
     :return: a matrix normalized by columns or rows
     """
-    norm = matrix.norm(p=norm, dim=axis)
-    norm = norm if axis == 0 else norm.unsqueeze(1)
-    return matrix.div(norm)
+    matrix_norms = matrix.norm(p=norm, dim=axis)
+    return matrix.div(matrix_norms.expand_as(matrix))
