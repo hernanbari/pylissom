@@ -60,7 +60,7 @@ def apply_circular_mask_to_weights(matrix, radius):
     """
     if radius is None:
         return matrix
-    distances = apply_fn_to_weights_between_maps(in_features=matrix.shape[1], out_features=matrix.shape[0],
+    distances = apply_fn_to_weights_between_maps(in_features=matrix.size()[1], out_features=matrix.size()[0],
                                                  fn=euclidian_distances)
     mask = distances > radius
     tensor = torch.from_numpy(mask.astype('uint8'))
@@ -77,7 +77,7 @@ def dense_weights_to_sparse(matrix):
     nnz_mask = matrix != 0
     nnz_values = matrix[nnz_mask]
     nnz_indexes = nnz_mask.nonzero()
-    params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.shape[0]), int(matrix.shape[1])])]
+    params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.size()[0]), int(matrix.size()[1])])]
     if matrix.is_cuda:
         return torch.cuda.sparse.FloatTensor(*params)
     else:

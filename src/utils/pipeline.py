@@ -32,7 +32,7 @@ class Pipeline(object):
     # TODO: check this
     @staticmethod
     def process_input(input, normalize=False):
-        batch_input_shape = torch.Size((1, int(np.prod(input.data.shape))))
+        batch_input_shape = torch.Size((1, int(np.prod(input.data.size()))))
         var = input
         if normalize:
             var = var / torch.norm(input, p=2, dim=1)

@@ -43,11 +43,11 @@ log_interval = 10
 
 
 def images_matrix(matrix, range=None):
-    out_features = matrix.shape[0]
-    in_features = matrix.shape[1]
+    out_features = matrix.size()[0]
+    in_features = matrix.size()[1]
     weights_shape = (int(np.sqrt(in_features)), int(np.sqrt(in_features)))
     reshaped_weights = matrix.contiguous().view((out_features, 1) + weights_shape)
-    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.shape[0])), range=range,
+    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.size()[0])), range=range,
                           pad_value=0.5 if range is not None and range[0] >= 0 else 0)
     return im
 
