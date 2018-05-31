@@ -2,7 +2,7 @@ import torch
 
 from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
-from supervised_gcal.utils.config import global_config
+from src.supervised_gcal.utils.config import global_config
 
 
 def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
