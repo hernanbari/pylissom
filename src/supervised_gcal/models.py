@@ -55,7 +55,7 @@ def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_densit
                  lgn_params, cfg_path)
     off = get_lgn(retinal_density, lgn_density, False,
                   lgn_params, cfg_path)
-    v1, optimizer, _ = get_reduced_lissom(retinal_density, cortical_density, rlissom_params, optim_params, cfg_path)
+    v1, optimizer, _ = get_reduced_lissom(lgn_density, cortical_density, rlissom_params, optim_params, cfg_path)
     model = Lissom(on, off, v1)
     return model, optimizer, None
 
