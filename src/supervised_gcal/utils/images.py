@@ -47,8 +47,9 @@ def images_matrix(matrix, range=None):
     in_features = matrix.size()[1]
     weights_shape = (int(np.sqrt(in_features)), int(np.sqrt(in_features)))
     reshaped_weights = matrix.contiguous().view((out_features, 1) + weights_shape)
-    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.size()[0])), range=range,
-                          pad_value=0.5 if range is not None and range[0] >= 0 else 0)
+    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.size()[0])), range=range)
+        # ,
+        #                   pad_value=0.5 if range is not None and range[0] >= 0 else 0)
     return im
 
 
