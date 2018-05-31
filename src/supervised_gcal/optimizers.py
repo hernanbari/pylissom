@@ -2,6 +2,7 @@ import torch
 from src.supervised_gcal.modules.lissom import register_recursive_input_output_hook, Cortex
 from src.supervised_gcal.utils.functions import kill_neurons, linear_decay
 from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
+from src.supervised_gcal.utils.math import normalize
 
 
 class CortexOptimizer(torch.optim.Optimizer):
@@ -40,10 +41,10 @@ class CortexHebbian(CortexOptimizer):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
 
-        delta = learning_rate * torch.matmul(input.data.t(), output.data)
+        delta = learning_rate * torch.mm(input.data.t(), output.data)
         apply_circular_mask_to_weights(delta.t_(), radius)
         weights.data.add_(delta.t_())
-        weights.data = torch.nn.functional.normalize(weights.data, p=1, dim=0)
+        weights.data = normalize(weights.data, norm=1, axis=0)
         return
 
 
