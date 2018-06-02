@@ -22,7 +22,6 @@ class OrientationMap(object):
         activations = []
         for inp in tqdm(inputs):
             inp = Pipeline.process_input(inp)
-            inp = inp.cuda() if model.is_cuda else inp
             act = model(inp)
             activations.append(act)
         maximums, _ = torch.max(torch.stack(activations), 0)
@@ -36,10 +35,12 @@ class OrientationMap(object):
     def get_orientation_map(self):
         activations = self.calculate_keys_activations(self.model, self.inputs)
         mat = torch.stack(list(activations.values()))
-        values, preferences = torch.max(mat, 0).squeeze()
+        _, preferences = torch.max(mat, 0)
         keys = list(activations.keys())
-        orientation_map = [keys[idx] for idx in preferences]
-        return np.reshape(np.asarray(orientation_map), self.model.self_shape)
+        orientation_map = [keys[idx.data[0]] for idx in preferences.squeeze()]
+        # Assumes Square Maps
+        rows = int(np.sqrt(self.model.out_features))
+        return np.reshape(np.asarray(orientation_map), (rows, rows))
 
     @staticmethod
     def orientation_hist(orientation_map):
@@ -47,7 +48,7 @@ class OrientationMap(object):
         return orientation_hist
 
     @lru_cache()
-    def get_orienatation_hist(self):
+    def get_orientation_hist(self):
         return self.orientation_hist(self.get_orientation_map())
 
 
