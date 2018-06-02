@@ -51,14 +51,14 @@ def gaussian_generator(size, mu_x, mu_y, sigma_x, sigma_y, orientation):
 
 
 def generate_random_gaussians(size, count):
-    return [
+    return (
         gaussian_generator(size,
                            mu_x=random.uniform(0, size - 1), mu_y=random.uniform(0, size - 1),
                            sigma_x=0.75, sigma_y=2.5,
                            orientation=random.uniform(0, 180)
                            )
         for _ in range(count)
-    ]
+    )
 
 
 def two_random_gaussians_generator(size, count):
@@ -69,13 +69,13 @@ def two_random_gaussians_generator(size, count):
 
 
 def generate_random_faces(size, count):
-    return [
+    return (
         generate_three_dots(size,
                             mu_x=random.uniform(0, size - 1),
                             mu_y=random.uniform(0, size - 1),
                             sigma_x=2 * 1.21 / size / 1.7)
         for _ in range(count)
-    ]
+    )
 
 
 def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
@@ -89,14 +89,14 @@ def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
 
 def faces_generator(size, num=1):
     while True:
-        faces = [
+        faces = (
             generate_three_dots(size,
                                 mu_x=random.uniform(10, size - 10), mu_y=random.uniform(10, size - 10),
                                 sigma_x=3.0,
                                 orientation=random.uniform(-15, 15)
                                 )
             for _ in range(num)
-        ]
+        )
         combined = combine_matrices(faces)
         yield combined
 
