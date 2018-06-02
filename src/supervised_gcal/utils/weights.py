@@ -50,6 +50,16 @@ def get_gaussian_weights(in_features, out_features, sigma):
     return get_gaussian_weights_wrapped(in_features, out_features, sigma).clone()
 
 
+# TODO: use clear cache to free memory
+@lru_cache(maxsize=3)
+def circular_mask(in_features, out_features, radius, cuda=False):
+    distances = apply_fn_to_weights_between_maps(in_features=in_features, out_features=out_features,
+                                                 fn=euclidian_distances)
+    mask = distances > radius
+    torch_mask = torch.from_numpy(mask.astype('uint8'))
+    return torch_mask.cuda() if cuda else torch_mask
+
+
 def apply_circular_mask_to_weights(matrix, radius):
     """
     This functions applies a circular mask to a matrix of weights. The weights of the neurons that are
@@ -60,11 +70,8 @@ def apply_circular_mask_to_weights(matrix, radius):
     """
     if radius is None:
         return matrix
-    distances = apply_fn_to_weights_between_maps(in_features=matrix.size()[1], out_features=matrix.size()[0],
-                                                 fn=euclidian_distances)
-    mask = distances > radius
-    tensor = torch.from_numpy(mask.astype('uint8'))
-    matrix.masked_fill_(tensor.cuda() if matrix.is_cuda else tensor, 0)
+    tensor = circular_mask(matrix.size()[1], matrix.size()[0], radius, matrix.is_cuda)
+    matrix.masked_fill_(tensor, 0)
     return matrix
 
 
