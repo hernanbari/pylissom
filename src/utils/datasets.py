@@ -33,7 +33,7 @@ class RandomDataset(Dataset):
 
     def __getitem__(self, item):
         # Foo target
-        return torch.from_numpy(next(self.gen), torch.Tensor(2))
+        return torch.from_numpy(next(self.gen)), torch.Tensor(2)
 
     @property
     def gen(self):
@@ -46,7 +46,7 @@ class OrientatedGaussians(RandomDataset):
         return two_random_gaussians_generator(self.size, len(self))
 
     def __init__(self, size, length):
-        super(OrientatedGaussians).__init__(length)
+        super(OrientatedGaussians, self).__init__(length)
         self.size = size
 
 
@@ -56,7 +56,7 @@ class ThreeDotFaces(RandomDataset):
         return faces_generator(self.size, self.faces)
 
     def __init__(self, size, length, faces=2):
-        super(ThreeDotFaces).__init__(length)
+        super(ThreeDotFaces, self).__init__(length)
         self.faces = faces
         self.size = size
 
