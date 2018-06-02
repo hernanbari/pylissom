@@ -10,14 +10,14 @@ from src.supervised_gcal.utils.math import gaussian
 
 def translate(bar, step=1, over_x=True):
     images = []
-    cols = bar.size()[0]
+    cols = bar.shape[0]
     half_cols = cols // 2
     for x in range(-half_cols, half_cols + 1 if cols % 2 == 1 else half_cols, step):
         if over_x:
             M = np.float32([[1, 0, x], [0, 1, 0]])
         else:
             M = np.float32([[1, 0, 0], [0, 1, x]])
-        dst = cv2.warpAffine(bar, M, bar.size())
+        dst = cv2.warpAffine(bar, M, bar.shape)
         images.append(dst)
     return images
 
@@ -26,7 +26,7 @@ def random_translation(img, x_offset=5, y_offset=5):
     random_x = random.uniform(-x_offset, x_offset)
     random_y = random.uniform(-y_offset, y_offset)
     M = np.float32([[1, 0, random_x], [0, 1, random_y]])
-    return cv2.warpAffine(img, M, img.size())
+    return cv2.warpAffine(img, M, img.shape)
 
 
 def generate_horizontal_bar(size):
