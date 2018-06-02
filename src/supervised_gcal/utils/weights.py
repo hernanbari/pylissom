@@ -89,21 +89,3 @@ def dense_weights_to_sparse(matrix):
         return torch.cuda.sparse.FloatTensor(*params)
     else:
         return torch.sparse.FloatTensor(*params)
-
-
-# TODO: remove if not used
-@lru_cache()
-def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=False):
-    weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
-                                                                            output_shape,
-                                                                            sigma=sigma),
-                                                       radius=radius),
-                        axis=1)
-    if sparse:
-        weights = dense_weights_to_sparse(weights)
-    return weights
-
-
-# TODO: remove if not used
-def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
-    return get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=sparse).clone()
