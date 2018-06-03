@@ -1,9 +1,9 @@
 import numpy as np
-from src.supervised_gcal.modules.lissom import DifferenceOfGaussiansLinear
+from src.nn.modules.lissom import DifferenceOfGaussiansLinear
 # from tensorboard import SummaryWriter
 
 import torch
-from src.supervised_gcal.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
+from src.nn.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
 from src.utils.images import plot_array_matrix, plot_dict_matrix, plot_matrix
 from torchvision import utils as vutils
 

@@ -7,8 +7,8 @@ import shutil
 import numpy as np
 
 import torch
-from src.supervised_gcal.modules.lissom import LGN
-from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
+from src.nn.modules.lissom import LGN
+from src.nn.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
 from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
 from src.utils.datasets import get_dataset, CKDataset
 from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
@@ -52,7 +52,7 @@ args = parser.parse_args()
 if os.path.exists(args.logdir):
     shutil.rmtree(args.logdir)
 
-import src.supervised_gcal.utils.images as images
+import src.nn.utils.images as images
 
 images.logdir = args.logdir
 images.log_interval = args.log_interval

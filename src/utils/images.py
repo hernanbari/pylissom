@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage.transform import rotate
 
-from src.supervised_gcal.utils.math import gaussian
+from src.nn.utils.math import gaussian
 
 
 def translate(bar, step=1, over_x=True):

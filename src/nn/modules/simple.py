@@ -1,6 +1,6 @@
 import torch
-from src.supervised_gcal.utils.functions import piecewise_sigmoid, afferent_normalize
-from src.supervised_gcal.utils.weights import get_gaussian_weights, apply_circular_mask_to_weights
+from src.nn.utils.functions import piecewise_sigmoid, afferent_normalize
+from src.nn.utils.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
 
 class GaussianLinear(torch.nn.Linear):

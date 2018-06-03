@@ -1,8 +1,8 @@
 import time
 
 import torch
-from src.supervised_gcal.utils.math import normalize
-from src.supervised_gcal.utils.weights import apply_circular_mask_to_weights
+from src.nn.utils.math import normalize
+from src.nn.utils.weights import apply_circular_mask_to_weights
 
 
 def linear_decay(w, start, epoch, final_epoch):

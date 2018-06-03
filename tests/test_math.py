@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from src.supervised_gcal.utils.math import *
+from src.nn.utils.math import *
 
 
 class TestMath(unittest.TestCase):

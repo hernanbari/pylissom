@@ -1,9 +1,9 @@
 import torch
 
-from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
-from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
-from src.supervised_gcal.utils.config import global_config
-from src.supervised_gcal.utils.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
+from src.nn.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
+from src.nn.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
+from src.nn.utils.config import global_config
+from src.nn.utils.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
 
 
 def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',

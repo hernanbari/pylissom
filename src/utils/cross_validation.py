@@ -2,7 +2,7 @@ import copy
 
 from sklearn.model_selection import GroupKFold
 
-# from src.supervised_gcal.utils import images as images
+# from src.nn.utils import images as images
 
 from src.utils.datasets import subj_indep_train_test_samplers
 from src.utils.helpers import save_model

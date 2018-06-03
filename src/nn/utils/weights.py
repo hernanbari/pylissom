@@ -7,7 +7,7 @@ from functools import lru_cache
 import numpy as np
 
 import torch
-from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
+from src.nn.utils.math import gaussian, euclidian_distances, normalize
 
 
 # TODO: use pytorch, not numpy
