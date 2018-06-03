@@ -2,8 +2,8 @@ import torch
 
 from src.math import normalize
 from src.nn.modules.lissom import register_recursive_input_output_hook, Cortex
-from src.nn.utils.functions import kill_neurons, linear_decay
-from src.nn.utils.weights import apply_circular_mask_to_weights
+from src.nn.functional.functions import kill_neurons, linear_decay
+from src.nn.functional.weights import apply_circular_mask_to_weights
 
 
 class CortexOptimizer(torch.optim.Optimizer):

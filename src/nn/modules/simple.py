@@ -1,6 +1,6 @@
 import torch
-from src.nn.utils.functions import piecewise_sigmoid, afferent_normalize
-from src.nn.utils.weights import get_gaussian_weights, apply_circular_mask_to_weights
+from src.nn.functional.functions import piecewise_sigmoid, afferent_normalize
+from src.nn.functional.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
 
 class GaussianLinear(torch.nn.Linear):

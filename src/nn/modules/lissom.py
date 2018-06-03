@@ -4,8 +4,8 @@ import torch
 
 from src.math import normalize
 from src.nn.modules.simple import GaussianCloudLinear, PiecewiseSigmoid, AfferentNorm
-from src.nn.utils.functions import check_compatible_mul, check_compatible_add
-from src.nn.utils.weights import apply_circular_mask_to_weights, get_gaussian_weights
+from src.nn.functional.functions import check_compatible_mul, check_compatible_add
+from src.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
 
 
 class Cortex(GaussianCloudLinear):

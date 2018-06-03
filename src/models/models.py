@@ -1,7 +1,7 @@
 import torch
 
 from src.nn.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
-from src.nn.utils.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
+from src.nn.functional.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
 from src.optim.optimizers import SequentialOptimizer, CortexHebbian
 from src.utils.config.config import global_config
 
