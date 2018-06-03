@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
+from src.datasets.datasets import get_dataset
 from src.nn.models import get_lissom, get_supervised, get_reduced_lissom
 from src.nn.utils import images as images
-from src.utils.datasets import get_dataset
 from src.utils.pipeline import Pipeline
 
 
