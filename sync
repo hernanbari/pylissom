@@ -9,7 +9,7 @@ fswatch --batch-marker=EOF -xrn . | while read file event; do
        fi
     else
        #echo $file $event
-       if [ ${file: -4} == ".sql" ] || [ ${file: -5} == ".html" ] || [ ${file: -3} == ".py" ] || [ ${file: -5} == ".yaml" ] || [ ${file: -6} == ".ipynb" ]; then
+       if [ ${file: -4} == ".sql" ] || [ ${file: -5} == ".html" ] || [ ${file: -3} == ".py" ] || [ ${file: -5} == ".yaml" ] || [ ${file: -4} == ".ini" ] ; then
            list+=($file)
        fi
     fi

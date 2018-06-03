@@ -7,8 +7,8 @@ import shutil
 import numpy as np
 
 import torch
-from src.supervised_gcal.lgn_layer import LGNLayer
-from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised
+from src.supervised_gcal.modules.lissom import LGN
+from src.supervised_gcal.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
 from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
 from src.utils.datasets import get_dataset, CKDataset
 from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
@@ -35,12 +35,12 @@ parser.add_argument('--dataset', default='mnist', choices=['mnist', 'ck', 'numbe
 parser.add_argument('--logdir', default='runs',
                     help='log dir for tensorboard')
 parser.add_argument('--model', required=True,
-                    choices=['lgn', 'cortex', 'lissom', 'supervised', 'control', 'lgn-grid-search',
+                    choices=['lgn', 'rlissom', 'lissom', 'supervised', 'control', 'lgn-grid-search',
                              'lissom-grid-search', 'supervised-grid-search', 'cv'],
                     help='which model to evaluate')
 parser.add_argument('--shape', type=int, default=28, metavar='N',
                     help='# of rows of square maps')
-parser.add_argument('--save_images', action='store_false', default=True,
+parser.add_argument('--save_images', action='store_true', default=False,
                     help='save images for tensorboard')
 parser.add_argument('--cv', action='store_true', default=False,
                     help='Run cross validation')
@@ -72,46 +72,54 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 classes = 10 if not args.dataset == 'ck ' else 7
-input_shape = (28, 28) if not args.dataset == 'ck' else (96, 96)
+input_shape = 28 if not args.dataset == 'ck' else 96
 batch_input_shape = torch.Size((args.batch_size, int(np.prod(input_shape))))
 model = None
 optimizer = None
 loss_fn = None
-lgn_shape = (args.shape, args.shape)
-cortex_shape = (args.shape, args.shape)
+lgn_shape = args.shape
+cortex_shape = args.shape
+model_fn = None
 
 if args.model == 'lgn':
     # LGN layer
-    model = LGNLayer(input_shape, lgn_shape, on=True)
+    model = get_lgn(input_shape, lgn_shape, True)
 
-if args.model == 'cortex':
-    model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape, args)
+if args.model == 'rlissom':
+    model, optimizer, _ = get_reduced_lissom(input_shape, cortex_shape)
 
 if args.model == 'lissom':
-    model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs)
+    model, optimizer, _ = get_lissom(input_shape, lgn_shape, cortex_shape)
 
 handles = None
-if args.save_images and args.model in ['lgn', 'cortex', 'lissom']:
+if args.save_images and args.model in ['lgn', 'rlissom', 'lissom']:
     handles = model.register_forward_hook(images.generate_images)
 
 if args.model == 'control':
     net_input_shape = batch_input_shape[1]
     model, optimizer, loss_fn = get_net(net_input_shape, classes)
-    model_fn = lambda: get_net(net_input_shape, classes)
+
+
+    def model_fn():
+        return get_net(net_input_shape, classes)
 
 if args.model == 'supervised':
     model, optimizer, loss_fn = get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval, args.epochs,
                                                classes)
-    model[0].register_forward_hook(images.generate_images)
-    model_fn = lambda: get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
-                                      args.epochs,
-                                      classes)
+    if args.save_images:
+        model[0].register_forward_hook(images.generate_images)
+
+
+    def model_fn():
+        return get_supervised(input_shape, lgn_shape, cortex_shape, args.log_interval,
+                              args.epochs,
+                              classes)
 
 if not args.cv and 'grid-search' not in args.model:
     test_loader = get_dataset(train=False, args=args)
     train_loader = get_dataset(train=True, args=args)
     pipeline = Pipeline(model, optimizer, loss_fn, log_interval=args.log_interval, dataset_len=args.dataset_len,
-                        cuda=args.cuda)
+                        cuda=args.cuda, use_writer=False)
     # TODO: Change epochs to 0
     for epoch in range(1, args.epochs + 1):
         pipeline.train(train_data_loader=train_loader, epoch=epoch)
@@ -120,7 +128,8 @@ if not args.cv and 'grid-search' not in args.model:
 
 # TODO: train lissom first and then net
 if args.cv:
-    assert model_fn is not None, "Cross validation only with supervised or control models"
+    if model_fn is None:
+        raise ValueError("Cross validation only with supervised or control models")
     ck_dataset = CKDataset()
     cv = CVSubjectIndependent(ck_dataset)
     run_cross_validation(model_fn, ck_dataset, cv, args)

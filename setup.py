@@ -26,7 +26,8 @@ setup(
     version='1.2.0',
 
     description='A sample Python project',
-    install_requires=['numpy', 'torch', 'torchvision'],
+    install_requires=['numpy', 'torch', 'torchvision', 'configobj', 'PyYAML', 'scipy', 'scikit-learn', 'opencv-python',
+                      'matplotlib', 'scikit-image'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
     }

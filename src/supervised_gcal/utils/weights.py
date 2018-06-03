@@ -2,14 +2,16 @@
 This module contains functions that modify the weights of the neural network.
 """
 
+from functools import lru_cache
+
 import numpy as np
 
 import torch
-from functools import lru_cache
 from src.supervised_gcal.utils.math import gaussian, euclidian_distances, normalize
 
 
-def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **kwargs):
+# TODO: use pytorch, not numpy
+def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     """
     The goal of this function is to apply a function fn, to all the elements of an array of dimension
     rows_dims_source x rows_dims_source (the lower array) centered on an element of the superior array.
@@ -23,12 +25,14 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
     :return: An array containing the new weights of the superior layer.
     PROBLEMAS? OJO QUE EL STEP PUEDE SER UN FLOAT
     """
-    dims = rows_dims_source ** 2
-    step = rows_dims_source / rows_dims_output
+    # ASSUMES SQUARE MAPS
+    rows_dims_source = int(in_features ** 0.5)
+    rows_dims_output = int(out_features ** 0.5)
+    dims = in_features
     tmp_map = []
-    for i in np.arange(0, rows_dims_source, step):
-        for j in np.arange(0, rows_dims_source, step):
-            weights_matrix = np.fromfunction(function=lambda x, y: fn(x, y, int(i), int(j), **kwargs),
+    for i in np.linspace(0, rows_dims_source - 1, rows_dims_output):
+        for j in np.linspace(0, rows_dims_source - 1, rows_dims_output):
+            weights_matrix = np.fromfunction(function=lambda x, y: fn(x, y, i, j, **kwargs),
                                              shape=(rows_dims_source, rows_dims_source), dtype=int)
             weights_row = np.reshape(weights_matrix, dims)
             tmp_map.append(weights_row)
@@ -36,16 +40,25 @@ def apply_fn_to_weights_between_maps(rows_dims_source, rows_dims_output, fn, **k
     return tmp_map
 
 
-@lru_cache()
-def get_gaussian_weights_wrapped(shape_source, shape_output, sigma):
-    rows_source = shape_source[0]
-    rows_output = shape_output[0]
-    ans = torch.from_numpy(apply_fn_to_weights_between_maps(rows_source, rows_output, gaussian, sigma=sigma))
+@lru_cache(maxsize=0)
+# TODO: use clear cache to free memory after layers initializations
+def get_gaussian_weights_wrapped(in_features, out_features, sigma):
+    ans = torch.from_numpy(apply_fn_to_weights_between_maps(in_features, out_features, gaussian, sigma=sigma))
     return ans
 
 
-def get_gaussian_weights(shape_source, shape_output, sigma):
-    return get_gaussian_weights_wrapped(shape_source, shape_output, sigma).clone()
+def get_gaussian_weights(in_features, out_features, sigma):
+    return get_gaussian_weights_wrapped(in_features, out_features, sigma).clone()
+
+
+# TODO: use clear cache to free memory
+@lru_cache(maxsize=3)
+def circular_mask(in_features, out_features, radius, cuda=False):
+    distances = apply_fn_to_weights_between_maps(in_features=in_features, out_features=out_features,
+                                                 fn=euclidian_distances)
+    mask = distances > radius
+    torch_mask = torch.from_numpy(mask.astype('uint8'))
+    return torch_mask.cuda() if cuda else torch_mask
 
 
 def apply_circular_mask_to_weights(matrix, radius):
@@ -58,15 +71,12 @@ def apply_circular_mask_to_weights(matrix, radius):
     """
     if radius is None:
         return matrix
-    orig_rows_dims_source = int(matrix.shape[1] ** 0.5)
-    orig_rows_dims_output = int(matrix.shape[0] ** 0.5)
-    distances = apply_fn_to_weights_between_maps(orig_rows_dims_source, orig_rows_dims_output, euclidian_distances)
-    mask = distances > radius
-    tensor = torch.from_numpy(mask.astype('uint8'))
-    matrix.masked_fill_(tensor.cuda() if matrix.is_cuda else tensor, 0)
+    tensor = circular_mask(matrix.size()[1], matrix.size()[0], radius, matrix.is_cuda)
+    matrix.masked_fill_(tensor, 0)
     return matrix
 
 
+# TODO: remove if not used
 def dense_weights_to_sparse(matrix):
     """
     Transforms a torch dense tensor to sparse
@@ -75,24 +85,8 @@ def dense_weights_to_sparse(matrix):
     nnz_mask = matrix != 0
     nnz_values = matrix[nnz_mask]
     nnz_indexes = nnz_mask.nonzero()
-    params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.shape[0]), int(matrix.shape[1])])]
+    params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.size()[0]), int(matrix.size()[1])])]
     if matrix.is_cuda:
         return torch.cuda.sparse.FloatTensor(*params)
     else:
         return torch.sparse.FloatTensor(*params)
-
-
-@lru_cache()
-def get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=False):
-    weights = normalize(apply_circular_mask_to_weights(get_gaussian_weights(input_shape,
-                                                                            output_shape,
-                                                                            sigma=sigma),
-                                                       radius=radius),
-                        axis=1)
-    if sparse:
-        weights = dense_weights_to_sparse(weights)
-    return weights
-
-
-def get_gaussian_weights_variable(input_shape, output_shape, sigma, radius, sparse=False):
-    return get_gaussian_weights_variable_wrapped(input_shape, output_shape, sigma, radius, sparse=sparse).clone()

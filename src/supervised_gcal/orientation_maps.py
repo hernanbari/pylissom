@@ -3,43 +3,45 @@ from functools import lru_cache
 import matplotlib.pyplot as plt
 
 from skimage.transform import rotate
-from tqdm import tqdm
+from tqdm import tqdm, tqdm_notebook
 
 import torch
 import numpy as np
 
-from src.utils.images import generate_horizontal_bar, translate
+from src.utils.images import generate_horizontal_bar, translate, debug
 from src.utils.pipeline import Pipeline
 
 
 class OrientationMap(object):
-    def __init__(self, model, inputs):
+    # TODO: optimize using vectorization to calculate activations
+    def __init__(self, model, inputs, use_tqdm_notebook=True):
+        self.use_tqdm_notebook = use_tqdm_notebook
         self.model = model
         self.inputs = inputs
+        self.tqdm = tqdm_notebook if self.use_tqdm_notebook else tqdm
 
-    @staticmethod
-    def maximum_activations(model, inputs):
+    def maximum_activations(self, model, inputs):
         activations = []
-        for inp in tqdm(inputs):
+        for inp in self.tqdm(inputs):
             inp = Pipeline.process_input(inp)
-            inp = inp.cuda() if model.is_cuda else inp
             act = model(inp)
             activations.append(act)
         maximums, _ = torch.max(torch.stack(activations), 0)
         return maximums
 
-    @staticmethod
-    def calculate_keys_activations(model, inputs):
-        return {k: OrientationMap.maximum_activations(model, array) for k, array in inputs.items()}
+    def calculate_keys_activations(self, model, inputs):
+        return {k: self.maximum_activations(model, array) for k, array in inputs.items()}
 
     @lru_cache()
     def get_orientation_map(self):
         activations = self.calculate_keys_activations(self.model, self.inputs)
         mat = torch.stack(list(activations.values()))
-        values, preferences = torch.max(mat, 0).squeeze()
+        _, preferences = torch.max(mat, 0)
         keys = list(activations.keys())
-        orientation_map = [keys[idx] for idx in preferences]
-        return np.reshape(np.asarray(orientation_map), self.model.self_shape)
+        orientation_map = [keys[idx.data[0]] for idx in preferences.squeeze()]
+        # Assumes Square Maps
+        rows = int(np.sqrt(self.model.out_features))
+        return np.reshape(np.asarray(orientation_map), (rows, rows))
 
     @staticmethod
     def orientation_hist(orientation_map):
@@ -47,7 +49,7 @@ class OrientationMap(object):
         return orientation_hist
 
     @lru_cache()
-    def get_orienatation_hist(self):
+    def get_orientation_hist(self):
         return self.orientation_hist(self.get_orientation_map())
 
 
