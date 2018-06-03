@@ -51,24 +51,31 @@ def gaussian_generator(size, mu_x, mu_y, sigma_x, sigma_y, orientation):
 
 
 def generate_random_gaussians(size, count):
-    return [
+    return (
         gaussian_generator(size,
                            mu_x=random.uniform(0, size - 1), mu_y=random.uniform(0, size - 1),
                            sigma_x=0.75, sigma_y=2.5,
                            orientation=random.uniform(0, 180)
                            )
         for _ in range(count)
-    ]
+    )
+
+
+def two_random_gaussians_generator(size, count):
+    stream_one = generate_random_gaussians(size, count)
+    stream_two = generate_random_gaussians(size, count)
+    for one, two in zip(stream_one, stream_two):
+        yield combine_matrices(one, two)
 
 
 def generate_random_faces(size, count):
-    return [
+    return (
         generate_three_dots(size,
                             mu_x=random.uniform(0, size - 1),
                             mu_y=random.uniform(0, size - 1),
                             sigma_x=2 * 1.21 / size / 1.7)
         for _ in range(count)
-    ]
+    )
 
 
 def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
@@ -78,6 +85,20 @@ def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
     eyes = combine_matrices(lefteye, righteye)
     face = combine_matrices(eyes, mouth)
     return rotate(face, orientation, mode='constant').astype(face.dtype)
+
+
+def faces_generator(size, num=1):
+    while True:
+        faces = (
+            generate_three_dots(size,
+                                mu_x=random.uniform(10, size - 10), mu_y=random.uniform(10, size - 10),
+                                sigma_x=3.0,
+                                orientation=random.uniform(-15, 15)
+                                )
+            for _ in range(num)
+        )
+        combined = combine_matrices(faces)
+        yield combined
 
 
 def combine_matrices(*matrices):
@@ -95,11 +116,17 @@ def debug():
     Pdb().set_trace()
 
 
-def plot_matrix(img):
-    plt.imshow(img, cmap='gray', vmin=0, vmax=1)
+def plot_matrix(img, vmin=0, vmax=1):
+    plt.imshow(img, cmap='gray', vmin=vmin, vmax=vmax)
     plt.show()
 
 
 def plot_array_matrix(imgs):
     for i in imgs:
+        plot_matrix(i)
+
+
+def plot_dict_matrix(imgs):
+    for k, i in imgs.items():
+        plt.title(k)
         plot_matrix(i)

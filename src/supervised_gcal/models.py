@@ -1,77 +1,67 @@
-import numpy as np
-
 import torch
-from src.supervised_gcal.cortex_layer import CortexLayer
-from src.supervised_gcal.lgn_layer import LGNLayer
+
+from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
+from src.supervised_gcal.utils.config import global_config
+from src.supervised_gcal.utils.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
 
 
-class FullLissom(torch.nn.Module):
-    def __init__(self, input_shape, lgn_shape, v1_shape, lgn_params=None, v1_params=None):
-        super().__init__()
-        if lgn_params is None:
-            lgn_params = {}
-        if v1_params is None:
-            v1_params = {}
-        self.input_shape = input_shape
-        self.activation_shape = torch.Size((1, int(np.prod(v1_shape))))
-        self.on = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=True, **lgn_params)
-        self.off = LGNLayer(input_shape=input_shape, self_shape=lgn_shape, on=False, **lgn_params)
-        self.v1 = CortexLayer(input_shape=lgn_shape, self_shape=v1_shape, **v1_params)
+def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
+                       rlissom_params='rlissom', optim_params='optim', cfg_path=None):
+    config = global_config(infile=cfg_path).eval_dict()
+    if not isinstance(retinal_density, int):
+        retinal_density = config[retinal_density]['retinal_density']
+    if not isinstance(cortical_density, int):
+        cortical_density = config[cortical_density]['cortical_density']
 
-    def forward(self, retina):
-        on_output = self.on(retina)
-        off_output = self.off(retina)
-        self.lgn_activation = on_output + off_output
-        return self.v1(self.lgn_activation)
+    in_features = retinal_density ** 2
+    out_features = cortical_density ** 2
+    rlissom_params = config[rlissom_params]
 
-    def register_forward_hook(self, hook):
-        handles = []
-        for m in self.children():
-            handles.append(m.register_forward_hook(hook))
-        return handles
+    afferent_module = Cortex(in_features, out_features, **(rlissom_params['afferent_module']))
+    excitatory_module = Cortex(out_features, out_features, **(rlissom_params['excitatory_module']))
+    inhibitory_module = Cortex(out_features, out_features, **(rlissom_params['inhibitory_module']))
+    model = ReducedLissom(afferent_module, excitatory_module, inhibitory_module, **(rlissom_params['others']))
 
-
-# TODO: test and define an optimizer
-class HLissom(torch.nn.Module):
-    def __init__(self, input_shape, lgn_shape, v1_shape, lgn_params=None, v1_params=None):
-        super().__init__()
-        if lgn_params is None:
-            lgn_params = {}
-        if v1_params is None:
-            v1_params = {}
-        self.full_lissom = FullLissom(input_shape, lgn_shape, v1_shape, lgn_params, v1_params)
-        self.cortexes = [self.full_lissom.v1]
-
-    def add_cortex_layer(self, cortex_shape):
-        last_shape = self.cortexes[-1].shape
-        self.cortexes.append(CortexLayer(input_shape=last_shape, self_shape=cortex_shape))
-
-    def forward(self, retina):
-        self.activations = [self.full_lissom(retina)]
-        for layer in self.cortexes:
-            self.activations.append(layer(self.activations[-1]))
-        return self.activations[-1]
-
-
-def get_cortex(input_shape, cortex_shape, pruning_step=None, final_epoch=None, v1_params=None, learning_rate=None):
-    # Cortex Layer
-    model = CortexLayer(input_shape, cortex_shape, **v1_params)
+    optim_params = config[optim_params]
     optimizer = SequentialOptimizer(
-    CortexHebbian(cortex_layer=model, learning_rate=learning_rate),
-        NeighborsDecay(cortex_layer=model,
-                       pruning_step=pruning_step, final_epoch=final_epoch))
+        CortexHebbian(cortex=afferent_module, **(optim_params['afferent'])),
+        CortexHebbian(cortex=excitatory_module, **(optim_params['excitatory'])),
+        CortexHebbian(cortex=inhibitory_module, **(optim_params['inhibitory'])),
+    )
+    get_gaussian_weights_wrapped.cache_clear()
+    apply_fn_to_weights_between_maps.cache_clear()
     return model, optimizer, None
 
 
-def get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step=None, final_epoch=None, lgn_params=None,
-                    v1_params=None):
+def get_lgn(retinal_density='DEFAULT', lgn_density='DEFAULT', on=False,
+            lgn_params='lgn', cfg_path=None):
+    config = global_config(infile=cfg_path).eval_dict()
+    if not isinstance(retinal_density, int):
+        retinal_density = config[retinal_density]['retinal_density']
+    if not isinstance(lgn_density, int):
+        lgn_density = config[lgn_density]['lgn_density']
+    # LGN
+
+    in_features = retinal_density ** 2
+    out_features = lgn_density ** 2
+
+    lgn_params = config[lgn_params]
+    lgn = LGN(in_features, out_features, on=on, **lgn_params)
+    return lgn
+
+
+def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_density='DEFAULT',
+               lgn_params='lgn', rlissom_params='rlissom', optim_params='optim', cfg_path=None):
     # Full Lissom
-    model = FullLissom(input_shape, lgn_shape, cortex_shape, lgn_params=lgn_params, v1_params=v1_params)
-    optimizer = SequentialOptimizer(
-        CortexHebbian(cortex_layer=model.v1),
-        NeighborsDecay(cortex_layer=model.v1,
-                       pruning_step=pruning_step, final_epoch=final_epoch))
+    on = get_lgn(retinal_density, lgn_density, True,
+                 lgn_params, cfg_path)
+    off = get_lgn(retinal_density, lgn_density, False,
+                  lgn_params, cfg_path)
+    v1, optimizer, _ = get_reduced_lissom(lgn_density, cortical_density, rlissom_params, optim_params, cfg_path)
+    model = Lissom(on, off, v1)
+    get_gaussian_weights_wrapped.cache_clear()
+    apply_fn_to_weights_between_maps.cache_clear()
     return model, optimizer, None
 
 
@@ -88,10 +78,11 @@ def get_net(net_input_shape, classes):
     return net, optimizer, loss_fn
 
 
-def get_supervised(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch, classes, v1_params=None):
+def get_supervised(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_density='DEFAULT',
+                   lgn_params='lgn', rlissom_params='rlissom', optim_params='optim', cfg_path=None, classes=10):
     # Lissom
-    lissom, optimizer_lissom, _ = get_full_lissom(input_shape, lgn_shape, cortex_shape, pruning_step, final_epoch,
-                                                  v1_params=v1_params)
+    lissom, optimizer_lissom, _ = get_lissom(retinal_density, lgn_density, cortical_density,
+                                             lgn_params, rlissom_params, optim_params, cfg_path)
     # Net
     net_input_shape = lissom.activation_shape[1]
     net, optimizer_nn, loss_fn = get_net(net_input_shape, classes)

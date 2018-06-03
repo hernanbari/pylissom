@@ -1,13 +1,17 @@
+from tqdm import tqdm_notebook as tqdm
+
 import torch
 import numpy as np
 
-from src.supervised_gcal.utils.images import get_writer
+# from src.supervised_gcal.utils.images import get_writer
 from torch.autograd import Variable
 import torch.nn.functional as F
 
 
 class Pipeline(object):
-    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, dataset_len=None, cuda=False, prefix=''):
+    def __init__(self, model, optimizer=None, loss_fn=None, log_interval=10, dataset_len=None, cuda=False, prefix='',
+                 use_writer=False):
+        self.use_writer = use_writer
         self.prefix = prefix
         self.dataset_len = dataset_len
         self.log_interval = log_interval
@@ -30,17 +34,20 @@ class Pipeline(object):
     # TODO: check this
     @staticmethod
     def process_input(input, normalize=False):
-        batch_input_shape = torch.Size((1, int(np.prod(input.shape))))
+        batch_input_shape = torch.Size((1, int(np.prod(input.data.size()))))
         var = input
         if normalize:
             var = var / torch.norm(input, p=2, dim=1)
         var = var.view(batch_input_shape)
         return var
 
+    # TODO: add loss progress with tqdm
     def _run(self, data_loader, train):
         self.correct = 0
-        self.writer = get_writer(train=train, epoch=0, prefix=self.prefix)
-        for batch_idx, (data, target) in enumerate(data_loader):
+        if self.use_writer:
+            self.writer = get_writer(train=train, epoch=0, prefix=self.prefix)
+        pbar = tqdm(enumerate(data_loader), total=len(data_loader))
+        for batch_idx, (data, target) in pbar:
             if self.dataset_len is not None and batch_idx >= self.dataset_len:
                 break
             loss = None
@@ -56,19 +63,21 @@ class Pipeline(object):
                 self.correct += pred.eq(target.data.view_as(pred)).cpu().sum()
             if train:
                 if self.loss_fn:
-                    self.writer.add_scalar('loss', loss.data[0],
+                    if self.use_writer:
+                        self.writer.add_scalar('loss', loss.data[0],
                                            global_step=batch_idx + len(data_loader) * (self.epoch - 1))
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
-                if batch_idx % self.log_interval == 0:
-                    self._train_log(batch_idx, data_loader, loss)
+                # if batch_idx % self.log_interval == 0:
+                #     self._train_log(batch_idx, data_loader, loss)
             elif self.loss_fn:
                 self.test_loss += loss.data[0]  # sum up batch loss
 
         if self.loss_fn:
-            if not train:
-                self._test_log(data_loader)
-            self.writer.add_scalar('accuracy', self.accuracy(data_loader), global_step=self.epoch-1)
+            # if not train:
+            #     self._test_log(data_loader)
+            if self.use_writer:
+                self.writer.add_scalar('accuracy', self.accuracy(data_loader), global_step=self.epoch-1)
             return self.accuracy(data_loader)
         return None
 

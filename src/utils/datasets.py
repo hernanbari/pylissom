@@ -3,6 +3,7 @@ from random import shuffle
 import numpy as np
 
 import torch
+from src.utils.images import two_random_gaussians_generator, faces_generator
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms
@@ -21,6 +22,43 @@ def get_dataset(train, args):
             batch_size=args.batch_size, **kwargs)
     elif args.dataset == 'number_one':
         raise NotImplementedError
+
+
+class RandomDataset(Dataset):
+    def __init__(self, length):
+        self._lenght = length
+
+    def __len__(self):
+        return self._lenght
+
+    def __getitem__(self, item):
+        # Foo target
+        return torch.from_numpy(next(self.gen)), torch.Tensor(2)
+
+    @property
+    def gen(self):
+        raise NotImplementedError
+
+
+class OrientatedGaussians(RandomDataset):
+    @property
+    def gen(self):
+        return two_random_gaussians_generator(self.size, len(self))
+
+    def __init__(self, size, length):
+        super(OrientatedGaussians, self).__init__(length)
+        self.size = size
+
+
+class ThreeDotFaces(RandomDataset):
+    @property
+    def gen(self):
+        return faces_generator(self.size, self.faces)
+
+    def __init__(self, size, length, faces=2):
+        super(ThreeDotFaces, self).__init__(length)
+        self.faces = faces
+        self.size = size
 
 
 class CKDataset(Dataset):
@@ -62,4 +100,3 @@ def subj_indep_train_test_samplers(subjs, pct):
         else:
             test_idxs.append(idx)
     return train_idxs, test_idxs
-
