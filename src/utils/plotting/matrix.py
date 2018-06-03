@@ -2,11 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def debug():
-    from IPython.core.debugger import Pdb
-    Pdb().set_trace()
-
-
 def plot_matrix(img, vmin=0, vmax=1):
     plt.imshow(img, cmap='gray', vmin=vmin, vmax=vmax)
     plt.show()

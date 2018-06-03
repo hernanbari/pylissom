@@ -1,5 +1,3 @@
-import time
-
 import torch
 
 from src.math import normalize
@@ -15,15 +13,6 @@ def linear_decay(w, start, epoch, final_epoch):
 
 def kill_neurons(w, threshold):
     return w.masked_fill_(mask=torch.lt(w, threshold), value=0)
-
-
-class TimeIt(object):
-    def __init__(self):
-        self.t0 = time.time()
-
-    def end(self):
-        t1 = time.time()
-        print(t1 - self.t0)
 
 
 # TODO: test
