@@ -6,7 +6,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 
 from src.datasets.datasets import subj_indep_train_test_samplers
 from src.utils.helpers import save_model
-from src.utils.pipeline import Pipeline
+from src.utils.training.pipeline import Pipeline
 
 
 # from src.nn.utils import images as images

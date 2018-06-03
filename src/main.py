@@ -7,11 +7,11 @@ import shutil
 import numpy as np
 import torch
 
-from src.models.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
 from src.datasets.datasets import get_dataset, CKDataset
-from src.utils.cross_validation import CVSubjectIndependent, run_cross_validation
-from src.utils.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
-from src.utils.pipeline import Pipeline
+from src.models.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
+from src.utils.training.cross_validation import CVSubjectIndependent, run_cross_validation
+from src.utils.training.pipeline import Pipeline
+from src.utils.training.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')

@@ -1,15 +1,14 @@
 from collections import Counter
 from functools import lru_cache
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 from skimage.transform import rotate
 from tqdm import tqdm, tqdm_notebook
 
-import torch
-import numpy as np
-
-from src.utils.images import generate_horizontal_bar, translate, debug
-from src.utils.pipeline import Pipeline
+from src.utils.images import generate_horizontal_bar, translate
+from src.utils.training.pipeline import Pipeline
 
 
 class OrientationMap(object):
