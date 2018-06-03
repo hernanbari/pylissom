@@ -7,7 +7,7 @@ from functools import lru_cache
 import numpy as np
 import torch
 
-from src.math import gaussian, euclidian_distances
+from pylissom.math import gaussian, euclidian_distances
 
 
 # TODO: use pytorch, not numpy

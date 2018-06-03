@@ -1,11 +1,11 @@
 import numpy as np
 from torchvision import utils as vutils
 
-from src.nn.modules.lissom import DifferenceOfGaussiansLinear
-from src.nn.modules.linear import UnnormalizedDifferenceOfGaussiansLinear
-from src.utils.plotting.matrix import plot_dict_matrix
+from pylissom.nn.modules.lissom import DifferenceOfGaussiansLinear
+from pylissom.nn.modules.linear import UnnormalizedDifferenceOfGaussiansLinear
+from pylissom.utils.plotting.matrix import plot_dict_matrix
 # from tensorboard import SummaryWriter
-from src.utils.plotting.matrix import tensor_to_numpy_matrix
+from pylissom.utils.plotting.matrix import tensor_to_numpy_matrix
 
 logdir = 'runs'
 log_interval = 10

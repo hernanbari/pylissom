@@ -1,7 +1,7 @@
 import torch
 
-from src.math import normalize
-from src.nn.functional.weights import apply_circular_mask_to_weights
+from pylissom.math import normalize
+from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 
 
 def linear_decay(w, start, epoch, final_epoch):

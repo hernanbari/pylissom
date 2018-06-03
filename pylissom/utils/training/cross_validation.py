@@ -4,12 +4,12 @@ from sklearn.model_selection import GroupKFold
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
-from src.datasets.datasets import subj_indep_train_test_samplers
-from src.utils.helpers import save_model
-from src.utils.training.pipeline import Pipeline
+from pylissom.datasets.datasets import subj_indep_train_test_samplers
+from pylissom.utils.helpers import save_model
+from pylissom.utils.training.pipeline import Pipeline
 
 
-# from src.nn.functional import images as images
+# from pylissom.nn.functional import images as images
 
 
 class CVSubjectIndependent(object):

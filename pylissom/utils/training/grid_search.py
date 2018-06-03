@@ -1,10 +1,10 @@
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
-from src.datasets.datasets import get_dataset
-from src.models.models import get_lissom, get_supervised, get_reduced_lissom
-from src.utils.training.pipeline import Pipeline
-from src.utils.plotting import layers as images
+from pylissom.datasets.datasets import get_dataset
+from pylissom.models.models import get_lissom, get_supervised, get_reduced_lissom
+from pylissom.utils.training.pipeline import Pipeline
+from pylissom.utils.plotting import layers as images
 
 
 class GridSearch(object):

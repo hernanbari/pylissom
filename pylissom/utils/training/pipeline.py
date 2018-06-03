@@ -3,7 +3,7 @@ from tqdm import tqdm_notebook as tqdm
 import torch
 import numpy as np
 
-# from src.nn.functional.images import get_writer
+# from pylissom.nn.functional.images import get_writer
 from torch.autograd import Variable
 import torch.nn.functional as F
 

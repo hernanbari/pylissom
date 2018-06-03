@@ -7,11 +7,11 @@ import shutil
 import numpy as np
 import torch
 
-from src.datasets.datasets import get_dataset, CKDataset
-from src.models.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
-from src.utils.training.cross_validation import CVSubjectIndependent, run_cross_validation
-from src.utils.training.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
-from src.utils.training.pipeline import Pipeline
+from pylissom.datasets.datasets import get_dataset, CKDataset
+from pylissom.models.models import get_reduced_lissom, get_lissom, get_net, get_supervised, get_lgn
+from pylissom.utils.training.cross_validation import CVSubjectIndependent, run_cross_validation
+from pylissom.utils.training.grid_search import run_lgn_grid_search, run_lissom_grid_search, run_supervised_grid_search
+from pylissom.utils.training.pipeline import Pipeline
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -51,7 +51,7 @@ args = parser.parse_args()
 if os.path.exists(args.logdir):
     shutil.rmtree(args.logdir)
 
-import src.utils.plotting.layers as images
+import pylissom.utils.plotting.layers as images
 
 images.logdir = args.logdir
 images.log_interval = args.log_interval

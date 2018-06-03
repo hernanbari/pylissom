@@ -2,10 +2,10 @@ from collections import OrderedDict
 
 import torch
 
-from src.math import normalize
-from src.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid, AfferentNorm
-from src.nn.functional.functions import check_compatible_mul, check_compatible_add
-from src.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
+from pylissom.math import normalize
+from pylissom.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid, AfferentNorm
+from pylissom.nn.functional.functions import check_compatible_mul, check_compatible_add
+from pylissom.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
 
 
 class Cortex(GaussianCloudLinear):

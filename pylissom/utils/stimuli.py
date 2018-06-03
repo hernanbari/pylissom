@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from skimage.transform import rotate
 
-from src.math import gaussian
+from pylissom.math import gaussian
 
 
 def translate(bar, step=1, over_x=True):
