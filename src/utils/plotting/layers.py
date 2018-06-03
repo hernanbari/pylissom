@@ -3,9 +3,9 @@ from torchvision import utils as vutils
 
 from src.nn.modules.lissom import DifferenceOfGaussiansLinear
 from src.nn.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
-from src.utils.plotting.images import plot_dict_matrix
+from src.utils.plotting.matrix import plot_dict_matrix
 # from tensorboard import SummaryWriter
-from src.utils.plotting.images import tensor_to_numpy_matrix
+from src.utils.plotting.matrix import tensor_to_numpy_matrix
 
 logdir = 'runs'
 log_interval = 10
