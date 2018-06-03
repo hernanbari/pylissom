@@ -5,9 +5,9 @@ This module contains functions that modify the weights of the neural network.
 from functools import lru_cache
 
 import numpy as np
-
 import torch
-from src.nn.utils.math import gaussian, euclidian_distances, normalize
+
+from src.math import gaussian, euclidian_distances
 
 
 # TODO: use pytorch, not numpy

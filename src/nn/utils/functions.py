@@ -1,7 +1,8 @@
 import time
 
 import torch
-from src.nn.utils.math import normalize
+
+from src.math import normalize
 from src.nn.utils.weights import apply_circular_mask_to_weights
 
 
