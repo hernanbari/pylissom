@@ -1,11 +1,11 @@
 import numpy as np
-from src.nn.modules.lissom import DifferenceOfGaussiansLinear
-# from tensorboard import SummaryWriter
-
-import torch
-from src.nn.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
-from src.utils.images import plot_array_matrix, plot_dict_matrix, plot_matrix
 from torchvision import utils as vutils
+
+from src.nn.modules.lissom import DifferenceOfGaussiansLinear
+from src.nn.modules.simple import UnnormalizedDifferenceOfGaussiansLinear
+from src.utils.plotting.images import plot_dict_matrix
+# from tensorboard import SummaryWriter
+from src.utils.plotting.images import tensor_to_numpy_matrix
 
 logdir = 'runs'
 log_interval = 10
@@ -70,16 +70,6 @@ def plot_layer_weights(layer, use_range=True, recursive=False, prefix=''):
         for k, c in layer.named_children():
             plot_layer_weights(c, prefix=k + '.')
     return
-
-
-def tensor_to_numpy_matrix(tensor, shape):
-    tensor = tensor.cpu() if tensor.is_cuda else tensor
-    return np.reshape(tensor.numpy(), shape)
-
-
-def plot_tensor(tensor, shape, vmin=0, vmax=1):
-    img = tensor_to_numpy_matrix(tensor, shape)
-    plot_matrix(img, vmin, vmax)
 
 
 def simple_plot_layer_activation(layer, prefix=''):
