@@ -49,22 +49,17 @@ def gaussian_generator(size, mu_x, mu_y, sigma_x, sigma_y, orientation):
     return rot.astype(g.dtype)
 
 
-def generate_random_gaussians(size, count):
-    return (
-        gaussian_generator(size,
-                           mu_x=random.uniform(0, size - 1), mu_y=random.uniform(0, size - 1),
-                           sigma_x=0.75, sigma_y=2.5,
-                           orientation=random.uniform(0, 180)
-                           )
-        for _ in range(count)
-    )
+def generate_random_gaussian(size):
+    return gaussian_generator(size,
+                              mu_x=random.uniform(0, size - 1), mu_y=random.uniform(0, size - 1),
+                              sigma_x=0.75, sigma_y=2.5,
+                              orientation=random.uniform(0, 180)
+                              )
 
 
-def two_random_gaussians_generator(size, count):
-    stream_one = generate_random_gaussians(size, count)
-    stream_two = generate_random_gaussians(size, count)
-    for one, two in zip(stream_one, stream_two):
-        yield combine_matrices(one, two)
+def random_gaussians_generator(size, count, gaussians=1):
+    for _ in range(count):
+        yield combine_matrices(*(generate_random_gaussian(size) for _ in range(gaussians)))
 
 
 def generate_random_faces(size, count):
