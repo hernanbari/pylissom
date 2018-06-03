@@ -3,6 +3,7 @@ import torch
 from src.supervised_gcal.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
 from src.supervised_gcal.optimizers import SequentialOptimizer, CortexHebbian, NeighborsDecay
 from src.supervised_gcal.utils.config import global_config
+from src.supervised_gcal.utils.weights import get_gaussian_weights_wrapped, apply_fn_to_weights_between_maps
 
 
 def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
@@ -28,6 +29,8 @@ def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
         CortexHebbian(cortex=excitatory_module, **(optim_params['excitatory'])),
         CortexHebbian(cortex=inhibitory_module, **(optim_params['inhibitory'])),
     )
+    get_gaussian_weights_wrapped.cache_clear()
+    apply_fn_to_weights_between_maps.cache_clear()
     return model, optimizer, None
 
 
@@ -57,6 +60,8 @@ def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_densit
                   lgn_params, cfg_path)
     v1, optimizer, _ = get_reduced_lissom(lgn_density, cortical_density, rlissom_params, optim_params, cfg_path)
     model = Lissom(on, off, v1)
+    get_gaussian_weights_wrapped.cache_clear()
+    apply_fn_to_weights_between_maps.cache_clear()
     return model, optimizer, None
 
 
