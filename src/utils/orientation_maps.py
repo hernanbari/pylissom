@@ -7,7 +7,7 @@ import torch
 from skimage.transform import rotate
 from tqdm import tqdm, tqdm_notebook
 
-from src.utils.images import generate_horizontal_bar, translate
+from src.utils.stimuli import translate, generate_horizontal_bar
 from src.utils.training.pipeline import Pipeline
 
 

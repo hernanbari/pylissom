@@ -3,7 +3,7 @@ from random import shuffle
 import numpy as np
 
 import torch
-from src.utils.images import two_random_gaussians_generator, faces_generator
+from src.utils.stimuli import two_random_gaussians_generator, faces_generator
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms
