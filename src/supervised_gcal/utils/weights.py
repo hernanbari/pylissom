@@ -40,7 +40,8 @@ def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     return tmp_map
 
 
-@lru_cache()
+@lru_cache(maxsize=0)
+# TODO: use clear cache to free memory after layers initializations
 def get_gaussian_weights_wrapped(in_features, out_features, sigma):
     ans = torch.from_numpy(apply_fn_to_weights_between_maps(in_features, out_features, gaussian, sigma=sigma))
     return ans
