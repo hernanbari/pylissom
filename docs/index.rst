@@ -25,6 +25,24 @@ Look how easy it is to use:
     # Get your stuff done
     project.do_stuff()
 
+API Reference
+=============
+
+.. autosummary::
+   :toctree: _modules
+
+   pylissom
+   pylissom.datasets
+   pylissom.models
+   pylissom.nn
+   pylissom.nn.functional
+   pylissom.nn.modules
+   pylissom.optim
+   pylissom.utils
+   pylissom.utils.config
+   pylissom.utils.plotting
+   pylissom.utils.training
+
 Features
 --------
 
