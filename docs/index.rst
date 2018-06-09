@@ -28,20 +28,21 @@ Look how easy it is to use:
 API Reference
 =============
 
-.. autosummary::
-   :toctree: _modules
+.. toctree::
+   :caption: Package Reference
+   :maxdepth: 1
 
-   pylissom
-   pylissom.datasets
-   pylissom.models
-   pylissom.nn
-   pylissom.nn.functional
-   pylissom.nn.modules
-   pylissom.optim
-   pylissom.utils
-   pylissom.utils.config
-   pylissom.utils.plotting
-   pylissom.utils.training
+   _modules/pylissom
+   _modules/pylissom.datasets
+   _modules/pylissom.models
+   _modules/pylissom.nn
+   _modules/pylissom.nn.functional
+   _modules/pylissom.nn.modules
+   _modules/pylissom.optim
+   _modules/pylissom.utils
+   _modules/pylissom.utils.config
+   _modules/pylissom.utils.plotting
+   _modules/pylissom.utils.training
 
 Features
 --------
@@ -80,4 +81,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
