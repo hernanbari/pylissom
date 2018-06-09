@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 #     long_description = f.read()
 
 setup(
-    name='tesis_hernan_barijhoff',
+    name='pylissom',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
