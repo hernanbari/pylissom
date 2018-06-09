@@ -7,6 +7,9 @@ from pylissom.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid, Af
 from pylissom.nn.functional.functions import check_compatible_mul, check_compatible_add
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
 
+torch.nn.Sequential.__module__ = 'torch.nn'
+torch.nn.Module.__module__ = 'torch.nn'
+
 
 class Cortex(GaussianCloudLinear):
     def __init__(self, in_features, out_features, radius, sigma=1.0):

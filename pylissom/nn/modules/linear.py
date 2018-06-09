@@ -2,6 +2,9 @@ import torch
 from pylissom.nn.functional.functions import piecewise_sigmoid, afferent_normalize
 from pylissom.nn.functional.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
+torch.nn.Linear.__module__ = 'torch.nn'
+torch.nn.Module.__module__ = 'torch.nn'
+
 
 class GaussianLinear(torch.nn.Linear):
     # ASSUMES SQUARE MAPS

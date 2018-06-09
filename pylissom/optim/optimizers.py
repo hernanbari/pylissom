@@ -5,6 +5,8 @@ from pylissom.nn.modules.lissom import register_recursive_input_output_hook, Cor
 from pylissom.nn.functional.functions import kill_neurons, linear_decay
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 
+torch.optim.Optimizer.__module__ = 'torch.optim'
+
 
 class CortexOptimizer(torch.optim.Optimizer):
     def __init__(self, cortex):

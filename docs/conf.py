@@ -46,6 +46,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -87,7 +88,11 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'collapse_navigation': False,
+    'display_version': True,
+    'logo_only': True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -148,6 +153,13 @@ man_pages = [
     (master_doc, 'pylissom', 'pylissom Documentation',
      [author], 1)
 ]
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {
+    'pytorch': ('https://pytorch.org/docs/stable/', None),
+    'python': ('https://docs.python.org/2', None),
+    'configobj': ('https://configobj.readthedocs.io/en/latest/', None)
+}
 
 
 # -- Options for Texinfo output ----------------------------------------------
