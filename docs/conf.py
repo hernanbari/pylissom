@@ -94,7 +94,7 @@ html_theme_options = {
     'logo_only': True,
 }
 
-html_favicon = '_static/pylissom_logo.png'
+html_favicon = 'pylissom_logo.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
