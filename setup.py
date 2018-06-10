@@ -26,7 +26,8 @@ setup(
     version='1.2.0',
 
     description='A sample Python project',
-    install_requires=['configobj==5.0.6',
+    install_requires=['tqdm',
+                      'configobj==5.0.6',
                       'PyYAML==3.12',
                       'torchvision<0.2.0',
                       'pillow==4.3.0',
