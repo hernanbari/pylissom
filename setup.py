@@ -28,7 +28,7 @@ setup(
     description='A sample Python project',
     install_requires=['configobj==5.0.6',
                       'PyYAML==3.12',
-                      'torchvision==0.1.7',
+                      'torchvision<0.2.0',
                       'pillow==4.3.0',
                       'opencv-python',
                       'scikit-learn',
