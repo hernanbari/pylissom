@@ -30,7 +30,7 @@ setup(
                       'matplotlib', 'scikit-image'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
-    }
+    },
     # long_description=long_description,
     #
     # # The project's main homepage.
@@ -73,6 +73,8 @@ setup(
     #
     # # You can just specify the packages manually here if your project is
     # # simple. Or you can use find_packages().
+    # package_dir={'': 'pylissom'}
+    packages=find_packages()
     # packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     #
     # # Alternatively, if you want to distribute just a my_module.py, uncomment
