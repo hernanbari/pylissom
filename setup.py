@@ -30,7 +30,7 @@ setup(
                       'PyYAML==3.12',
                       'pillow==4.2.1',
                       'opencv-python',
-                      'scikit-learn==0.19.0',
+                      'scikit-learn',
                       'scikit-image',
                       'scipy',
                       'matplotlib',
