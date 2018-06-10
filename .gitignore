@@ -11,3 +11,4 @@ pytorch
 torch
 torchvision
 vision-master
+docs/_build
