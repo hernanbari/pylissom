@@ -35,7 +35,7 @@ setup(
                       'scikit-learn==0.19.0',
                       'opencv-python==3.3.0.10',
                       'matplotlib==2.0.2',
-                      'scikit-image==0.13.0',
+                      'scikit-image',
                       'pillow==4.2.1'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
