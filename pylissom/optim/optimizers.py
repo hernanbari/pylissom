@@ -9,6 +9,7 @@ torch.optim.Optimizer.__module__ = 'torch.optim'
 
 
 class CortexOptimizer(torch.optim.Optimizer):
+    """"Abstract py:class:`Optimizer` that can only be used with py:class:`Cortex`"""
     def __init__(self, cortex):
         assert isinstance(cortex, Cortex)
         self.cortex = cortex
@@ -30,6 +31,20 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
+    r""""Implements hebbian learning over a py:class:`Cortex` weights
+
+    The formula is as follows:
+
+    ..math::
+
+        \begin{equation*}
+        \text{w\'}_pq,ij = \text{w\'}_pq,ij + \alpha X_pq n_ij
+        \end{equation*}
+
+    Parameters:
+        - **cortex** - :py:class:`Cortex` map to apply formula
+        - **learning_rate** -
+    """
     def __init__(self, cortex, learning_rate):
         super(CortexHebbian, self).__init__(cortex)
         self.learning_rate = learning_rate

@@ -7,6 +7,13 @@ torch.nn.Module.__module__ = 'torch.nn'
 
 
 class GaussianLinear(torch.nn.Linear):
+    """Applies a linear transformation to the incoming data: :math:`y = Ax + b`
+
+    where A is a Gaussian matrix
+
+    Parameters:
+        - **sigma** -
+    """
     # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, sigma=1.0):
         super(GaussianLinear, self).__init__(in_features, out_features, bias=False)
@@ -23,6 +30,13 @@ class GaussianLinear(torch.nn.Linear):
 
 
 class GaussianCloudLinear(GaussianLinear):
+    """Applies a linear transformation to the incoming data: :math:`y = Ax + b`
+
+    where A is a Gaussian matrix multiplied with Gaussian Noise
+
+    Parameters:
+        - **sigma** -
+    """
     # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, sigma=1.0):
         super(GaussianCloudLinear, self).__init__(in_features, out_features, sigma=sigma)
@@ -31,6 +45,15 @@ class GaussianCloudLinear(GaussianLinear):
 
 
 class PiecewiseSigmoid(torch.nn.Module):
+    r"""Applies an approximation of the sigmoid function :math:`f(x) = 1 / ( 1 + exp(-x))`
+
+    The formula is as follows:
+    TODO
+    Parameters:
+        - **min_theta** -
+        - **max_theta** -
+
+    """
     def __init__(self, min_theta=0.0, max_theta=1.0):
         super(PiecewiseSigmoid, self).__init__()
         self.max_theta = max_theta

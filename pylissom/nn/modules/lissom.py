@@ -12,6 +12,16 @@ torch.nn.Module.__module__ = 'torch.nn'
 
 
 class Cortex(GaussianCloudLinear):
+    """Applies a linear transformation to the incoming data: :math:`y = Ax + b`
+
+    where A is a Gaussian Cloud with a connective radius
+
+    This module is primarily used to build a :py:class`ReducedLissom`
+
+    Parameters:
+        - **radius** -
+        - **sigma** -
+    """
     def __init__(self, in_features, out_features, radius, sigma=1.0):
         super(Cortex, self).__init__(in_features, out_features, sigma=sigma)
         self.radius = radius
@@ -42,6 +52,22 @@ class AfferentNormCortex(torch.nn.Sequential):
 
 
 class DifferenceOfGaussiansLinear(torch.nn.Linear):
+    r"""Applies a linear transformation to the incoming data: :math:`y = Ax + b`,
+    where A is a Difference of Gaussians with a connective radius:
+
+    .. math::
+
+        \begin{equation*}
+        \text{out}_ab = \sigma(\phi_L \sum_(xy) \text{input}_xy L_xy,ab)
+        \end{equation*}
+
+    Parameters:
+        - **on** - Defines if the substraction goes sorround gaussian - center gaussian or the other way around
+        - **radius** -
+        - **sigma_surround** -
+        - **sigma_center** -
+    """
+
     # ASSUMES SQUARE MAPS
     # Order of diff(normalize(mask(gaussian)))) is important
     def __init__(self, in_features, out_features, on, radius, sigma_surround, sigma_center=1.0):
@@ -85,6 +111,32 @@ class Mul(torch.nn.Module):
 
 
 class LGN(torch.nn.Sequential):
+    r"""Represents an LGN channel, can be ON or OFF
+
+    The transformation applied can be described as:
+
+    .. math::
+
+        \begin{equation*}
+        \text{out}_ab = \sigma(\phi_L \sum_(xy) \text{input}_xy L_xy,ab)
+        \end{equation*}
+
+    where :math:`\sigma` is the piecewise sigmoid,
+    :math:`N` is foo
+
+    It inherits from :py:class:`Sequential` because an LGN is in essence a composition of several transformations
+
+    * :attr:`afferent_module`
+
+    Parameters:
+        - **on** -
+        - **radius** -
+        - **sigma_surround** -
+        - **sigma_center** -
+        - **strength** -
+        - **min_theta** -
+        - **max_theta** -
+    """
     def __init__(self, in_features, out_features, on, radius, sigma_surround,
                  sigma_center=1.0, min_theta=0.0, max_theta=1.0, strength=1.0,
                  diff_of_gauss_cls=DifferenceOfGaussiansLinear, pw_sigmoid_cls=PiecewiseSigmoid):
@@ -103,6 +155,34 @@ class LGN(torch.nn.Sequential):
 
 
 class ReducedLissom(torch.nn.Module):
+    r"""Represents a Reduced Lissom consisting of afferent, excitatory and inhibitory modules
+
+    The transformation applied can be described as:
+
+    .. math::
+
+        \begin{equation*}
+        n_ij = \sigma(s_ij + \phi_E \sum_(kl) n_kl (t-1) E_kl,ij - \phi_I \sum_(kl) n_kl (t-1) E_kl,ij I_lk,ij)
+        \end{equation*}
+
+    where :math:`\sigma` is the piecewise sigmoid,
+    :math:`N` is foo
+
+    * :attr:`afferent_module`
+
+    Parameters:
+        - **afferent_module** -
+        - **excitatory_module** -
+        - **inhibitory_module** -
+        - **afferent_strength** -
+        - **excitatory_strength** -
+        - **inhibitory_strength** -
+        - **min_theta** -
+        - **max_theta** -
+        - **settling_steps** -
+
+    """
+
     def __init__(self, afferent_module, excitatory_module, inhibitory_module,
                  min_theta=1.0, max_theta=1.0, settling_steps=10,
                  afferent_strength=1.0, excitatory_strength=1.0, inhibitory_strength=1.0,
@@ -147,6 +227,25 @@ class ReducedLissom(torch.nn.Module):
 
 
 class Lissom(torch.nn.Module):
+    r"""Represents a Full Lissom, with ON/OFF channels and a V1 ( :py:class:`ReducedLissom` )
+
+    The transformation applied can be described as:
+
+    .. math::
+
+        \begin{equation*}
+        \text{out} = \text{v1}(\text{on}(input) + \text{off}(input))
+        \end{equation*}
+
+    Parameters:
+        - **on** - an ON :py:class:`LGN` map
+        - **off** - an OFF :py:class:`LGN` map
+        - **v1** - a :py:class:`ReducedLissom` map
+
+    Shape:
+        - TODO
+    """
+
     def __init__(self, on, off, v1):
         super(Lissom, self).__init__()
         check_compatible_add(on, off)
