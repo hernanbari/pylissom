@@ -34,7 +34,7 @@ setup(
                       'scikit-image',
                       'scipy',
                       'matplotlib',
-                      'numpy==1.13.3',
+                      'numpy',
                       'torchvision',
                       'torch'],
     extras_require={
