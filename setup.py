@@ -28,6 +28,7 @@ setup(
     description='A sample Python project',
     install_requires=['configobj==5.0.6',
                       'PyYAML==3.12',
+                      'torchvision==0.1.8',
                       'pillow==4.3.0',
                       'opencv-python',
                       'scikit-learn',
@@ -35,7 +36,6 @@ setup(
                       'scipy',
                       'matplotlib',
                       'numpy',
-                      'torchvision',
                       'torch'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
