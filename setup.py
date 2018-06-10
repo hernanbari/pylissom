@@ -28,7 +28,7 @@ setup(
     description='A sample Python project',
     install_requires=['configobj==5.0.6',
                       'PyYAML==3.12',
-                      'pillow==4.2.1',
+                      'pillow==4.3.0',
                       'opencv-python',
                       'scikit-learn',
                       'scikit-image',
