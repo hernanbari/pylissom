@@ -31,7 +31,7 @@ setup(
                       'torchvision==0.1.8',
                       'configobj==5.0.6',
                       'PyYAML==3.12',
-                      'scipy==0.19.1',
+                      'scipy',
                       'scikit-learn==0.19.0',
                       'opencv-python',
                       'matplotlib==2.0.2',
