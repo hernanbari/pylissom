@@ -94,6 +94,8 @@ html_theme_options = {
     'logo_only': True,
 }
 
+html_favicon = '_static/pylissom_logo.png'
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -177,6 +179,8 @@ texinfo_documents = [
 # -- Extension configuration -------------------------------------------------
 ## Generate autodoc stubs with summaries from code
 autosummary_generate = True
+
+autodoc_inherit_docstrings = False
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
