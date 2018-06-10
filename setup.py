@@ -26,8 +26,17 @@ setup(
     version='1.2.0',
 
     description='A sample Python project',
-    install_requires=['numpy', 'torch', 'torchvision', 'configobj', 'PyYAML', 'scipy', 'scikit-learn', 'opencv-python',
-                      'matplotlib', 'scikit-image'],
+    install_requires=['numpy==1.13.3',
+                      'torch==0.1.12',
+                      'torchvision==0.1.8',
+                      'configobj==5.0.6',
+                      'PyYAML==3.12',
+                      'scipy==0.19.1',
+                      'scikit-learn==0.19.0',
+                      'opencv-python==3.3.0.10',
+                      'matplotlib==2.0.2',
+                      'scikit-image==0.13.0',
+                      'pillow==4.2.1'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
     },
