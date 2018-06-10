@@ -36,7 +36,7 @@ setup(
                       'matplotlib==2.0.2',
                       'numpy==1.13.3',
                       'torchvision==0.1.9',
-                      'torch==0.1.12'],
+                      'torch'],
     extras_require={
         'dev': ['tensorflow', 'ipdb', 'tensorboard', 'visdom', 'tensorboardX']
     },
