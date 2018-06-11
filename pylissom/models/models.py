@@ -1,3 +1,8 @@
+"""
+Extens :py:mod:`model_zoo` and :py:mod:`torchvision.models` with some functions that read a config file and output
+some Lissom Modules, i.e. Lissom, ReducedLissom or LGN maps
+"""
+
 import torch
 
 from pylissom.nn.modules.lissom import ReducedLissom, Lissom, Cortex, LGN

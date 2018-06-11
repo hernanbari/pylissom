@@ -1,3 +1,8 @@
+"""
+Extends two common configuration libraries, configobj and yaml, to support execution of arbitrary code.
+This lets the user use mathematical formulas in their config file, common in Lissom experimentation.
+"""
+
 import configobj
 import os
 import yaml

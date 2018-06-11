@@ -1,3 +1,7 @@
+"""
+Provides some helpers to calculate Orientation Preferences of a Lissom Network
+"""
+
 from collections import Counter
 from functools import lru_cache
 

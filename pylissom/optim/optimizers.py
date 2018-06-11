@@ -1,3 +1,7 @@
+"""
+Extends the py:class:`Optimizer` class with Lissom optimizers, mainly Hebbian Learning
+"""
+
 import torch
 
 from pylissom.math import normalize

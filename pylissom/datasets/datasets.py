@@ -1,3 +1,7 @@
+"""
+Extends :py:mod:`torchvision.datasets` with two common Lissom stimuli, Oriented Gaussians and "Gaussian" Faces
+"""
+
 from random import shuffle
 
 import numpy as np

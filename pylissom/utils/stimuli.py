@@ -1,3 +1,7 @@
+"""
+Provides several functions that create and manipulate matrices representing different stimuli, mainly guassians disks
+"""
+
 import random
 
 import cv2

@@ -1,3 +1,7 @@
+"""
+Some plotting functions that receive :py:mod:`numpy` matrices as input
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

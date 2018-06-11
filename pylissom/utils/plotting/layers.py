@@ -1,3 +1,7 @@
+"""
+Some functions to plot specifically weights and activations of Lissom modules
+"""
+
 import numpy as np
 from torchvision import utils as vutils
 
