@@ -3,30 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pylissom's documentation!
-====================================
+Pylissom documentation
+======================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Pylissom is a Pytorch extension implementing the Lissom network and other tools, based in the topographica framework.
 
+It's split in two parts, the core nn and optim packages, which implement the network itself,
+ and the datasets, models and utils packages, that consist of a researcher's toolkit akin to topographica features.
 
-This is fooooooooo.
+For examples on how to use it you should check the jupyter notebooks in the github's page.
 
-$project
-========
-
-$project will solve your problem of where to start with documentation,
-by providing a basic explanation of how to do it easily.
-
-Look how easy it is to use:
-
-    import project
-    # Get your stuff done
-    project.do_stuff()
-
-API Reference
-=============
 
 .. toctree::
    :caption: Package Reference
@@ -44,30 +30,18 @@ API Reference
    _modules/pylissom.utils.plotting
    _modules/pylissom.utils.training
 
-Features
---------
-
-- Be awesome
-- Make things faster
 
 Installation
 ------------
 
-Install $project by running:
+Install pylisosm by running:
 
-    install project
+    pip install pylissom
 
 Contribute
 ----------
 
-- Issue Tracker: github.com/$project/$project/issues
-- Source Code: github.com/$project/$project
-
-Support
--------
-
-If you are having issues, please let us know.
-We have a mailing list located at: project@google-groups.com
+- Source Code: https://github.com/hernanbari/pylissom
 
 License
 -------

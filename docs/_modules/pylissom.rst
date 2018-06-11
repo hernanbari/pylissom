@@ -1,13 +1,11 @@
 pylissom
-================
+========
 
 .. automodule:: pylissom
     :members:
     :undoc-members:
     :show-inheritance:
 
-Submodules
-----------
 
 pylissom.math module
 --------------------
