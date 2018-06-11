@@ -18,14 +18,19 @@ def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
     The elements of the array would be the weights of the superior layer, with the inferior layer, i.e.,
     it modifies the weights of each one of the neurons of the superior layer, with respect to all the neurons
     of the inferior layer.
-    :param rows_dims_source: The dimension of the inferior array.
-    :param rows_dims_output: The dimension of the superior array.
-    :param fn: The function applied to the weights.
-    :param kwargs: The actual weights.
-    :return: An array containing the new weights of the superior layer.
+
+    ASSUMES SQUARE MAPS
     PROBLEMAS? OJO QUE EL STEP PUEDE SER UN FLOAT
+
+    Args:
+        in_features:
+        out_features:
+        fn: The function applied to the weights
+        **kwargs: Optional parameters to fn
+
+    Returns:
+        An array containing the new weights of the superior layer.
     """
-    # ASSUMES SQUARE MAPS
     rows_dims_source = int(in_features ** 0.5)
     rows_dims_output = int(out_features ** 0.5)
     dims = in_features
@@ -65,9 +70,13 @@ def apply_circular_mask_to_weights(matrix, radius):
     """
     This functions applies a circular mask to a matrix of weights. The weights of the neurons that are
     more far than the radius, will have its weight set to zero.
-    :param matrix: Tensor of weights. The rows are the neurons. The columns the weights of the neuron.
-    :param radius: The radius of neighborhood.
-    :return:
+
+    Args:
+        matrix: Tensor of weights. The rows are the neurons. The columns the weights of the neuron.
+        radius: The radius of neighborhood.
+
+    Returns:
+
     """
     if radius is None:
         return matrix
@@ -81,6 +90,12 @@ def dense_weights_to_sparse(matrix):
     """
     Transforms a torch dense tensor to sparse
     http://pytorch.org/docs/master/sparse.html
+
+    Args:
+        matrix:
+
+    Returns:
+
     """
     nnz_mask = matrix != 0
     nnz_values = matrix[nnz_mask]

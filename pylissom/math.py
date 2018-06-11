@@ -10,11 +10,15 @@ import torch
 def euclidian_distances(x, y, mu_x, mu_y):
     """
     This function implements the euclidean distance between two 2-dimensional vectors.
-    :param x: first element of the first vector
-    :param y: second element of the first vector
-    :param mu_x: first element of the second vector
-    :param mu_y: second element of the second vector
-    :return: euclidean distance
+
+    Args:
+        x: first element of the first vector
+        y: second element of the first vector
+        mu_x: first element of the second vector
+        mu_y: second element of the second vector
+
+    Returns:
+        Euclidean distance
     """
     return np.sqrt(((x - mu_x) ** 2 + (y - mu_y) ** 2))
 
@@ -23,9 +27,13 @@ def euclidian_distances(x, y, mu_x, mu_y):
 def euclidean_distance_general(x, y):
     """
     This function implements the euclidean distance between two n-dimensional vectors as numpy arrays.
-    :param x: First vector (numpy array)
-    :param y: Second vector (numpy array)
-    :return: euclidean distance
+
+    Args:
+        x: First vector (numpy array)
+        y: Second vector (numpy array)
+
+    Returns:
+        euclidean distance
     """
     return np.sqrt(np.sum((x - y) ** 2))
 
@@ -33,12 +41,17 @@ def euclidean_distance_general(x, y):
 def gaussian(x, y, mu_x, mu_y, sigma, sigma_y=None):
     """
     This function implements a circular gaussian function.
-    :param x:
-    :param y:
-    :param mu_x: Center
-    :param mu_y: Center
-    :param sigma:
-    :return: Gaussian
+
+    Args:
+        x:
+        y:
+        mu_x: Center
+        mu_y: Center
+        sigma:
+        sigma_y:
+
+    Returns:
+        Gaussian
     """
     if sigma_y is None:
         sigma_y = sigma
@@ -53,10 +66,14 @@ def normalize(matrix, norm=1, axis=1):
     """
     This function implements a normalization of the row or column vectors of a matrix
     (by default, normalizes the columns and uses norm 1).
-    :param matrix: input matrix
-    :param norm: Dimension of the norm
-    :param axis:  0 is column, 1 is row
-    :return: a matrix normalized by columns or rows
+
+    Args:
+        matrix: input matrix
+        norm: Dimension of the norm
+        axis: 0 is column, 1 is row
+
+    Returns:
+        A matrix normalized by columns or rows
     """
     matrix_norms = matrix.norm(p=norm, dim=axis)
     return matrix.div(matrix_norms.expand_as(matrix))
