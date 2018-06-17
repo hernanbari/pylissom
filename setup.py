@@ -146,6 +146,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     # Should not pin down version
     install_requires=['tqdm',
+                      'pillow>4.0.0',
                       'configobj',
                       'PyYAML',
                       'torchvision',
