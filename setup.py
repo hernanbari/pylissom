@@ -146,17 +146,16 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     # Should not pin down version
     install_requires=['tqdm',
-                      'configobj==5.0.6',
-                      'PyYAML==3.12',
-                      'torchvision<0.2.0',
-                      'pillow==4.3.0',
-                      'opencv-python',
-                      'scikit-learn',
-                      'scikit-image',
-                      'scipy',
+                      'ipdb',
+                      'configobj',
+                      'PyYAML',
+                      'torchvision',
+                      'opencv-python',  # used to create stimuli in utils
+                      'scikit-learn',  # used in training utils, grid search, cross validation
+                      'scikit-image',  # used to create stimuli in utils, should replace with torch.rotation
                       'matplotlib',
                       'numpy',
-                      'torch'],  # Optional
+                      'torch'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
