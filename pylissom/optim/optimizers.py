@@ -9,6 +9,7 @@ from pylissom.nn.modules.lissom import register_recursive_input_output_hook, Cor
 from pylissom.nn.functional.functions import kill_neurons, linear_decay
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 
+# This is necessary for docs inter-sphinx to work
 torch.optim.Optimizer.__module__ = 'torch.optim'
 
 

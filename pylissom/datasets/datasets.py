@@ -12,6 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms
 
+# This is necessary for docs inter-sphinx to work
 Dataset.__module__ = 'torch.utils.data'
 
 
