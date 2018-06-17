@@ -21,7 +21,7 @@ def get_dataset(train, args):
     if args.dataset == 'ck':
         dataset = CKDataset()
         return DataLoader(CKDataset(), batch_size=args.batch_size,
-                          sampler=train_test_CK_samplers(dataset, train),
+                          sampler=train_test_ck_samplers(dataset, train),
                           **kwargs)
     elif args.dataset == 'mnist':
         return DataLoader(
@@ -86,7 +86,7 @@ class CKDataset(Dataset):
         return len(self.X)
 
 
-def train_test_CK_samplers(ck_dataset, train, train_pct=0.5):
+def train_test_ck_samplers(ck_dataset, train, train_pct=0.5):
     train_idxs, test_idxs = subj_indep_train_test_samplers(ck_dataset.subjs, pct=train_pct)
     if train:
         return SubsetRandomSampler(train_idxs)
