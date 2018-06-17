@@ -1,5 +1,5 @@
 """
-Extends the py:class:`Optimizer` class with Lissom optimizers, mainly Hebbian Learning
+Extends the py:class:`torch.optim.Optimizer` class with Lissom optimizers, mainly Hebbian Learning
 """
 
 import torch

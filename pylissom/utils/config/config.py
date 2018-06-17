@@ -17,6 +17,7 @@ class EvalConf(object):
 
 
 class EvalConfigYaml(EvalConf):
+    r"""Uses :py:func:`yaml.add_constructor` to add arbitrary code execution to yaml file"""
     def __init__(self, infile=os.path.join(here, 'modules_params.yaml'), user_values=None):
         self.infile = infile
 
@@ -43,6 +44,7 @@ class EvalConfigYaml(EvalConf):
 
 
 class EvalConfigObj(ConfigObj, EvalConf):
+    r"""Inherits :py:class:`configobj.ConfigObj` and adds arbitrary code execution to config file"""
     def __init__(self, infile=None, user_values=None, **kwargs):
         infile = os.path.join(here, 'modules_params.ini') if infile is None else infile
         usr = ConfigObj(infile=user_values)
