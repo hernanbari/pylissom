@@ -1,11 +1,7 @@
-from tqdm import tqdm_notebook as tqdm
-
-import torch
 import numpy as np
-
-# from pylissom.nn.functional.images import get_writer
+import torch
 from torch.autograd import Variable
-import torch.nn.functional as F
+from tqdm import tqdm_notebook as tqdm
 
 
 class Pipeline(object):
@@ -20,6 +16,9 @@ class Pipeline(object):
         self.optimizer = optimizer
         self.model = model if not cuda else model.cuda()
 
+        self.epoch = None
+        self.test_loss = None
+
     def train(self, train_data_loader, epoch):
         self.model.train()
         self.epoch = epoch
@@ -33,11 +32,11 @@ class Pipeline(object):
 
     # TODO: check this
     @staticmethod
-    def process_input(input, normalize=False):
-        batch_input_shape = torch.Size((1, int(np.prod(input.data.size()))))
-        var = input
+    def process_input(inp, normalize=False):
+        batch_input_shape = torch.Size((1, int(np.prod(inp.data.size()))))
+        var = inp
         if normalize:
-            var = var / torch.norm(input, p=2, dim=1)
+            var = var / torch.norm(inp, p=2, dim=1)
         var = var.view(batch_input_shape)
         return var
 
@@ -65,7 +64,7 @@ class Pipeline(object):
                 if self.loss_fn:
                     if self.use_writer:
                         self.writer.add_scalar('loss', loss.data[0],
-                                           global_step=batch_idx + len(data_loader) * (self.epoch - 1))
+                                               global_step=batch_idx + len(data_loader) * (self.epoch - 1))
                     loss.backward()
                 self.optimizer.step() if self.optimizer else None
                 # if batch_idx % self.log_interval == 0:
@@ -77,7 +76,7 @@ class Pipeline(object):
             # if not train:
             #     self._test_log(data_loader)
             if self.use_writer:
-                self.writer.add_scalar('accuracy', self.accuracy(data_loader), global_step=self.epoch-1)
+                self.writer.add_scalar('accuracy', self.accuracy(data_loader), global_step=self.epoch - 1)
             return self.accuracy(data_loader)
         return None
 

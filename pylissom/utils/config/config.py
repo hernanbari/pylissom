@@ -35,7 +35,8 @@ class EvalConfigYaml(EvalConf):
     def eval_dict(self):
         return self.conf
 
-    def anchors(self, kwargs):
+    @staticmethod
+    def anchors(kwargs):
         base_str = '{anchor}: &{anchor} {value}\n'
         text = ''
         for k, v in kwargs.items():

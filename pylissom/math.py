@@ -3,7 +3,6 @@ This module contains auxiliary math functions.
 """
 
 import numpy as np
-import torch
 
 
 # TODO: use pytorch lib

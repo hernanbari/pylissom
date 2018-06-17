@@ -62,7 +62,7 @@ class PiecewiseSigmoid(torch.nn.Module):
 
     def forward(self, input):
         # TODO: add inplace option
-        return piecewise_sigmoid(min_theta=self.min_theta, max_theta=self.max_theta, input=input)
+        return piecewise_sigmoid(min_theta=self.min_theta, max_theta=self.max_theta, inp=input)
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \

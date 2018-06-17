@@ -46,12 +46,12 @@ log_interval = 10
 #     return writer
 
 
-def images_matrix(matrix, range=None):
+def images_matrix(matrix, range_interval=None):
     out_features = matrix.size()[0]
     in_features = matrix.size()[1]
     weights_shape = (int(np.sqrt(in_features)), int(np.sqrt(in_features)))
     reshaped_weights = matrix.contiguous().view((out_features, 1) + weights_shape)
-    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.size()[0])), range=range)
+    im = vutils.make_grid(reshaped_weights, normalize=True, nrow=int(np.sqrt(reshaped_weights.size()[0])), range=range_interval)
         # ,
         #                   pad_value=0.5 if range is not None and range[0] >= 0 else 0)
     return im
@@ -69,7 +69,8 @@ def plot_layer_weights(layer, use_range=True, recursive=False, prefix=''):
                                   or isinstance(layer, UnnormalizedDifferenceOfGaussiansLinear) else (0, 1)
     else:
         values_range = None
-    plot_dict_matrix({prefix + '.' + k: weights_to_numpy_matrix(w.data, values_range) for k, w in layer.named_parameters()})
+    plot_dict_matrix({prefix + '.' + k: weights_to_numpy_matrix(w.data, values_range)
+                      for k, w in layer.named_parameters()})
     if recursive:
         for k, c in layer.named_children():
             plot_layer_weights(c, prefix=k + '.')
@@ -83,14 +84,15 @@ def simple_plot_layer_activation(layer, prefix=''):
         inp_mat = tensor_to_numpy_matrix(layer.input.data, (input_rows, input_rows))
         act_mat = tensor_to_numpy_matrix(layer.output.data, (output_rows, output_rows))
         plot_dict_matrix(dict([(prefix + '.' + 'input', inp_mat), (prefix + '.' + 'activation', act_mat)]))
+    # TODO: change excpetion to more specific one
     except Exception:
         pass
 
 
-def named_apply(module, fn, prefix):
-    for k, m in module.named_children():
+def named_apply(mod, fn, prefix):
+    for k, m in mod.named_children():
         named_apply(m, fn, prefix + '.' + k)
-    fn(module, prefix)
+    fn(mod, prefix)
 
 
 def plot_layer_activation(layer, prefix=''):

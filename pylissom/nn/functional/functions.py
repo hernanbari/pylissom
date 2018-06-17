@@ -25,10 +25,10 @@ def afferent_normalize(radius, strength, afferent_input, activation):
     return activation
 
 
-def piecewise_sigmoid(min_theta, max_theta, input):
-    mask_zeros = torch.le(input, min_theta)
-    mask_ones = torch.ge(input, max_theta)
-    output = (input - min_theta).div(max_theta - min_theta)
+def piecewise_sigmoid(min_theta, max_theta, inp):
+    mask_zeros = torch.le(inp, min_theta)
+    mask_ones = torch.ge(inp, max_theta)
+    output = (inp - min_theta).div(max_theta - min_theta)
     output.masked_fill_(mask=mask_zeros, value=0)
     output.masked_fill_(mask=mask_ones, value=1)
     return output

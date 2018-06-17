@@ -17,10 +17,10 @@ def translate(bar, step=1, over_x=True):
     half_cols = cols // 2
     for x in range(-half_cols, half_cols + 1 if cols % 2 == 1 else half_cols, step):
         if over_x:
-            M = np.float32([[1, 0, x], [0, 1, 0]])
+            matrix = np.float32([[1, 0, x], [0, 1, 0]])
         else:
-            M = np.float32([[1, 0, 0], [0, 1, x]])
-        dst = cv2.warpAffine(bar, M, bar.shape)
+            matrix = np.float32([[1, 0, 0], [0, 1, x]])
+        dst = cv2.warpAffine(bar, matrix, bar.shape)
         images.append(dst)
     return images
 
@@ -28,8 +28,8 @@ def translate(bar, step=1, over_x=True):
 def random_translation(img, x_offset=5, y_offset=5):
     random_x = random.uniform(-x_offset, x_offset)
     random_y = random.uniform(-y_offset, y_offset)
-    M = np.float32([[1, 0, random_x], [0, 1, random_y]])
-    return cv2.warpAffine(img, M, img.shape)
+    matrix = np.float32([[1, 0, random_x], [0, 1, random_y]])
+    return cv2.warpAffine(img, matrix, img.shape)
 
 
 def generate_horizontal_bar(size):
@@ -37,7 +37,7 @@ def generate_horizontal_bar(size):
     return cv2.GaussianBlur(line, (7, 7), 0)
 
 
-def generate_gaussian(shape, mu_x=0, mu_y=0, sigma_x=1.0, sigma_y=None):
+def generate_gaussian(shape, mu_x=0.0, mu_y=0.0, sigma_x=1.0, sigma_y=None):
     return np.fromfunction(function=lambda x, y: gaussian(x, y, mu_x, mu_y, sigma=sigma_x, sigma_y=sigma_y),
                            shape=shape, dtype=int)
 
