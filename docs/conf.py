@@ -181,10 +181,12 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
-## Generate autodoc stubs with summaries from code
+# Generate autodoc stubs with summaries from code
 autosummary_generate = True
 
 autodoc_inherit_docstrings = False
+
+autodoc_member_order = 'bysource'
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
