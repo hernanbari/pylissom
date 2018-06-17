@@ -11,7 +11,6 @@ Pylissom is a Pytorch extension implementing the Lissom network and other tools,
 It's split in two parts, the core nn and optim packages, which implement the network itself,
  and the datasets, models and utils packages, that consist of a researcher's toolkit akin to topographica features.
 
-For examples on how to use it you should check the jupyter notebooks in the github's page.
 
 
 .. toctree::
@@ -31,12 +30,21 @@ For examples on how to use it you should check the jupyter notebooks in the gith
    _modules/pylissom.utils.training
 
 
+Getting Started
+---------------
+
+For examples on how to use it you should check the jupyter notebooks in the github's page: https://github.com/hernanbari/pylissom.
+
 Installation
 ------------
+
+You should first install pytorch with conda as explained at: https://pytorch.org/
 
 Install pylisosm by running:
 
     pip install pylissom
+
+The code is hosted in pypi: https://test.pypi.org/project/pylissom/
 
 Contribute
 ----------
