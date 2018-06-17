@@ -160,8 +160,11 @@ man_pages = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'pytorch': ('https://pytorch.org/docs/stable/', None),
-    'python': ('https://docs.python.org/2', None),
-    'configobj': ('https://configobj.readthedocs.io/en/latest/', None)
+    'torchvision': ('https://pytorch.org/docs/stable/', None),
+    'python': ('https://docs.python.org/3', None),
+    'configobj': ('https://configobj.readthedocs.io/en/latest/', None),
+    'yaml': ('https://yaml.readthedocs.io/en/latest/', None),
+    'numpy': ('https://numpy.readthedocs.io/en/latest/', None)
 }
 
 
