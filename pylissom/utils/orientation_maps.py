@@ -16,6 +16,7 @@ from pylissom.utils.training.pipeline import Pipeline
 
 
 class OrientationMap(object):
+    r"""FOOOOOOO"""
     # TODO: optimize using vectorization to calculate activations
     def __init__(self, model, inputs, use_tqdm_notebook=True):
         """
