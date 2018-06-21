@@ -1,5 +1,6 @@
 """
 Provides several functions that create and manipulate matrices representing different stimuli, mainly guassians disks
+TODO: only use cv2 or scikit-image, not both
 """
 
 import random
@@ -43,17 +44,28 @@ def generate_gaussian(shape, mu_x=0.0, mu_y=0.0, sigma_x=1.0, sigma_y=None):
 
 
 def rotations(img, num=13):
-    return dict([(int(degree), rotate(img, degree, mode='constant').astype(img.dtype)) for degree in
-                 np.linspace(0, 180, num)])
+    r"""
+    Returns: Returns a dictionary of len 180 / num, representing {rotation_degrees: rotated_img}
+    """
+    return {(int(degree), rotate(img, degree, mode='constant').astype(img.dtype)) for degree in
+                 np.linspace(0, 180, num)}
 
 
 def gaussian_generator(size, mu_x, mu_y, sigma_x, sigma_y, orientation):
+    r"""
+    Args:
+        orientation: It's actually redundant because orientation is a function of the sigmas, but make it easier to use
+    Returns: A numpy matrix representing a gaussian of shape = (size, size)
+    """
     g = generate_gaussian((size, size), mu_x, mu_y, sigma_x, sigma_y)
     rot = rotate(g, orientation, mode='constant')
     return rot.astype(g.dtype)
 
 
 def generate_random_gaussian(size):
+    r"""
+    Returns: A numpy matrix with a random gaussian of shape = (size, size)
+    """
     return gaussian_generator(size,
                               mu_x=random.uniform(0, size - 1), mu_y=random.uniform(0, size - 1),
                               sigma_x=0.75, sigma_y=2.5,
@@ -61,8 +73,15 @@ def generate_random_gaussian(size):
                               )
 
 
-def random_gaussians_generator(size, count, gaussians=1):
-    for _ in range(count):
+def random_gaussians_generator(size, gaussians=1):
+    r"""
+    Args:
+        size: img will have shape = (size, size)
+        gaussians: How many gaussians per matrix
+
+    Returns: Yields a squared numpy matrix with gaussians disks
+    """
+    while True:
         yield combine_matrices(*(generate_random_gaussian(size) for _ in range(gaussians)))
 
 
@@ -77,6 +96,9 @@ def generate_random_faces(size, count):
 
 
 def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
+    r"""
+    Returns: A numpy matrix with 3 gaussian disks representing a face
+    """
     lefteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y + 2.5 * 4, sigma_x=sigma_x)
     righteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y - 2.5 * 4, sigma_x=sigma_x)
     mouth = generate_gaussian((size, size), mu_x=mu_x + 5 * 4, mu_y=mu_y, sigma_x=sigma_x)
@@ -86,6 +108,13 @@ def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
 
 
 def faces_generator(size, num=1):
+    r"""
+    Args:
+        size: img will have shape = (size, size)
+        gaussians: How many faces per matrix
+
+    Returns: Yields a squared numpy matrix with 3-gaussians faces
+    """
     while True:
         faces = (
             generate_three_dots(size,
@@ -100,6 +129,9 @@ def faces_generator(size, num=1):
 
 
 def combine_matrices(*matrices):
+    r"""
+    Returns: Merges matrices in one matrix using the maximum values in each pixel
+    """
     return np.maximum.reduce(matrices)
 
 

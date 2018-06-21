@@ -18,11 +18,13 @@ def load_model(fname='model.pth.tar'):
 
 
 def debug():
+    r"""Calls a debugger that works with jupyter notebooks"""
     from IPython.core.debugger import Pdb
     Pdb().set_trace()
 
 
 class TimeIt(object):
+    r"""At instantiation starts a timer and prints value when end() is called"""
     def __init__(self):
         self.t0 = time.time()
 

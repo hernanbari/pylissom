@@ -32,25 +32,30 @@ def get_dataset(train, args):
 
 
 class RandomDataset(Dataset):
+    r"""Abstract Dataset representing random samples, subclasses must implement
+    :py:func:`pylissom.datasets.RandomDataset._gen`"""
     def __init__(self, length):
         self._lenght = length
 
     def __len__(self):
         return self._lenght
 
-    def __getitem__(self, item):
+    def __getitem__(self, index):
+        if index >= (len(self)):
+            raise StopIteration
         # Foo target
         return torch.from_numpy(next(self.gen)), torch.Tensor(2)
 
     @property
-    def gen(self):
+    def _gen(self):
         raise NotImplementedError
 
 
 class OrientatedGaussians(RandomDataset):
+    r"""Dataset of random Oriented Gaussians samples, as used in Computional Maps in the Visual Cortex"""
     @property
-    def gen(self):
-        return random_gaussians_generator(self.size, len(self), self.gaussians)
+    def _gen(self):
+        return random_gaussians_generator(self.size, self.gaussians)
 
     def __init__(self, size, length, gaussians=2):
         super(OrientatedGaussians, self).__init__(length)
@@ -59,8 +64,9 @@ class OrientatedGaussians(RandomDataset):
 
 
 class ThreeDotFaces(RandomDataset):
+    r"""Dataset of random Faces made of Three Gaussians Disks, as used in Computional Maps in the Visual Cortex"""
     @property
-    def gen(self):
+    def _gen(self):
         return faces_generator(self.size, self.faces)
 
     def __init__(self, size, length, faces=2):

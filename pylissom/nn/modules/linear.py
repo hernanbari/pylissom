@@ -46,7 +46,7 @@ class GaussianCloudLinear(GaussianLinear):
 
 
 class PiecewiseSigmoid(torch.nn.Module):
-    r"""Applies an approximation of the sigmoid function :math:`f(x) = 1 / ( 1 + exp(-x))`
+    r"""Applies a piecewise approximation of the sigmoid function :math:`f(x) = 1 / ( 1 + exp(-x))`
 
     The formula is as follows:
     TODO
@@ -71,43 +71,44 @@ class PiecewiseSigmoid(torch.nn.Module):
                + ')'
 
 
-class AfferentNorm(torch.nn.Module):
-    def __init__(self, strength, radius):
-        super(AfferentNorm, self).__init__()
-        self.radius = radius
-        self.strength = strength
+# class AfferentNorm(torch.nn.Module):
+#     def __init__(self, strength, radius):
+#         super(AfferentNorm, self).__init__()
+#         self.radius = radius
+#         self.strength = strength
+#
+#     def forward(self, afferent_input, activation):
+#         # TODO: add inplace option
+#         return afferent_normalize(strength=self.strength,
+#                                   afferent_input=afferent_input,
+#                                   activation=activation,
+#                                   radius=self.radius)
+#
+#     def __repr__(self):
+#         return self.__class__.__name__ + ' (' \
+#                + 'radius=' + str(self.radius) \
+#                + ', ' + 'strength=' + str(self.strength) \
+#                + ')'
 
-    def forward(self, afferent_input, activation):
-        # TODO: add inplace option
-        return afferent_normalize(strength=self.strength,
-                                  afferent_input=afferent_input,
-                                  activation=activation,
-                                  radius=self.radius)
-
-    def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + 'radius=' + str(self.radius) \
-               + ', ' + 'strength=' + str(self.strength) \
-               + ')'
-
-
-# TODO: test, remove if not used
-class CircularMask(torch.nn.Module):
-    def __init__(self, radius):
-        super(CircularMask, self).__init__()
-        self.radius = radius
-
-    def forward(self, input):
-        # TODO: add inplace option
-        apply_circular_mask_to_weights(matrix=input, radius=self.radius)
-
-    def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + 'radius=' + str(self.radius) \
-               + ')'
+#
+# # TODO: test, remove if not used
+# class CircularMask(torch.nn.Module):
+#     def __init__(self, radius):
+#         super(CircularMask, self).__init__()
+#         self.radius = radius
+#
+#     def forward(self, input):
+#         # TODO: add inplace option
+#         apply_circular_mask_to_weights(matrix=input, radius=self.radius)
+#
+#     def __repr__(self):
+#         return self.__class__.__name__ + ' (' \
+#                + 'radius=' + str(self.radius) \
+#                + ')'
 
 
 class UnnormalizedDifferenceOfGaussiansLinear(torch.nn.Linear):
+    r"""NOT USED, only for example in notebooks"""
     # Not used in lissom, only for example
     # ASSUMES SQUARE MAPS
     def __init__(self, in_features, out_features, on, sigma_surround, sigma_center=1.0):

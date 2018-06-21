@@ -3,9 +3,9 @@ from collections import OrderedDict
 import torch
 
 from pylissom.math import normalize
-from pylissom.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid, AfferentNorm
 from pylissom.nn.functional.functions import check_compatible_mul, check_compatible_add
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
+from pylissom.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid
 
 # This is necessary for docs inter-sphinx to work
 torch.nn.Sequential.__module__ = 'torch.nn'
@@ -37,19 +37,19 @@ class Cortex(GaussianCloudLinear):
                + ')'
 
 
-# TODO: test
-class AfferentNormCortex(torch.nn.Sequential):
-    def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=1.0,
-                 cortex_cls=Cortex, aff_norm_cls=AfferentNorm):
-        self.sigma = sigma
-        self.aff_norm_strength = aff_norm_strength
-        self.radius = radius
-        self.out_features = out_features
-        self.in_features = in_features
-        layers = OrderedDict(
-            {'cortex': cortex_cls(in_features=in_features, out_features=out_features, radius=radius, sigma=sigma),
-             'aff_norm': aff_norm_cls(aff_norm_strength=aff_norm_strength, radius=radius)})
-        super(AfferentNormCortex, self).__init__(layers)
+# # TODO: test
+# class AfferentNormCortex(torch.nn.Sequential):
+#     def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=1.0,
+#                  cortex_cls=Cortex, aff_norm_cls=AfferentNorm):
+#         self.sigma = sigma
+#         self.aff_norm_strength = aff_norm_strength
+#         self.radius = radius
+#         self.out_features = out_features
+#         self.in_features = in_features
+#         layers = OrderedDict(
+#             {'cortex': cortex_cls(in_features=in_features, out_features=out_features, radius=radius, sigma=sigma),
+#              'aff_norm': aff_norm_cls(aff_norm_strength=aff_norm_strength, radius=radius)})
+#         super(AfferentNormCortex, self).__init__(layers)
 
 
 class DifferenceOfGaussiansLinear(torch.nn.Linear):
@@ -100,6 +100,7 @@ class DifferenceOfGaussiansLinear(torch.nn.Linear):
 
 
 class Mul(torch.nn.Module):
+    r"""Represents a layer than only multiplies the input by a constant, used in :py:class:`pylissom.nn.modules.LGN`"""
     def __init__(self, number):
         super(Mul, self).__init__()
         self.number = number
@@ -271,14 +272,3 @@ class Lissom(torch.nn.Module):
                + ')'
 
 
-def register_recursive_forward_hook(module, hook):
-    return [m.register_forward_hook(hook) for m in module.modules()]
-
-
-def input_output_hook(module, input, output):
-    module.input = input[0].clone()
-    module.output = output.clone()
-
-
-def register_recursive_input_output_hook(module):
-    return register_recursive_forward_hook(module, input_output_hook)

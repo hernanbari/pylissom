@@ -6,7 +6,7 @@ some Lissom Modules, i.e. Lissom, ReducedLissom or LGN maps
 import torch
 
 from pylissom.nn.modules.lissom import ReducedLissom, Lissom, Cortex, LGN
-from pylissom.nn.functional.weights import get_gaussian_weights_wrapped
+from pylissom.nn.functional.weights import get_gaussian_weights
 from pylissom.optim.optimizers import SequentialOptimizer, CortexHebbian
 from pylissom.utils.config.config import global_config
 
@@ -34,7 +34,7 @@ def get_reduced_lissom(retinal_density='DEFAULT', cortical_density='DEFAULT',
         CortexHebbian(cortex=excitatory_module, **(optim_params['excitatory'])),
         CortexHebbian(cortex=inhibitory_module, **(optim_params['inhibitory'])),
     )
-    get_gaussian_weights_wrapped.cache_clear()
+    get_gaussian_weights.cache_clear()
     return model, optimizer, None
 
 
@@ -64,7 +64,7 @@ def get_lissom(retinal_density='DEFAULT', lgn_density='DEFAULT', cortical_densit
                   lgn_params, cfg_path)
     v1, optimizer, _ = get_reduced_lissom(lgn_density, cortical_density, rlissom_params, optim_params, cfg_path)
     model = Lissom(on, off, v1)
-    get_gaussian_weights_wrapped.cache_clear()
+    get_gaussian_weights.cache_clear()
     return model, optimizer, None
 
 

@@ -47,18 +47,15 @@ def apply_fn_to_weights_between_maps(in_features, out_features, fn, **kwargs):
 
 @lru_cache(maxsize=0)
 # TODO: use clear cache to free memory after layers initializations
-def get_gaussian_weights_wrapped(in_features, out_features, sigma):
-    ans = torch.from_numpy(apply_fn_to_weights_between_maps(in_features, out_features, gaussian, sigma=sigma))
-    return ans
-
-
 def get_gaussian_weights(in_features, out_features, sigma):
-    return get_gaussian_weights_wrapped(in_features, out_features, sigma).clone()
+    r"""Returns a Tensor of size in_features x out_features with each column weight representing a Gaussian Disk"""
+    return torch.from_numpy(apply_fn_to_weights_between_maps(in_features, out_features, gaussian, sigma=sigma)).clone()
 
 
 # TODO: use clear cache to free memory
 @lru_cache(maxsize=3)
 def circular_mask(in_features, out_features, radius, cuda=False):
+    r"""Creates a boolean mask representing valid connective radius"""
     distances = apply_fn_to_weights_between_maps(in_features=in_features, out_features=out_features,
                                                  fn=euclidian_distances)
     mask = distances > radius

@@ -15,14 +15,14 @@ def kill_neurons(w, threshold):
     return w.masked_fill_(mask=torch.lt(w, threshold), value=0)
 
 
-# TODO: test
-def afferent_normalize(radius, strength, afferent_input, activation):
-    reshaped_input = afferent_input.data.repeat(afferent_input.data.size()[1], 1)
-    masked_input = apply_circular_mask_to_weights(reshaped_input, radius)
-    sums = masked_input.sum(1).unsqueeze(1).t()
-    den = 1 + strength * sums
-    activation = activation / den
-    return activation
+# # TODO: test
+# def afferent_normalize(radius, strength, afferent_input, activation):
+#     reshaped_input = afferent_input.data.repeat(afferent_input.data.size()[1], 1)
+#     masked_input = apply_circular_mask_to_weights(reshaped_input, radius)
+#     sums = masked_input.sum(1).unsqueeze(1).t()
+#     den = 1 + strength * sums
+#     activation = activation / den
+#     return activation
 
 
 def piecewise_sigmoid(min_theta, max_theta, inp):
@@ -35,12 +35,14 @@ def piecewise_sigmoid(min_theta, max_theta, inp):
 
 
 def check_compatible_mul(module_one, module_two):
+    r"""Checks that two modules have correct sizes for matrix multiplication"""
     if module_one.out_features != module_two.in_features:
         raise ValueError(
             "Matmul: {}.out_features doesn't match {}.in_features".format(str(module_one), str(module_two)))
 
 
 def check_compatible_add(module_one, module_two):
+    r"""Checks that two modules have correct sizes for matrix addition"""
     if module_one.out_features != module_two.out_features:
         raise ValueError(
             "Add: {}.out_features doesn't match {}.out_features".format(str(module_one), str(module_two)))
