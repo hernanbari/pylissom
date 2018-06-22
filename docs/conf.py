@@ -36,7 +36,8 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.
                 'skimage', 'skimage.transform',
                 'torchvision',
                 'tqdm']
-sys.modules.update((mod_name, Mock(Optimizer=object)) for mod_name in MOCK_MODULES)
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+sys.modules['torch.optim'] = Mock(Optimizer=object)
 
 # -- Project information -----------------------------------------------------
 
