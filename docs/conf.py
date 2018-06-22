@@ -16,27 +16,27 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
-import sys
-# noinspection PyCompatibility
-from unittest.mock import MagicMock
-
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.data', 'torch.utils.data.sampler',
-                'torch.autograd', 'torch.optim.Optimizer',
-                'numpy',
-                'matplotlib', 'matplotlib.pyplot',
-                'cv2',
-                'sklearn', 'sklearn.model_selection',
-                'yaml',
-                'skimage', 'skimage.transform',
-                'torchvision',
-                'tqdm']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+# import sys
+# # noinspection PyCompatibility
+# from unittest.mock import MagicMock
+#
+#
+# class Mock(MagicMock):
+#     @classmethod
+#     def __getattr__(cls, name):
+#         return MagicMock()
+#
+# MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.data', 'torch.utils.data.sampler',
+#                 'torch.autograd', 'torch.optim.Optimizer',
+#                 'numpy',
+#                 'matplotlib', 'matplotlib.pyplot',
+#                 'cv2',
+#                 'sklearn', 'sklearn.model_selection',
+#                 'yaml',
+#                 'skimage', 'skimage.transform',
+#                 'torchvision',
+#                 'tqdm']
+# sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- Project information -----------------------------------------------------
 
