@@ -26,7 +26,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return MagicMock()
 
-MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim',
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.data',
                 'numpy',
                 'matplotlib', 'matplotlib.pyplot',
                 'cv2',
@@ -34,7 +34,8 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim',
                 'sklearn', 'sklearn.model_selection',
                 'yaml',
                 'skimage', 'skimage.transform',
-                'torchvision']
+                'torchvision',
+                'tqdm']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- Project information -----------------------------------------------------
