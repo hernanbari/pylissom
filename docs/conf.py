@@ -199,6 +199,15 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+autodoc_mock_imports = ['torch',
+                        'numpy',
+                        'matplotlib',
+                        'cv2',
+                        'sklearn',
+                        'yaml',
+                        'skimage',
+                        'torchvision',
+                        'tqdm']
 
 # -- Extension configuration -------------------------------------------------
 # Generate autodoc stubs with summaries from code
