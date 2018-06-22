@@ -36,8 +36,8 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.utils.data', 'torch.u
                 'skimage', 'skimage.transform',
                 'torchvision',
                 'tqdm']
-sys.modules.update((mod_name, MagicMock()) for mod_name in MOCK_MODULES)
-# sys.modules['torch.optim'] = Mock(Optimizer=object)
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+sys.modules['torch.optim'] = Mock
 
 # -- Project information -----------------------------------------------------
 
@@ -200,7 +200,7 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-autodoc_mock_imports = ['torch.optim.Optimizer']
+# autodoc_mock_imports = ['torch.optim.Optimizer']
 # autodoc_mock_imports = ['torch',
 #                         'numpy',
 #                         'matplotlib',
