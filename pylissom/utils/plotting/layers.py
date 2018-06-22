@@ -5,7 +5,7 @@ Some functions to plot specifically weights and activations of Lissom modules
 import numpy as np
 from torchvision import utils as vutils
 
-from nn.modules import named_apply
+from pylissom.nn.modules import named_apply
 from pylissom.nn.modules.linear import UnnormalizedDifferenceOfGaussiansLinear
 from pylissom.nn.modules.lissom import DifferenceOfGaussiansLinear
 from pylissom.utils.plotting.matrix import plot_dict_matrices

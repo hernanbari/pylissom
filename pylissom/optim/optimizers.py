@@ -4,7 +4,7 @@ Extends the py:class:`torch.optim.Optimizer` class with Lissom optimizers, mainl
 
 import torch
 
-from nn.modules import register_recursive_input_output_hook
+from pylissom.nn.modules import register_recursive_input_output_hook
 from pylissom.math import normalize
 from pylissom.nn.functional.functions import kill_neurons, linear_decay
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
