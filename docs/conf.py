@@ -26,7 +26,7 @@ MOCK_CLASSES = ['Optimizer']
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        print(cls, name)
+        print(name)
         if name == 'Optimizer':
             print("AFAFAFAFF")
             return object
@@ -44,7 +44,7 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.
                 'torchvision',
                 'tqdm']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-sys.modules['torch.optim.Optimizer'] = object
+sys.modules['torch.optim'] = MagicMock()
 
 # -- Project information -----------------------------------------------------
 
