@@ -27,9 +27,9 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
         print(name)
-        # if name == 'Optimizer':
-        #     print("AFAFAFAFF")
-        #     return object
+        if name == 'Optimizer':
+            print("AFAFAFAFF")
+            return type('Optimizer', (object,))
         return MagicMock()
 
 
