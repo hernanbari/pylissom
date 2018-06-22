@@ -23,14 +23,16 @@ from unittest.mock import MagicMock
 
 MOCK_CLASSES = ['Optimizer']
 
+
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        print(name)
+        print(cls, name)
         if name == 'Optimizer':
             print("AFAFAFAFF")
-            return object
-            return type('Optimizer', (object,), {'__module__': 'torch.optim', '__source__': 'foo'})
+            # return object
+            return type('Optimizer', (object,), {'__module__': 'torch.optim', '__source__': 'foo',
+                                                 '__loader__': 'foo'})
         return MagicMock()
 
 
@@ -44,7 +46,7 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.
                 'skimage', 'skimage.transform',
                 'torchvision',
                 'tqdm']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+sys.modules.update((mod_name, Mock(name=mod_name)) for mod_name in MOCK_MODULES)
 # sys.modules['torch.optim'] = MagicMock()
 
 # -- Project information -----------------------------------------------------
