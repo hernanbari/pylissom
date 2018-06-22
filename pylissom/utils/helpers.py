@@ -24,7 +24,8 @@ def debug():
 
 
 class TimeIt(object):
-    r"""At instantiation starts a timer and prints value when end() is called"""
+    r"""At instantiation starts a timer and prints value when end() is called
+    """
     def __init__(self):
         self.t0 = time.time()
 
