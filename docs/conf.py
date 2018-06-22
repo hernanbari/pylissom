@@ -21,7 +21,8 @@ import sys
 from unittest.mock import MagicMock
 
 
-MOCK_CLASSES = {'Optimizer': 'torch.optim', 'Linear': 'torch.nn', 'Module': 'torch.nn', 'Sequential': 'torch.nn'}
+MOCK_CLASSES = {'Optimizer': 'torch.optim', 'Linear': 'torch.nn', 'Module': 'torch.nn', 'Sequential': 'torch.nn',
+                'Dataset': 'torch.utils.data'}
 
 
 class Mock(MagicMock):

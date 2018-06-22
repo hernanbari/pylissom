@@ -12,9 +12,6 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms
 
-# This is necessary for docs inter-sphinx to work
-Dataset.__module__ = 'torch.utils.data'
-
 
 def get_dataset(train, args):
     kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
