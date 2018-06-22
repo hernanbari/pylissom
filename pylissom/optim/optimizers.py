@@ -15,7 +15,7 @@ torch.optim.Optimizer.__module__ = 'torch.optim'
 
 
 class CortexOptimizer(torch.optim.Optimizer):
-    """"Abstract py:class:`Optimizer` that can only be used with py:class:`Cortex`"""
+    """Abstract py:class:`Optimizer` that can only be used with py:class:`Cortex`"""
     def __init__(self, cortex):
         assert isinstance(cortex, Cortex)
         self.cortex = cortex
@@ -24,7 +24,7 @@ class CortexOptimizer(torch.optim.Optimizer):
 
 class SequentialOptimizer(object):
     r"""Similar to :py:class:`torch.nn.Sequential` but for optimizers, used to contain
-    :py:class:`pylissom.optim.CortexHebbian` for ReducedLissom modules"""
+    :py:class:`pylissom.optim.optimizers.CortexHebbian` for ReducedLissom modules"""
     # TODO: inherit from torch.optim.Optimizer
     def __init__(self, *optimizers):
         self.optimizers = optimizers
@@ -39,11 +39,7 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
-    # TODO:  Should use batch hebbian learning:
-    # TODO: https://pdfs.semanticscholar.org/presentation/0fdc/eaea9ce40ea82711051d770714d1b0c7c17f.pdf
-    # TODO: http://www.gatsby.ucl.ac.uk/~remo/TN1/ch8.pdf
-    # TODO: http://elderlab.yorku.ca/~elder/teaching/psych6256/lectures/09%20Hebbian%20Learning.pdf
-    r""""Implements hebbian learning over a py:class:`pylissom.nn.modules.Cortex` weights
+    r"""Implements hebbian learning over a py:class:`pylissom.nn.modules.Cortex` weights
 
     The formula is as follows:
 
@@ -57,6 +53,10 @@ class CortexHebbian(CortexOptimizer):
         - **cortex** - :py:class:`pylissom.nn.modules.Cortex` map to apply formula
         - **learning_rate** -
     """
+    # TODO:  Should use batch hebbian learning:
+    # TODO: https://pdfs.semanticscholar.org/presentation/0fdc/eaea9ce40ea82711051d770714d1b0c7c17f.pdf
+    # TODO: http://www.gatsby.ucl.ac.uk/~remo/TN1/ch8.pdf
+    # TODO: http://elderlab.yorku.ca/~elder/teaching/psych6256/lectures/09%20Hebbian%20Learning.pdf
     def __init__(self, cortex, learning_rate):
         super(CortexHebbian, self).__init__(cortex)
         self.learning_rate = learning_rate
