@@ -29,7 +29,7 @@ class Mock(MagicMock):
         print(name)
         if name == 'Optimizer':
             print("AFAFAFAFF")
-            return type('Optimizer', (object,))
+            return type('Optimizer', (object,), {})
         return MagicMock()
 
 
