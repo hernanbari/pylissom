@@ -27,6 +27,7 @@ class Mock(MagicMock):
         return MagicMock()
 
 MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.data', 'torch.utils.data.sampler',
+                'torch.autograd',
                 'numpy',
                 'matplotlib', 'matplotlib.pyplot',
                 'cv2',
