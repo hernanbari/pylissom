@@ -16,34 +16,34 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
-# import sys
-# # noinspection PyCompatibility
-# from unittest.mock import MagicMock
-#
-#
-# MOCK_CLASSES = ['Optimizer']
-#
-# class Mock(MagicMock):
-#     @classmethod
-#     def __getattr__(cls, name):
-#         print(name)
-#         if name == 'Optimizer':
-#             print("AFAFAFAFF")
-#             return object
-#         return MagicMock()
-#
-#
-# MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.data', 'torch.utils.data.sampler',
-#                 'torch.autograd',
-#                 'numpy',
-#                 'matplotlib', 'matplotlib.pyplot',
-#                 'cv2',
-#                 'sklearn', 'sklearn.model_selection',
-#                 'yaml',
-#                 'skimage', 'skimage.transform',
-#                 'torchvision',
-#                 'tqdm']
-# sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+import sys
+# noinspection PyCompatibility
+from unittest.mock import MagicMock
+
+
+MOCK_CLASSES = ['Optimizer']
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        print(name)
+        # if name == 'Optimizer':
+        #     print("AFAFAFAFF")
+        #     return object
+        return MagicMock()
+
+
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.data', 'torch.utils.data.sampler',
+                'torch.autograd',
+                'numpy',
+                'matplotlib', 'matplotlib.pyplot',
+                'cv2',
+                'sklearn', 'sklearn.model_selection',
+                'yaml',
+                'skimage', 'skimage.transform',
+                'torchvision',
+                'tqdm']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 # sys.modules['torch.optim'] = MagicMock()
 
 # -- Project information -----------------------------------------------------
@@ -207,16 +207,17 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+# This doesn't work with inherited classes
 # autodoc_mock_imports = ['torch.optim.Optimizer']
-autodoc_mock_imports = ['torch',
-                        'numpy',
-                        'matplotlib',
-                        'cv2',
-                        'sklearn',
-                        'yaml',
-                        'skimage',
-                        'torchvision',
-                        'tqdm']
+# autodoc_mock_imports = ['torch',
+#                         'numpy',
+#                         'matplotlib',
+#                         'cv2',
+#                         'sklearn',
+#                         'yaml',
+#                         'skimage',
+#                         'torchvision',
+#                         'tqdm']
 
 # -- Extension configuration -------------------------------------------------
 # Generate autodoc stubs with summaries from code
