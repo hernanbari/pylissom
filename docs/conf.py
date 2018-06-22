@@ -26,7 +26,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return Mock()
 
-MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.data', 'torch.utils.data.sampler',
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.utils.data', 'torch.utils.data.sampler',
                 'torch.autograd',
                 'numpy',
                 'matplotlib', 'matplotlib.pyplot',
