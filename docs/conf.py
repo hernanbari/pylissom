@@ -33,7 +33,7 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim',
                 'configobj',
                 'sklearn', 'sklearn.model_selection',
                 'yaml',
-                'skimage',
+                'skimage', 'skimage.transform',
                 'torchvision']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
