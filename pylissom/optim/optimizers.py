@@ -10,11 +10,11 @@ from pylissom.nn.functional.functions import kill_neurons, linear_decay
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 from pylissom.nn.modules.lissom import Cortex
 
-# This is necessary for docs inter-sphinx to work
-torch.optim.Optimizer.__module__ = 'torch.optim'
+# # This is necessary for docs inter-sphinx to work
+# torch.optim.Optimizer.__module__ = 'torch.optim'
 
 
-class CortexOptimizer(object):
+class CortexOptimizer(torch.optim.Optimizer):
     r"""Abstract py:class:`torch.optim.Optimizer` that can only be used with py:class:`pylissom.nn.modules.Cortex`"""
     def __init__(self, cortex):
         assert isinstance(cortex, Cortex)
