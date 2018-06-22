@@ -31,8 +31,7 @@ class Mock(MagicMock):
         if name == 'Optimizer':
             print("AFAFAFAFF")
             # return object
-            return type('Optimizer', (object,), {'__module__': 'torch.optim', '__source__': 'foo',
-                                                 '__loader__': 'foo'})
+            return type('Optimizer', (object,), {'__module__': 'torch.optim'})()
         return MagicMock()
 
 
