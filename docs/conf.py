@@ -200,6 +200,7 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+autodoc_mock_imports = ['torch.optim.Optimizer']
 # autodoc_mock_imports = ['torch',
 #                         'numpy',
 #                         'matplotlib',
