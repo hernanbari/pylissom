@@ -32,6 +32,8 @@ class Mock(MagicMock):
             return type(name, (object,), {'__module__': MOCK_CLASSES[name]})
         elif name == '__file__':  # Sphinx tries to find source code, but doesn't matter because it's mocked
             return "FOO"
+        elif name == '__loader__':
+            return "AAAAA"
         return MagicMock()
 
 
