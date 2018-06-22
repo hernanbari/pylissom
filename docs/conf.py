@@ -31,7 +31,6 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.
                 'numpy',
                 'matplotlib', 'matplotlib.pyplot',
                 'cv2',
-                'configobj',
                 'sklearn', 'sklearn.model_selection',
                 'yaml',
                 'skimage', 'skimage.transform',
