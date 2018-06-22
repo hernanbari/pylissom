@@ -1,5 +1,5 @@
 import torch
-from pylissom.nn.functional.functions import piecewise_sigmoid, afferent_normalize
+from pylissom.nn.functional.functions import piecewise_sigmoid
 from pylissom.nn.functional.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
 # This is necessary for docs inter-sphinx to work
