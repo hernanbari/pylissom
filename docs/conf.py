@@ -44,7 +44,7 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.optim', 'torch.nn', 'torch.utils.
                 'torchvision',
                 'tqdm']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-sys.modules['torch.optim'] = MagicMock()
+# sys.modules['torch.optim'] = MagicMock()
 
 # -- Project information -----------------------------------------------------
 

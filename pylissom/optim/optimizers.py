@@ -1,8 +1,8 @@
 """
 Extends the py:class:`torch.optim.Optimizer` class with Lissom optimizers, mainly Hebbian Learning
 """
-
-import torch
+from torch.optim import Optimizer
+from torch import mm
 
 from pylissom.nn.modules import register_recursive_input_output_hook
 from pylissom.math import normalize
@@ -14,7 +14,7 @@ from pylissom.nn.modules.lissom import Cortex
 # torch.optim.Optimizer.__module__ = 'torch.optim'
 
 
-class CortexOptimizer(torch.optim.Optimizer):
+class CortexOptimizer(Optimizer):
     r"""Abstract py:class:`torch.optim.Optimizer` that can only be used with py:class:`pylissom.nn.modules.Cortex`"""
     def __init__(self, cortex):
         assert isinstance(cortex, Cortex)
@@ -74,7 +74,7 @@ class CortexHebbian(CortexOptimizer):
         # Weight adaptation of a single neuron
         # w'_pq,ij = (w_pq,ij + alpha * input_pq * output_ij) / sum_uv (w_uv,ij + alpha * input_uv * output_ij)
 
-        delta = learning_rate * torch.mm(input.data.t(), output.data)
+        delta = learning_rate * mm(input.data.t(), output.data)
         apply_circular_mask_to_weights(delta.t_(), radius)
         weights.data.add_(delta.t_())
         weights.data = normalize(weights.data, norm=1, axis=0)
