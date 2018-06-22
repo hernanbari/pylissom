@@ -26,7 +26,7 @@ MOCK_CLASSES = ['Optimizer']
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        print(name)
+        print(cls, name)
         if name == 'Optimizer':
             print("AFAFAFAFF")
             return object
