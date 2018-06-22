@@ -153,8 +153,8 @@ setup(
                       'scikit-learn',  # used in training utils, grid search, cross validation
                       'scikit-image',  # used to create stimuli in utils, should replace with torch.rotation
                       'matplotlib',
-                      'numpy',
-                      'torch'],
+                      # 'torch'  # Can't install pytorch with pip, use conda
+                      'numpy'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
