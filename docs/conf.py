@@ -21,21 +21,17 @@ import sys
 from unittest.mock import MagicMock
 
 
-MOCK_CLASSES = ['Optimizer']
+MOCK_CLASSES = {'Optimizer': 'torch.optim', 'Linear': 'torch.nn', 'Module': 'torch.nn', 'Sequential': 'torch.nn'}
 
 
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        print(cls, name)
-        if name == 'Optimizer':
-            print("AFAFAFAFF")
-            # return object
-            return type('Optimizer', (object,), {'__module__': 'torch.optim'})
-        elif name == '__file__':
+        if name in MOCK_CLASSES:
+            # return object  # Sphinx renders object in base classes
+            return type(name, (object,), {'__module__': MOCK_CLASSES[name]})
+        elif name == '__file__':  # Sphinx tries to find source code, but doesn't matter because it's mocked
             return "FOO"
-        elif name == '__loader__':
-            return "AAAA"
         return MagicMock()
 
 

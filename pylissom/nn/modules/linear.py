@@ -1,13 +1,11 @@
 import torch
+from torch.nn import Linear, Module
+
 from pylissom.nn.functional.functions import piecewise_sigmoid
 from pylissom.nn.functional.weights import get_gaussian_weights, apply_circular_mask_to_weights
 
-# This is necessary for docs inter-sphinx to work
-torch.nn.Linear.__module__ = 'torch.nn'
-torch.nn.Module.__module__ = 'torch.nn'
 
-
-class GaussianLinear(torch.nn.Linear):
+class GaussianLinear(Linear):
     """Applies a linear transformation to the incoming data: :math:`y = Ax + b`
 
     where A is a Gaussian matrix
@@ -45,7 +43,7 @@ class GaussianCloudLinear(GaussianLinear):
         self.weight.data.mul_(uniform_noise)
 
 
-class PiecewiseSigmoid(torch.nn.Module):
+class PiecewiseSigmoid(Module):
     r"""Applies a piecewise approximation of the sigmoid function :math:`f(x) = 1 / ( 1 + exp(-x))`
 
     The formula is as follows:
@@ -71,7 +69,7 @@ class PiecewiseSigmoid(torch.nn.Module):
                + ')'
 
 
-# class AfferentNorm(torch.nn.Module):
+# class AfferentNorm(Module):
 #     def __init__(self, strength, radius):
 #         super(AfferentNorm, self).__init__()
 #         self.radius = radius
@@ -92,7 +90,7 @@ class PiecewiseSigmoid(torch.nn.Module):
 
 #
 # # TODO: test, remove if not used
-# class CircularMask(torch.nn.Module):
+# class CircularMask(Module):
 #     def __init__(self, radius):
 #         super(CircularMask, self).__init__()
 #         self.radius = radius
@@ -107,7 +105,7 @@ class PiecewiseSigmoid(torch.nn.Module):
 #                + ')'
 
 
-class UnnormalizedDifferenceOfGaussiansLinear(torch.nn.Linear):
+class UnnormalizedDifferenceOfGaussiansLinear(Linear):
     r"""NOT USED, only for example in notebooks"""
     # Not used in lissom, only for example
     # ASSUMES SQUARE MAPS

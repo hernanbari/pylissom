@@ -1,5 +1,5 @@
 """
-Extends the py:class:`torch.optim.Optimizer` class with Lissom optimizers, mainly Hebbian Learning
+Extends the :py:class:`torch.optim.Optimizer` class with Lissom optimizers, mainly Hebbian Learning
 """
 from torch.optim import Optimizer
 from torch import mm
@@ -15,7 +15,7 @@ from pylissom.nn.modules.lissom import Cortex
 
 
 class CortexOptimizer(Optimizer):
-    r"""Abstract py:class:`torch.optim.Optimizer` that can only be used with py:class:`pylissom.nn.modules.Cortex`"""
+    r"""Abstract :py:class:`torch.optim.Optimizer` that can only be used with :py:class:`pylissom.nn.modules.Cortex`"""
     def __init__(self, cortex):
         assert isinstance(cortex, Cortex)
         self.cortex = cortex
@@ -39,7 +39,7 @@ class SequentialOptimizer(object):
 
 
 class CortexHebbian(CortexOptimizer):
-    r"""Implements hebbian learning over a py:class:`pylissom.nn.modules.Cortex` weights
+    r"""Implements hebbian learning over a :py:class:`pylissom.nn.modules.Cortex` weights
 
     The formula is as follows:
 

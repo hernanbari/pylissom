@@ -1,15 +1,12 @@
 from collections import OrderedDict
 
 import torch
+from torch.nn import Linear, Sequential, Module
 
 from pylissom.math import normalize
 from pylissom.nn.functional.functions import check_compatible_mul, check_compatible_add
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights, get_gaussian_weights
 from pylissom.nn.modules.linear import GaussianCloudLinear, PiecewiseSigmoid
-
-# This is necessary for docs inter-sphinx to work
-torch.nn.Sequential.__module__ = 'torch.nn'
-torch.nn.Module.__module__ = 'torch.nn'
 
 
 class Cortex(GaussianCloudLinear):
@@ -38,7 +35,7 @@ class Cortex(GaussianCloudLinear):
 
 
 # # TODO: test
-# class AfferentNormCortex(torch.nn.Sequential):
+# class AfferentNormCortex(Sequential):
 #     def __init__(self, in_features, out_features, radius, aff_norm_strength, sigma=1.0,
 #                  cortex_cls=Cortex, aff_norm_cls=AfferentNorm):
 #         self.sigma = sigma
@@ -52,7 +49,7 @@ class Cortex(GaussianCloudLinear):
 #         super(AfferentNormCortex, self).__init__(layers)
 
 
-class DifferenceOfGaussiansLinear(torch.nn.Linear):
+class DifferenceOfGaussiansLinear(Linear):
     r"""Applies a linear transformation to the incoming data: :math:`y = Ax + b`,
     where A is a Difference of Gaussians with a connective radius:
 
@@ -99,7 +96,7 @@ class DifferenceOfGaussiansLinear(torch.nn.Linear):
                + ')'
 
 
-class Mul(torch.nn.Module):
+class Mul(Module):
     r"""Represents a layer than only multiplies the input by a constant, used in :py:class:`pylissom.nn.modules.LGN`"""
     def __init__(self, number):
         super(Mul, self).__init__()
@@ -112,7 +109,7 @@ class Mul(torch.nn.Module):
         return '*' + str(self.number)
 
 
-class LGN(torch.nn.Sequential):
+class LGN(Sequential):
     r"""Represents an LGN channel, can be ON or OFF
 
     The transformation applied can be described as:
@@ -156,7 +153,7 @@ class LGN(torch.nn.Sequential):
         super(LGN, self).__init__(layers)
 
 
-class ReducedLissom(torch.nn.Module):
+class ReducedLissom(Module):
     r"""Represents a Reduced Lissom consisting of afferent, excitatory and inhibitory modules
 
     The transformation applied can be described as:
@@ -228,7 +225,7 @@ class ReducedLissom(torch.nn.Module):
                + ')'
 
 
-class Lissom(torch.nn.Module):
+class Lissom(Module):
     r"""Represents a Full Lissom, with ON/OFF channels and a V1 ( :py:class:`ReducedLissom` )
 
     The transformation applied can be described as:
