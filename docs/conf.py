@@ -24,9 +24,9 @@ from unittest.mock import MagicMock
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        return MagicMock()
+        return Mock()
 
-MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.data', 'torch.utils.data.sampler',
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.utils.data', 'torch.utils.data.sampler',
                 'torch.autograd',
                 'numpy',
                 'matplotlib', 'matplotlib.pyplot',
@@ -36,8 +36,8 @@ MOCK_MODULES = ['torch', 'torch.utils', 'torch.nn', 'torch.optim', 'torch.utils.
                 'skimage', 'skimage.transform',
                 'torchvision',
                 'tqdm']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-sys.modules['torch.optim'] = Mock(Optimizer=object)
+sys.modules.update((mod_name, Mock) for mod_name in MOCK_MODULES)
+# sys.modules['torch.optim'] = Mock(Optimizer=object)
 
 # -- Project information -----------------------------------------------------
 
