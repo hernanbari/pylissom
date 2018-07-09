@@ -41,7 +41,7 @@ class RandomDataset(Dataset):
         if index >= (len(self)):
             raise StopIteration
         # Foo target
-        return torch.from_numpy(next(self.gen)), torch.Tensor(2)
+        return torch.from_numpy(next(self._gen)), torch.Tensor(2)
 
     @property
     def _gen(self):
