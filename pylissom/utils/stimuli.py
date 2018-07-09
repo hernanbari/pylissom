@@ -85,23 +85,26 @@ def random_gaussians_generator(size, gaussians=1):
         yield combine_matrices(*(generate_random_gaussian(size) for _ in range(gaussians)))
 
 
-def generate_random_faces(size, count):
-    return (
-        generate_three_dots(size,
-                            mu_x=random.uniform(0, size - 1),
-                            mu_y=random.uniform(0, size - 1),
-                            sigma_x=2 * 1.21 / size / 1.7)
-        for _ in range(count)
-    )
+def generate_random_faces(size):
+    # TODO: sigma should be a function of size
+    return generate_three_dots(size,
+                               mu_x=random.uniform(0, size - 1),
+                               mu_y=random.uniform(0, size - 1),
+                               # sigma_x=2 * 1.21 / size / 1.7,
+                               sigma_x=1.2,
+                               # sigma_x=2.0,
+                               orientation=random.uniform(-15, 15)
+                               )
 
 
 def generate_three_dots(size, mu_x, mu_y, sigma_x, orientation):
+    # TODO: The spacing between eyes and mouth should be a function of the image size or sigma
     r"""
     Returns: A numpy matrix with 3 gaussian disks representing a face
     """
-    lefteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y + 2.5 * 4, sigma_x=sigma_x)
-    righteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y - 2.5 * 4, sigma_x=sigma_x)
-    mouth = generate_gaussian((size, size), mu_x=mu_x + 5 * 4, mu_y=mu_y, sigma_x=sigma_x)
+    lefteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y + 2.5 * 2, sigma_x=sigma_x)
+    righteye = generate_gaussian((size, size), mu_x=mu_x, mu_y=mu_y - 2.5 * 2, sigma_x=sigma_x)
+    mouth = generate_gaussian((size, size), mu_x=mu_x + 5 * 2, mu_y=mu_y, sigma_x=sigma_x)
     eyes = combine_matrices(lefteye, righteye)
     face = combine_matrices(eyes, mouth)
     return rotate(face, orientation, mode='constant').astype(face.dtype)
@@ -116,16 +119,7 @@ def faces_generator(size, num=1):
     Returns: Yields a squared numpy matrix with 3-gaussians faces
     """
     while True:
-        faces = (
-            generate_three_dots(size,
-                                mu_x=random.uniform(10, size - 10), mu_y=random.uniform(10, size - 10),
-                                sigma_x=3.0,
-                                orientation=random.uniform(-15, 15)
-                                )
-            for _ in range(num)
-        )
-        combined = combine_matrices(faces)
-        yield combined
+        yield combine_matrices(*(generate_random_faces(size) for _ in range(num)))
 
 
 def combine_matrices(*matrices):
