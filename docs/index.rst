@@ -19,7 +19,6 @@ It's split in two parts, the core nn and optim packages, which implement the net
    _modules/pylissom
    _modules/pylissom.datasets
    _modules/pylissom.models
-   _modules/pylissom.nn
    _modules/pylissom.nn.functional
    _modules/pylissom.nn.modules
    _modules/pylissom.optim
