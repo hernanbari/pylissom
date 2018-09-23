@@ -11,3 +11,7 @@ pytorch
 torch
 torchvision
 vision-master
+docs/_build
+build/
+dist/
+notebooks/.ipynb_checkpoints
