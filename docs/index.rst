@@ -40,7 +40,7 @@ You should first install pytorch with conda as explained at: https://pytorch.org
 
 Install pylissom by running:
 
-    pip install pylissom
+    pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pylissom
 
 The code is hosted in pypi: https://test.pypi.org/project/pylissom/
 
@@ -52,7 +52,7 @@ Contribute
 License
 -------
 
-The project is licensed under the BSD license.
+The project is licensed under the GPLv3 license.
 
 
 
