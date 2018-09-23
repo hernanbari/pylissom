@@ -204,7 +204,9 @@ class ReducedLissom(Module):
 
     def forward(self, cortex_input):
         afferent_activation = self.afferent_strength * self.afferent_module(cortex_input)
+        # This is t=0
         current_activation = self.piecewise_sigmoid(afferent_activation)
+        # These are the settling steps, from t=1 (or range=0 to self.settlings_setps)
         for _ in range(self.settling_steps):
             excitatory_activation = self.excitatory_strength * self.excitatory_module(current_activation)
             inhibitory_activation = self.inhibitory_strength * self.inhibitory_module(current_activation)
