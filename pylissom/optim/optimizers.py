@@ -81,6 +81,19 @@ class CortexHebbian(CortexOptimizer):
         return
 
 
+class ReducedLissomHebbian(SequentialOptimizer):
+    def __init__(self, afferent_mod, inhibitory_mod, excitatory_mod, aff_params, inhib_params, excit_params):
+        self.aff_hebbian = CortexHebbian(cortex=afferent_mod, **aff_params)
+        self.excit_hebbian = CortexHebbian(cortex=excitatory_mod, **excit_params)
+        self.inhib_hebbian = CortexHebbian(cortex=inhibitory_mod, **inhib_params)
+
+        super(ReducedLissomHebbian, self).__init__(
+            CortexHebbian(cortex=afferent_mod, **aff_params),
+            CortexHebbian(cortex=excitatory_mod, **inhib_params),
+            CortexHebbian(cortex=inhibitory_mod, **excit_params)
+        )
+
+
 class CortexPruner(CortexOptimizer):
     r"""Abstract class that prunes the weights in each step, subclasses must implement
     :py:func:`pylissom.optim.optimizers.CortexPruner._prune`
