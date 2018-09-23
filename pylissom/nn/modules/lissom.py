@@ -207,7 +207,7 @@ class ReducedLissom(Module):
         current_activation = self.piecewise_sigmoid(afferent_activation)
         for _ in range(self.settling_steps):
             excitatory_activation = self.excitatory_strength * self.excitatory_module(current_activation)
-            inhibitory_activation = self.afferent_strength * self.inhibitory_module(current_activation)
+            inhibitory_activation = self.inhibitory_strength * self.inhibitory_module(current_activation)
 
             sum_activations = afferent_activation + excitatory_activation - inhibitory_activation
 
