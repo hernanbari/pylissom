@@ -1,6 +1,6 @@
 import unittest
 
-from math import *
+from pylissom.math import *
 
 
 class TestMath(unittest.TestCase):
