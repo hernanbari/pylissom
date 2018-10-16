@@ -2,8 +2,7 @@ import pytest
 import numpy as np
 
 from pylissom.math import gaussian, euclidian_distances
-from pylissom.nn.functional.weights import apply_fn_to_weights_between_maps, circular_mask, \
-    apply_circular_mask_to_weights
+from pylissom.nn.functional.weights import apply_fn_to_weights_between_maps, circular_mask
 
 
 class TestWeights(object):
@@ -38,8 +37,16 @@ class TestWeights(object):
             mu_y = idx % sqrt
             assert np.allclose(reshaped, partial_fn(*np.indices([sqrt, sqrt]), mu_x, mu_y))
 
+    @pytest.mark.parametrize("in_features, out_features, radius", [
+        (9, 9, 1),
+        (4, 4, 1),
+        (9, 9, 5),
+        (4, 4, 5),
+        (9, 9, 0),
+        (4, 4, 0),
+    ])
     def test_circular_mask(self, in_features, out_features, radius):
-        pass
-
-    def test_apply_circular_mask_to_weights(self):
-        pass
+        distances = apply_fn_to_weights_between_maps(in_features=in_features, out_features=out_features,
+                                                     fn=euclidian_distances)
+        mask = distances > radius
+        assert np.allclose(circular_mask(in_features, out_features, radius).numpy(), mask)
