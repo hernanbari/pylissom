@@ -4,6 +4,7 @@ python:
   - "3.6"
 # command to install dependencies
 install:
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install . --progress-bar off
 # command to run tests
