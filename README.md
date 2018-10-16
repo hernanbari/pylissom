@@ -2,10 +2,16 @@
 Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom)
 ========
 
-Pylissom is a Pytorch extension implementing the Lissom network and other tools, based in the topographica framework.
+![Lissom](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
+
+Pylissom is a Pytorch extension implementing the LISSOM network and other tools, based in the Topographica framework.
 
 It's split in two parts, the core nn and optim packages, which implement the network itself,
- and the datasets, models and utils packages, that consist of a researcher's toolkit akin to topographica features.
+ and the datasets, models and utils packages, that consist of a researcher's toolkit akin to Topographica features.
+
+[LISSOM](http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html) is a model of human neocortex (mainly modeled on visual cortex) at a neural column level. The model was developed by Bednar, Choe, Miikkulainen, and Sirosh, at the University of Texas
+
+[Topographica](http://ioam.github.io/topographica/index.html) is an old software package for computational modeling of neural maps, developed by the the same team of LISSOM. The goal is to help researchers understand brain function at the level of the topographic maps that make up sensory and motor systems, but became outdated over the years.
 
 
 Getting Started
