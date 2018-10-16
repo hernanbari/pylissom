@@ -1,6 +1,5 @@
 
 Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)
-
 ========
 
 ![Lissom](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
