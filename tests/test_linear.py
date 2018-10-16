@@ -1,3 +1,6 @@
+from pylissom.nn.modules import GaussianLinear, GaussianCloudLinear, PiecewiseSigmoid
+
+
 class TestLinear(object):
     """
     Test class for the math module

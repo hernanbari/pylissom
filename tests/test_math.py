@@ -2,8 +2,7 @@ import pytest
 from sklearn.preprocessing import normalize as sklearn_normalize
 import torch
 
-from pylissom.math import *
-
+from pylissom.math import euclidian_distances, euclidean_distance_general, gaussian, normalize
 
 @pytest.fixture(params=[(3, 3)])
 def two_dim_grid_indices(request):
