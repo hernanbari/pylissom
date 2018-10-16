@@ -82,23 +82,23 @@ def apply_circular_mask_to_weights(matrix, radius):
     return matrix
 
 
-# TODO: remove if not used
-def dense_weights_to_sparse(matrix):
-    """
-    Transforms a torch dense tensor to sparse
-    http://pytorch.org/docs/master/sparse.html
-
-    Args:
-        matrix:
-
-    Returns:
-
-    """
-    nnz_mask = matrix != 0
-    nnz_values = matrix[nnz_mask]
-    nnz_indexes = nnz_mask.nonzero()
-    params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.size()[0]), int(matrix.size()[1])])]
-    if matrix.is_cuda:
-        return torch.cuda.sparse.FloatTensor(*params)
-    else:
-        return torch.sparse.FloatTensor(*params)
+# # TODO: remove if not used
+# def dense_weights_to_sparse(matrix):
+#     """
+#     Transforms a torch dense tensor to sparse
+#     http://pytorch.org/docs/master/sparse.html
+#
+#     Args:
+#         matrix:
+#
+#     Returns:
+#
+#     """
+#     nnz_mask = matrix != 0
+#     nnz_values = matrix[nnz_mask]
+#     nnz_indexes = nnz_mask.nonzero()
+#     params = [nnz_indexes.t(), nnz_values, torch.Size([int(matrix.size()[0]), int(matrix.size()[1])])]
+#     if matrix.is_cuda:
+#         return torch.cuda.sparse.FloatTensor(*params)
+#     else:
+#         return torch.sparse.FloatTensor(*params)

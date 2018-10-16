@@ -1,10 +1,22 @@
-from pylissom.nn.modules import Cortex, DifferenceOfGaussiansLinear, Mul, LGN, ReducedLissom, Lissom
+from pylissom.nn.modules import Cortex, DifferenceOfGaussiansLinear, LGN, ReducedLissom, Lissom
 
 
 class TestLissom(object):
     """
-    Test class for the math module
+    Test class for the lissom module
     """
 
-    def test_euclidean(self):
-        assert 1 == 1
+    def test_cortex(self):
+        pass
+
+    def test_difference_of_gaussians_linear(self):
+        pass
+
+    def test_lgn(self):
+        pass
+
+    def test_reduced_lissom(self):
+        pass
+
+    def test_lissom(self):
+        pass

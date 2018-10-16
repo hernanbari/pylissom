@@ -3,8 +3,14 @@ from pylissom.nn.modules import GaussianLinear, GaussianCloudLinear, PiecewiseSi
 
 class TestLinear(object):
     """
-    Test class for the math module
+    Test class for the linear module
     """
 
-    def test_euclidean(self):
-        assert 1 == 1
+    def test_gaussian_linear(self):
+        pass
+
+    def test_gaussian_cloud_linear(self):
+        pass
+
+    def test_piecewise_sigmoid(self):
+        pass

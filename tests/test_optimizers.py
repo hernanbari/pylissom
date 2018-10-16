@@ -1,11 +1,22 @@
-from pylissom.optim import CortexOptimizer, SequentialOptimizer, CortexHebbian, ReducedLissomHebbian, CortexPruner, \
-    ConnectionDeath, NeighborsDecay
+from pylissom.optim import SequentialOptimizer, CortexHebbian, ReducedLissomHebbian, ConnectionDeath, NeighborsDecay
 
 
 class TestOptimizers(object):
     """
-    Test class for the math module
+    Test class for the optim module
     """
 
-    def test_euclidean(self):
-        assert 1 == 1
+    def test_sequential_optimizer(self):
+        pass
+
+    def test_cortex_hebbian(self):
+        pass
+
+    def test_reduced_lissom_hebbian(self):
+        pass
+
+    def test_connection_death(self):
+        pass
+
+    def test_neighbors_decay(self):
+        pass

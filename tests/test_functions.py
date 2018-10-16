@@ -3,8 +3,14 @@ from pylissom.nn.functional.functions import linear_decay, kill_neurons, piecewi
 
 class TestFunctions(object):
     """
-    Test class for the math module
+    Test class for the functions module
     """
 
-    def test_euclidean(self):
-        assert 1 == 1
+    def test_linear_decay(self):
+        pass
+
+    def test_kill_neurons(self):
+        pass
+
+    def test_piecewise_sigmoid(self):
+        pass
