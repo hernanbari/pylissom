@@ -1,5 +1,5 @@
 
-Pylissom
+Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom)
 ========
 
 Pylissom is a Pytorch extension implementing the Lissom network and other tools, based in the topographica framework.
