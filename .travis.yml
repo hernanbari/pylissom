@@ -24,6 +24,9 @@ install:
   - pip install --upgrade pip
   - pip install . --progress-bar off
   - pip install pytest
+  - pip install coveralls
 # command to run tests
 script:
   - pytest
+after_sucess:
+  - coveralls
