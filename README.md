@@ -26,6 +26,13 @@ Then you can install pylissom by running:
     
 The code is hosted in pypi: https://test.pypi.org/project/pylissom/
 
+Contributing
+------------
+
+The tests are in the `tests/` folder, and can be run with [`pytest`](https://docs.pytest.org/en/latest/). Also, the repository has [Travis CI](https://docs.travis-ci.com/) enabled, meaning every commit and Pull Request runs the tests in a virtualenv, showing as green checkmarks and red crosses in the PR page.
+
+For any questions please contact the repo collaborators.
+
 License
 -------
 
