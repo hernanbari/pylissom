@@ -25,4 +25,4 @@ install:
   - pip install . --progress-bar off
 # command to run tests
 script:
-  - pytest
+  - source activate test-environment; pytest
