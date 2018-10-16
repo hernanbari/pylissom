@@ -6,7 +6,7 @@
 Pylissom documentation
 ======================
 
-![LISSOM](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
+.. image:: http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif
 
 Pylissom is a Pytorch extension implementing the LISSOM network and other tools, based in the Topographica framework.
 
