@@ -23,7 +23,6 @@ install:
 
   - pip install --upgrade pip
   - pip install . --progress-bar off
-  - conda install torch==0.1.12 torchvision==0.1.9
 # command to run tests
 script:
   - pytest
