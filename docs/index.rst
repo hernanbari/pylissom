@@ -6,9 +6,17 @@
 Pylissom documentation
 ======================
 
-Pylissom is a Pytorch extension implementing the Lissom network and other tools, based in the topographica framework.
+![LISSOM](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
 
-It's split in two parts, the core nn and optim packages, which implement the network itself, and the datasets, models and utils packages, that consist of a researcher's toolkit akin to topographica features.
+Pylissom is a Pytorch extension implementing the LISSOM network and other tools, based in the Topographica framework.
+
+It's split in two parts, the core nn and optim packages, which implement the network itself,
+ and the datasets, models and utils packages, that consist of a researcher's toolkit akin to Topographica features.
+
+[LISSOM](http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html) is a model of human neocortex (mainly modeled on visual cortex) at a neural column level. The model was developed by Bednar, Choe, Miikkulainen, and Sirosh, at the University of Texas
+
+[Topographica](http://ioam.github.io/topographica/index.html) is an old software package for computational modeling of neural maps, developed by the the same team of LISSOM. The goal is to help researchers understand brain function at the level of the topographic maps that make up sensory and motor systems, but became outdated over the years.
+
 
 
 
@@ -31,7 +39,15 @@ It's split in two parts, the core nn and optim packages, which implement the net
 Getting Started
 ---------------
 
-For examples on how to use it you should check the jupyter notebooks in the github's page: https://github.com/hernanbari/pylissom.
+There is an UML class diagram for reference at the end of this page. And for hands-on examples there are jupyter notebooks at the [github's page](https://github.com/hernanbari/pylissom). If Github is not rendering them, we leave these links at your disposal:
+
+[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb)
+
+[Lissom modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_lissom_modules.ipynb)
+
+[Optimizers](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Test_optimizers.ipynb)
+
+[Orientation Maps](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_preferences.ipynb)
 
 Installation
 ------------
