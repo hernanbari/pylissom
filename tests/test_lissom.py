@@ -1,4 +1,4 @@
-class TestLinear(object):
+class TestLissom(object):
     """
     Test class for the math module
     """
