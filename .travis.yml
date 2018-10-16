@@ -2,7 +2,7 @@ language: python
 sudo: false
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
-  - "3.6"
+  - "2.7"
 # command to install dependencies
 install:
   - sudo apt-get update
@@ -23,6 +23,7 @@ install:
 
   - pip install --upgrade pip
   - pip install . --progress-bar off
+  - python -c 'import pylissom; print(pylissom.__file__)'
 # command to run tests
 script:
-  - source activate test-environment; pytest
+  - source activate test-environment; python -c 'import pylissom; print(pylissom.__file__)'; pytest
