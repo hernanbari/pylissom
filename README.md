@@ -8,12 +8,19 @@ It's split in two parts, the core nn and optim packages, which implement the net
  and the datasets, models and utils packages, that consist of a researcher's toolkit akin to topographica features.
 
 
-The API documentation is at: https://pylissom.readthedocs.io/
-
 Getting Started
 ---------------
 
-For examples on how to use it you should check the jupyter notebooks at notebooks/.
+The library and API documentation is at: https://pylissom.readthedocs.io/, you should check it out for a high level overview. There is an UML class diagram for reference. And for hands-on examples there are jupyter notebooks at `notebooks/`. If Github is not rendering them, we leave these links at your disposal:
+
+[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb)
+
+[Lissom modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_lissom_modules.ipynb)
+
+[Optimizers](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Test_optimizers.ipynb)
+
+[Orientation Maps](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_preferences.ipynb)
+
 
 Installation
 ------------
