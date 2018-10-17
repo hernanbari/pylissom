@@ -19,9 +19,9 @@ Getting Started
 
 The library and API documentation is at: https://pylissom.readthedocs.io/, you should check it out for a high level overview. There is an UML class diagram for reference. And for hands-on examples there are jupyter notebooks at `notebooks/`. If Github is not rendering them, we leave these links at your disposal:
 
-[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb)
-
 [Lissom modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_lissom_modules.ipynb)
+
+[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb)
 
 [Optimizers](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Test_optimizers.ipynb)
 
