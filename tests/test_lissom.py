@@ -15,7 +15,7 @@ class TestLissom(object):
     def test_lgn(self):
         pass
 
-    def test_reduced_lissom(self):
+    def test_reduced_lissom(self, rlissom, gaussian_variable):
         pass
 
     def test_lissom(self):
