@@ -1,5 +1,5 @@
 
-Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest) ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master)
+Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)   <!-- ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master) -->
 ========
 
 ![Lissom](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
