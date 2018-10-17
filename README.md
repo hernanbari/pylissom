@@ -42,7 +42,17 @@ The code is hosted in pypi: https://test.pypi.org/project/pylissom/
 Contributing
 ------------
 
-The tests are in the `tests/` folder, and can be run with [`pytest`](https://docs.pytest.org/en/latest/). Also, the repository has [Travis CI](https://docs.travis-ci.com/) enabled, meaning every commit and Pull Request runs the tests in a virtualenv, showing as green checkmarks and red crosses in the PR page.
+The tests are in the `tests/` folder, and can be run with [`pytest`](https://docs.pytest.org/en/latest/). Also, the repository has [Travis CI](https://docs.travis-ci.com/) enabled, meaning every commit and Pull Request runs the tests in a virtualenv, showing as green checkmarks and red crosses in the PR page. These are all the integrations links of the repo:
+
+Travis - Continuous Integration: [repo_page](https://travis-ci.com/hernanbari/pylissom)
+
+Coveralls - Code coverage: [repo_page](https://coveralls.io/github/hernanbari/pylissom)
+
+Scrutinizer - Code health: [repo_page](https://scrutinizer-ci.com/g/hernanbari/pylissom/)
+
+CodeClimate - Maintainability: [repo_page](https://codeclimate.com/github/hernanbari/pylissom)
+
+ReadTheDocs - Documentation: [repo_page](https://readthedocs.org/projects/pylissom/)
 
 For any questions please contact the repo collaborators.
 
