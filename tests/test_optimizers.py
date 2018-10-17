@@ -4,7 +4,7 @@ import numpy as np
 
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 from pylissom.nn.modules import Cortex
-from pylissom.optim import SequentialOptimizer, CortexHebbian, ReducedLissomHebbian, ConnectionDeath, NeighborsDecay
+from pylissom.optim import CortexHebbian, ReducedLissomHebbian, ConnectionDeath, NeighborsDecay
 from pylissom.utils.stimuli import gaussian_generator
 
 
@@ -75,10 +75,6 @@ class TestOptimizers(object):
     """
     Test class for the optim module
     """
-
-    def test_sequential_optimizer(self):
-        pass
-
     def test_cortex_hebbian(self, cortex, learning_rate, gaussian_variable):
         previous_weights = cortex.weight.data.numpy().copy()
         inp = gaussian_variable.data.numpy().copy()
