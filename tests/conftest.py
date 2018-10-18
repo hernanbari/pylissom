@@ -2,9 +2,14 @@ import copy
 
 import pytest
 import torch
+import random
 
-from pylissom.nn.modules import Cortex, PiecewiseSigmoid, ReducedLissom
+from pylissom.datasets import ThreeDotFaces
+from torch.utils.data import DataLoader
+from pylissom.optim import CortexHebbian, ReducedLissomHebbian, SequentialOptimizer
+from pylissom.nn.modules import Cortex, PiecewiseSigmoid, ReducedLissom, LGN, Lissom
 from pylissom.utils.stimuli import gaussian_generator
+from pylissom.utils.training import Pipeline
 
 
 @pytest.fixture(params=[4, 9])
@@ -100,9 +105,9 @@ def inhibitory_strength(request):
 
 @pytest.fixture()
 def rlissom(settling_steps, afferent_strength, excitatory_strength, inhibitory_strength):
-    cortex = Cortex(9, 9, 5, 0.9)
-    cortex2 = Cortex(9, 9, 3, 1.1)
-    cortex3 = Cortex(9, 9, 2, 0.5)
+    cortex = get_dummy_cortex()
+    cortex2 = get_dummy_cortex()
+    cortex3 = get_dummy_cortex()
     return ReducedLissom(afferent_module=cortex, excitatory_module=cortex2, inhibitory_module=cortex3,
                          settling_steps=settling_steps, min_theta=0.2, max_theta=1.1,
                          afferent_strength=afferent_strength, excitatory_strength=excitatory_strength,
