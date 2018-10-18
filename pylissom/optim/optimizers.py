@@ -64,8 +64,13 @@ class CortexHebbian(CortexOptimizer):
         self.handles = register_recursive_input_output_hook(cortex)
 
     def step(self, **kwargs):
-        self._hebbian_learning(self.cortex.weight, self.cortex.input, self.cortex.output,
-                               self.learning_rate, self.cortex.radius)
+        try:
+            self._hebbian_learning(self.cortex.weight, self.cortex.input, self.cortex.output,
+                                   self.learning_rate, self.cortex.radius)
+        except AttributeError:
+            # Called step but cortex was not activated, nothing will be learned
+            pass
+
 
     @staticmethod
     def _hebbian_learning(weights, input, output, learning_rate, radius):
