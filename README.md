@@ -1,10 +1,10 @@
 
-Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)  [![Maintainability](https://api.codeclimate.com/v1/badges/05d5a41d500fcdd8e90d/maintainability)](https://codeclimate.com/github/hernanbari/pylissom/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/hernanbari/pylissom/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/hernanbari/pylissom/?branch=master) <!-- ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master) --> [![codecov](https://codecov.io/gh/hernanbari/pylissom/branch/master/graph/badge.svg)](https://codecov.io/gh/hernanbari/pylissom)
+PyLissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)  [![Maintainability](https://api.codeclimate.com/v1/badges/05d5a41d500fcdd8e90d/maintainability)](https://codeclimate.com/github/hernanbari/pylissom/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/hernanbari/pylissom/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/hernanbari/pylissom/?branch=master) <!-- ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master) --> [![codecov](https://codecov.io/gh/hernanbari/pylissom/branch/master/graph/badge.svg)](https://codecov.io/gh/hernanbari/pylissom)
 ========
 
 The [LISSOM](http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html) family of self-organizing computational models aims to replicate the detailed development of the visual cortex of humans.
 
-Pylissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed as a hybrid use case for the machine learning and the neuroscience communities.
+PyLissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed as a hybrid use case for the machine learning and the neuroscience communities.
 
 
 Getting Started
@@ -24,9 +24,9 @@ The library and API documentation are at: https://pylissom.readthedocs.io/, you 
 Installation
 ------------
 
-You should first install pytorch with conda as explained at: https://pytorch.org/
+You should first install PyTorch with conda as explained at: https://pytorch.org/
 
-Then you can install pylissom by running:
+Then you can install PyLissom by running:
 
     pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pylissom    
     
