@@ -1,5 +1,5 @@
 
-Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)  [![Maintainability](https://api.codeclimate.com/v1/badges/05d5a41d500fcdd8e90d/maintainability)](https://codeclimate.com/github/hernanbari/pylissom/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/hernanbari/pylissom/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/hernanbari/pylissom/?branch=master) <!-- ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master) --> <!-- [![codecov](https://codecov.io/gh/hernanbari/pylissom/branch/master/graph/badge.svg)](https://codecov.io/gh/hernanbari/pylissom) -->
+Pylissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=master)](https://travis-ci.com/hernanbari/pylissom) [![Documentation Status](https://readthedocs.org/projects/pylissom/badge/?version=latest)](https://pylissom.readthedocs.io/en/latest/?badge=latest)  [![Maintainability](https://api.codeclimate.com/v1/badges/05d5a41d500fcdd8e90d/maintainability)](https://codeclimate.com/github/hernanbari/pylissom/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/hernanbari/pylissom/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/hernanbari/pylissom/?branch=master) <!-- ![Coverage Status](https://coveralls.io/repos/github/hernanbari/pylissom/badge.svg?branch=master) --> [![codecov](https://codecov.io/gh/hernanbari/pylissom/branch/master/graph/badge.svg)](https://codecov.io/gh/hernanbari/pylissom)
 ========
 
 ![Lissom](http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif)
@@ -46,7 +46,7 @@ The tests are in the `tests/` folder, and can be run with [`pytest`](https://doc
 
 Travis - Continuous Integration: [repo_page](https://travis-ci.com/hernanbari/pylissom)
 
-Coveralls - Code coverage: [repo_page](https://coveralls.io/github/hernanbari/pylissom)
+Codecov - Code coverage: [repo_page](https://codecov.io/gh/hernanbari/pylissom)
 
 Scrutinizer - Code health: [repo_page](https://scrutinizer-ci.com/g/hernanbari/pylissom/)
 
