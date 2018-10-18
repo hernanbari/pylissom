@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from torch.autograd import Variable
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 
 
 class Pipeline(object):
