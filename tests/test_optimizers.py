@@ -1,14 +1,8 @@
 import numpy as np
-import pytest
 import torch
 
 from pylissom.nn.functional.weights import apply_circular_mask_to_weights
 from pylissom.optim import CortexHebbian
-
-
-@pytest.fixture(params=[0.1, 0.2])
-def learning_rate(request):
-    return request.param
 
 
 class TestOptimizers(object):

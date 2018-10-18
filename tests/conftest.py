@@ -109,5 +109,64 @@ def rlissom(settling_steps, afferent_strength, excitatory_strength, inhibitory_s
                          inhibitory_strength=inhibitory_strength)
 
 
+def get_dummy_cortex():
+    radius = int(random.uniform(1, 5))
+    sigma = random.uniform(0.5, 1.1)
+    return Cortex(9, 9, radius, sigma)
+
+
+def get_dummy_cortex_hebbian(cortex):
+    learning_rate = random.uniform(0, 3.5)
+    return CortexHebbian(cortex, learning_rate)
+
+
+def get_dummy_lgn(on=False):
+    radius = int(random.uniform(1, 5))
+    sigma_center = random.uniform(0.5, 1.1)
+    sigma_surround = random.uniform(1, 1.7)
+    min_theta = random.uniform(0, 1.5)
+    max_theta = random.uniform(0, 1.5)
+    strength = random.uniform(0, 3.5)
+    return LGN(9, 9, on, radius, sigma_surround, sigma_center, min_theta, max_theta, strength)
+
+
+def get_dummy_rlissom():
+    settling_steps = int(random.uniform(0, 3))
+    afferent_strength = random.uniform(0, 3.5)
+    excitatory_strength = random.uniform(0, 3.5)
+    inhibitory_strength = random.uniform(0, 3.5)
+    min_theta = random.uniform(0, 1.5)
+    max_theta = random.uniform(0, 1.5)
+    cortex = get_dummy_cortex()
+    cortex2 = get_dummy_cortex()
+    cortex3 = get_dummy_cortex()
+    return ReducedLissom(afferent_module=cortex, excitatory_module=cortex2, inhibitory_module=cortex3,
+                         settling_steps=settling_steps, min_theta=min_theta, max_theta=max_theta,
+                         afferent_strength=afferent_strength, excitatory_strength=excitatory_strength,
+                         inhibitory_strength=inhibitory_strength)
+
+
+def get_dummy_rlissom_hebbian(rlissom):
+    return SequentialOptimizer(get_dummy_cortex_hebbian(rlissom.afferent_module),
+                               get_dummy_cortex_hebbian(rlissom.inhibitory_module),
+                               get_dummy_cortex_hebbian(rlissom.excitatory_module))
+
+
+def get_dummy_lissom():
+    rlissom = get_dummy_rlissom()
+    on = get_dummy_lgn(on=True)
+    off = get_dummy_lgn(on=False)
+    return Lissom(on, off, rlissom)
+
+
+def get_dummy_lissom_hebbian(lissom):
+    return get_dummy_rlissom_hebbian(lissom.v1)
+
+
 def copy_module(m):
     return copy.deepcopy(m)
+
+
+@pytest.fixture(params=[0.1, 0.2])
+def learning_rate(request):
+    return request.param
