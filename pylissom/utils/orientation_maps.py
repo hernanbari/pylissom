@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from skimage.transform import rotate
-from tqdm import tqdm, tqdm_notebook
 
 from pylissom.utils.stimuli import translate, generate_horizontal_bar
 from pylissom.utils.training.pipeline import Pipeline
@@ -21,11 +20,10 @@ class OrientationMap(object):
         self.use_tqdm_notebook = use_tqdm_notebook
         self.model = model
         self.inputs = inputs
-        self.tqdm = tqdm_notebook if self.use_tqdm_notebook else tqdm
 
     def maximum_activations(self, model, inputs):
         activations = []
-        for inp in self.tqdm(inputs):
+        for inp in inputs:
             inp = Pipeline.process_input(inp)
             act = model(inp)
             activations.append(act)
