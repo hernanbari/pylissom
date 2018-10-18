@@ -4,7 +4,7 @@ PyLissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=m
 
 The [LISSOM](http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html) family of self-organizing computational models aims to replicate the detailed development of the visual cortex of humans.
 
-PyLissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed as a hybrid use case for the machine learning and the neuroscience communities.
+PyLissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of the LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed for a hybrid use case of the machine learning and the neuroscience communities.
 
 
 Getting Started
