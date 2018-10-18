@@ -175,3 +175,21 @@ def copy_module(m):
 @pytest.fixture(params=[0.1, 0.2])
 def learning_rate(request):
     return request.param
+
+
+def get_dummy_pipeline(model, optimizer):
+    return Pipeline(model, optimizer)
+
+
+def get_dummy_data_loader(size):
+    gaussians_inputs = ThreeDotFaces(size=size, length=10)
+    return DataLoader(gaussians_inputs, shuffle=True, pin_memory=False)
+
+
+def get_dummy_trained_lissom():
+    model = get_dummy_lissom()
+    optimizer = get_dummy_lissom_hebbian(model)
+    train_loader = get_dummy_data_loader(int(model.in_features**0.5))
+    pipe = get_dummy_pipeline(model, optimizer)
+    pipe.train(train_loader, epoch=0)
+    return model
