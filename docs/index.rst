@@ -6,17 +6,9 @@
 Pylissom documentation
 ======================
 
-.. image:: http://homepages.inf.ed.ac.uk/jbednar/images/000506_or_map_128MB.RF-LISSOM.anim.gif
+The `LISSOM <http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html>`_ family of self-organizing computational models aims to replicate the detailed development of the visual cortex of humans.
 
-Pylissom is a Pytorch extension implementing the LISSOM network and other tools, based in the Topographica framework.
-
-It's split in two parts, the core nn and optim packages, which implement the network itself,
- and the datasets, models and utils packages, that consist of a researcher's toolkit akin to Topographica features.
-
-`LISSOM <http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html>`_ is a model of human neocortex (mainly modeled on visual cortex) at a neural column level. The model was developed by Bednar, Choe, Miikkulainen, and Sirosh, at the University of Texas
-
-`Topographica <http://ioam.github.io/topographica/index.html>`_ is an old software package for computational modeling of neural maps, developed by the the same team of LISSOM. The goal is to help researchers understand brain function at the level of the topographic maps that make up sensory and motor systems, but became outdated over the years.
-
+Pylissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by `Topographica <http://ioam.github.io/topographica/index.html>`_, a former implementation of LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed as a hybrid use case for the machine learning and the neuroscience communities.
 
 
 
@@ -39,7 +31,7 @@ It's split in two parts, the core nn and optim packages, which implement the net
 Getting Started
 ---------------
 
-There is an UML class diagram for reference at the end of this page. And for hands-on examples there are jupyter notebooks at the `github's page <https://github.com/hernanbari/pylissom>`_. If Github is not rendering them, we leave these links at your disposal:
+There is an UML class diagram for reference at the end of this page. For hands-on examples there are jupyter notebooks at the `github's page <https://github.com/hernanbari/pylissom>`_. If Github is not rendering them, we leave these links at your disposal:
 
 `Linear modules <https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb>`_
 
