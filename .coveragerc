@@ -1,0 +1,6 @@
+[run]
+omit =
+    pylissom/utils/training/cross_validation.py
+    pylissom/utils/training/grid_search.py
+    pylissom/datasets/*
+    pylissom/utils/plotting/*
