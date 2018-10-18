@@ -23,9 +23,10 @@ install:
 
   - pip install --upgrade pip
   - pip install . --progress-bar off
-  - pip install pytest pytest-cov coveralls
+  - pip install pytest pytest-cov coveralls codecov
 # command to run tests
 script:
   - pytest . --cov pylissom
 after_success:
   - coveralls
+  - codecov
