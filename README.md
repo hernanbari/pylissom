@@ -18,9 +18,9 @@ The library and API documentation are at: https://pylissom.readthedocs.io/, you 
 
 [Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Linear_modules.ipynb)
 
-[Orientation_maps_and_tools](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Optimizers.ipynb)
+[Optimizers](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Optimizers.ipynb)
 
-[Orientation Maps](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb)
+[Orientation Maps and pylissom tools](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb)
 
 
 Installation
