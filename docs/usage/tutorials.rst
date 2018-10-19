@@ -10,4 +10,4 @@ There are Jupyter notebooks with tutorials at the `github's page <https://github
 
 `Optimizers <https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Optimizers.ipynb>`_
 
-`Orientation Maps <https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb>`_
+`Orientation Maps and pylissom tools <https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb>`_
