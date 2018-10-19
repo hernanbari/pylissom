@@ -4,7 +4,9 @@ PyLissom [![Build Status](https://travis-ci.com/hernanbari/pylissom.svg?branch=m
 
 The [LISSOM](http://homepages.inf.ed.ac.uk/jbednar/rflissom_small.html) family of self-organizing computational models aims to replicate the detailed development of the visual cortex of humans.
 
-PyLissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of the LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed for a hybrid use case of the machine learning and the neuroscience communities.
+PyLissom is a Pytorch extension implementing the LISSOM networks. It's split in two parts: the core nn and optim packages, which implement the LISSOM network itself, and the datasets, models, and utils packages. 
+
+Some of the datasets, models and utils of PyLissom were inspired by [Topographica](http://ioam.github.io/topographica/index.html), a former implementation of the LISSOM networks oriented in its design to the neuroscience community. Instead, PyLissom was designed for a hybrid use case of the machine learning and the neuroscience communities.
 
 
 Getting Started
@@ -12,13 +14,13 @@ Getting Started
 
 The library and API documentation are at: https://pylissom.readthedocs.io/, you should check it out for a high level overview. There is an UML class diagram for reference. For hands-on examples there are jupyter notebooks at `notebooks/`. If Github is not rendering them, we leave these links at your disposal:
 
-[Lissom modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_lissom_modules.ipynb)
+[Lissom modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Lissom_modules.ipynb)
 
-[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Tests_simple_modules.ipynb)
+[Linear modules](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Linear_modules.ipynb)
 
-[Optimizers](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Test_optimizers.ipynb)
+[Orientation_maps_and_tools](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Optimizers.ipynb)
 
-[Orientation Maps](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_preferences.ipynb)
+[Orientation Maps](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb)
 
 
 Installation
