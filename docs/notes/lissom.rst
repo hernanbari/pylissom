@@ -258,7 +258,7 @@ photoreceptor cell (x, y) is calculated according to:
 
 .. math:: \chi_{xy} = \max_{k} \exp (-\frac{(x-x_{c,k})^2+(y-y_{c,k})^2}{\sigma^2_u})
 
- where :math:`(x_{c,k},y_{c,k})` specifies the center of Gaussian
+where :math:`(x_{c,k},y_{c,k})` specifies the center of Gaussian
 :math:`k` and :math:`\sigma_u` its width. At each iteration,
 :math:`x_{c,k}` and :math:`y{c,k}` are chosen randomly within the
 retinal area; :math:`\sigma_u` is usually constant.
