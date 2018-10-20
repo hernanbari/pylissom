@@ -181,13 +181,13 @@ compare the model with experimental results.
 
    \centering
 
-.. figure:: LGNon.png
+.. figure:: images/LGNon.png
    :alt: ON neuron
    :name: fig:1
 
    ON neuron
 
-.. figure:: LGNoff.png
+.. figure:: images/LGNoff.png
    :alt: OFF neuron
    :name: fig:2
 
@@ -384,7 +384,7 @@ stimulation :math:`s` with lateral excitation and inhibition:
    \label{fig:steptcorticalactivation}
    \eta_{ij}(t) = \sigma \left(s_{ij} + \gamma_E\sum_{kl} \eta_{kl}(t-1)E_{kl,ij} - \gamma_I\sum_{kl} \eta_{kl}(t-1)I_{kl,ij}\right)
 
- where :math:`\eta_{kl}(t - 1)` is the activity of another cortical
+where :math:`\eta_{kl}(t - 1)` is the activity of another cortical
 neuron (k, l) during the previous time step, :math:`E_{kl,ij}` is the
 excitatory lateral connection weight on the connection from that neuron
 to neuron (i, j), and :math:`I_{kl,ij}` is the inhibitory connection
