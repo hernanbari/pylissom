@@ -66,7 +66,7 @@ The LISSOM model
 
    \centering
 
-.. figure:: architecture_lissom
+.. figure:: images/architecture_lissom.png
    :alt: **Basic LISSOM model of the primary visual cortex.** The core
    of the LISSOM model consists of a two-dimensional array of
    computational units representing columns in V1. These units receive
@@ -227,7 +227,7 @@ in the cortex.
 
    \centering
 
-.. figure:: v1_neurons
+.. figure:: images/v1_neurons.png
    :alt: **Initial V1 afferent and lateral weights.** The initial
    incoming weights of a sample neuron at the center of V1 are plotted
    in gray-scale coding from white to black (low to high).
@@ -267,7 +267,7 @@ retinal area; :math:`\sigma_u` is usually constant.
 
    \centering
 
-.. figure:: activation_lissom
+.. figure:: images/activation_lissom.png
    :alt: **Example input and response.** At each self-organization
    iteration in LISSOM, the photoreceptors in the retina are activated
    with two unoriented Gaussians.
@@ -334,7 +334,7 @@ enforced by the activation function.
 
    \centering
 
-.. figure:: sigmoid_activation
+.. figure:: images/sigmoid_activation.png
    :alt: **Neuron activation function :math:`\sigma(s)`.** The neuron
    requires an input as large as the threshold :math:`\sigma_l` before
    responding, and saturates at the ceiling :math:`\sigma_u`. The output
