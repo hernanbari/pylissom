@@ -20,6 +20,12 @@ PyLissom is a PyTorch extension implementing the LISSOM networks. It's split in 
    usage/tutorials
    usage/design
 
+.. toctree::
+   :caption: notes
+   :maxdepth: 1
+   
+   notes/visual_cortex.html
+   
 .. toctree::   
    :caption: Package Reference
    :maxdepth: 1
