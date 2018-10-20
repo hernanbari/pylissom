@@ -40,12 +40,11 @@ over dark, or vice versa, being called ON or OFF cells.
 
 
 .. figure:: images/oncell.png
-    :align: center
-    :alt: alternate text
-
+   :align: center
+   :alt: alternate text   
+   
    **ON cell in retina or LGN**
- 
- 
+   
 .. figure:: images/offcell.png
    :align: center
    :alt: alternate text   
@@ -70,19 +69,16 @@ direction of movement, color combinations(such as red/green or
 blue/yellow borders), disparity (relative positions on the two retinas),
 etc.
 
-.. figure:: V1Cell.png
-   :alt: **Receptive field in V1.** Starting in V1, most cells in
+.. figure:: images/V1Cell.png
+   :align: center
+   :alt: alternate text   
+   
+   **Receptive field in V1.** Starting in V1, most cells in
    primates have orientation-selective RFs. The V1 RFs can be classified
    into a few basic spatial types. The figure shows a two-lobe
    arrangement, favoring a :math:`45^\circ` edge with dark in the upper
    left and light in the lower right
-   :name: fig:v1cell
-
-   **Receptive field in V1.** Starting in V1, most cells in primates
-   have orientation-selective RFs. The V1 RFs can be classified into a
-   few basic spatial types. The figure shows a two-lobe arrangement,
-   favoring a :math:`45^\circ` edge with dark in the upper left and
-   light in the lower right
+   
 
 At a given location on the cortical sheet, the neurons in a vertical
 section through the cortex respond most strongly to the same eye of
@@ -111,18 +107,9 @@ location represented by different but nearby orientation-selective
 cells. The figure below displays an example orientation map from monkey
 cortex.
 
-.. raw:: latex
-
-   \centering
-
-.. figure:: Visual_map.jpg
-   :alt: **Orientation map in the macaque.** Orientation preference map
-   observed in area V1 of macaque monkey. Each neuron is colored
-   according to the orientation it prefers, using the color key on the
-   right. Nearby neurons in the map generally prefer similar
-   orientations, forming groups of the same color called iso-orientation
-   patches. Scale bar = 1 mm.
-   :name: fig:ormap
+.. figure:: images/Visual_map.jpg
+   :align: center
+   :alt: alternate text 
 
    **Orientation map in the macaque.** Orientation preference map
    observed in area V1 of macaque monkey. Each neuron is colored
