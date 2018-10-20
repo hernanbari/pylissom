@@ -1,3 +1,5 @@
+.. _nn_module:
+
 pylissom.nn.modules
 ===========================
 

@@ -1,3 +1,5 @@
+.. _plotting:
+
 pylissom.utils.plotting
 ===============================
 

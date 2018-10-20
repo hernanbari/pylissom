@@ -25,6 +25,8 @@ pylissom.utils.orientation\_maps module
     :undoc-members:
     :show-inheritance:
 
+.. _stimuli:
+
 pylissom.utils.stimuli module
 -----------------------------
 

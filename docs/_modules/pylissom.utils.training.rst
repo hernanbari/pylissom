@@ -1,3 +1,5 @@
+.. _training:
+
 pylissom.utils.training
 ===============================
 
@@ -24,6 +26,8 @@ pylissom.utils.training.grid\_search module
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. _pipeline:
 
 pylissom.utils.training.pipeline module
 ---------------------------------------

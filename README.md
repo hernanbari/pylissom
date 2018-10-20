@@ -23,6 +23,21 @@ The library and API documentation are at: https://pylissom.readthedocs.io/, you 
 [Orientation Maps and pylissom tools](https://nbviewer.jupyter.org/github/hernanbari/pylissom/blob/master/notebooks/Orientation_maps_and_tools.ipynb)
 
 
+The main features provided by **pylissom** are:
+
+- LISSOM's activation
+
+- LISSOM's hebbian learning mechanism and others
+
+- Configuration and model building tools
+
+- Common Guassian stimuli for LISSOM experiments
+
+- Plotting helpers
+
+- Training pipeline objects
+
+
 Installation
 ------------
 
