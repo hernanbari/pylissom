@@ -117,3 +117,11 @@ cortex.
    right. Nearby neurons in the map generally prefer similar
    orientations, forming groups of the same color called iso-orientation
    patches. Scale bar = 1 mm.
+   
+   
+:math:`\alpha > \beta`
+   
+.. math::
+
+n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+   
