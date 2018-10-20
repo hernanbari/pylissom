@@ -8,7 +8,7 @@ Lissom
 ======
 
 *The LISSOM model focuses on V1 and the structures to which it connects.
-This chapter explains the key concepts of the LISSOM networks: its
+This note explains the key concepts of the LISSOM networks: its
 architecture, activation and learning rule.*
 
 LISSOM principles
