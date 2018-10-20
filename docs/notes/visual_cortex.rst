@@ -24,9 +24,7 @@ different higher cortical areas, including areas that underlie object
 and face processing.
    
 .. figure:: images/visual_pathways.png
-    :width: 200px
     :align: center
-    :height: 100px
     :alt: alternate text
     :figclass: align-center
 
