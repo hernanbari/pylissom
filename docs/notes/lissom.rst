@@ -290,7 +290,7 @@ More precisely, the response :math:`\xi_{ab}` of ON or OFF-center cell
    \label{fig:lgnactivation}
    \xi_{ab} = \sigma(\gamma_L \sum_{xy}\chi_{xy}L_{xy,ab})
 
- where :math:`X_{xy}` is the activation of cell :math:`(x, y)` in the
+where :math:`X_{xy}` is the activation of cell :math:`(x, y)` in the
 receptive field of :math:`(a, b)`, :math:`L_{xy,ab}` is the afferent
 weight from :math:`(x, y)` to :math:`(a, b)`, and :math:`\gamma_L` is a
 constant scaling factor. The squashing function :math:`\sigma(\cdot)` ()
@@ -365,7 +365,7 @@ sum of activations in its receptive fields on the LGN:
    \label{fig:corticalactivation}
    s_{ij} = \gamma_A\left(\sum_{ab \in \,ON} \xi_{ab}A_{ab,ij} + \sum_{ab \in \,OFF} \xi_{ab}A_{ab,ij}\right)
 
- where :math:`\xi_{ab}` is the activation of neuron (a, b) in the
+where :math:`\xi_{ab}` is the activation of neuron (a, b) in the
 receptive field of neuron (i, j) in the ON or OFF channels,
 :math:`A_{ab,ij}` is the corresponding afferent weight, and
 :math:`\gamma_A` is a constant scaling factor. The afferent stimulation
@@ -425,7 +425,7 @@ according to the same biologically motivated mechanism: the Hebb rule
    \label{fig:hebbianrule}
        w'_{pq,ij} = \frac{w_{pq,ij} + \alpha X_{pq}\eta_{ij}}{\sum_{uv}(w_{uv,ij} + \alpha X_{uv}\eta_{ij})}
 
- where :math:`w_{pq,ij}` is the current afferent or lateral connection
+where :math:`w_{pq,ij}` is the current afferent or lateral connection
 weight (either :math:`A`, :math:`E` or :math:`I`) from (p, q) to (i, j),
 :math:`w'_{pq,ij}` is the new weight to be used until the end of the
 next settling process, :math:`\alpha` is the learning rate for each type
