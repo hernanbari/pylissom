@@ -62,23 +62,10 @@ plasticity, and function of the primary visual cortex.
 The LISSOM model
 ----------------
 
-.. raw:: latex
-
-   \centering
-
 .. figure:: images/architecture_lissom.png
-   :alt: **Basic LISSOM model of the primary visual cortex.** The core
-   of the LISSOM model consists of a two-dimensional array of
-   computational units representing columns in V1. These units receive
-   input from the retinal receptors through the ON/OFF channels of the
-   LGN, and from other columns in V1 through lateral connections. The
-   solid circles and lines delineate the receptive fields of two sample
-   units in the LGN and one in V1, and the dashed circle in V1 outlines
-   the lateral connections of the V1 unit. The LGN and V1 activation in
-   response to a sample input on the retina is displayed in gray-scale
-   coding from white to black (low to high).
-   :name: fig:architecturelissom
-
+   :align: center
+   :alt: alternate text   
+   
    **Basic LISSOM model of the primary visual cortex.** The core of the
    LISSOM model consists of a two-dimensional array of computational
    units representing columns in V1. These units receive input from the
@@ -91,8 +78,7 @@ The LISSOM model
    white to black (low to high).
 
 The V1 network in LISSOM is a sheet of N x N interconnected
-computational units, or “neurons” (Fig.
-`1.1 <#fig:architecturelissom>`__). Because the focus is on the
+computational units, or “neurons”. Because the focus is on the
 two-dimensional organization of the cortex, each neuron in V1
 corresponds to a vertical column of cells through the six layers of the
 biological cortex. This columnar organization helps make the problem of
@@ -223,16 +209,10 @@ center–surround pattern is crucial for self-organization, and
 approximates the lateral interactions that take place at high contrasts
 in the cortex.
 
-.. raw:: latex
-
-   \centering
-
 .. figure:: images/v1_neurons.png
-   :alt: **Initial V1 afferent and lateral weights.** The initial
-   incoming weights of a sample neuron at the center of V1 are plotted
-   in gray-scale coding from white to black (low to high).
-   :name: fig:v1neurons
-
+   :align: center
+   :alt: alternate text 
+   
    **Initial V1 afferent and lateral weights.** The initial incoming
    weights of a sample neuron at the center of V1 are plotted in
    gray-scale coding from white to black (low to high).
@@ -263,16 +243,11 @@ where :math:`(x_{c,k},y_{c,k})` specifies the center of Gaussian
 :math:`x_{c,k}` and :math:`y{c,k}` are chosen randomly within the
 retinal area; :math:`\sigma_u` is usually constant.
 
-.. raw:: latex
-
-   \centering
 
 .. figure:: images/activation_lissom.png
-   :alt: **Example input and response.** At each self-organization
-   iteration in LISSOM, the photoreceptors in the retina are activated
-   with two unoriented Gaussians.
-   :name: fig:activationlissom
-
+   :align: center
+   :alt: alternate text 
+   
    **Example input and response.** At each self-organization iteration
    in LISSOM, the photoreceptors in the retina are activated with two
    unoriented Gaussians.
@@ -330,18 +305,10 @@ are used as input to the model. Overall, the LGN neurons respond to
 image contrast, subject to the minimum and maximum activity values
 enforced by the activation function.
 
-.. raw:: latex
-
-   \centering
-
 .. figure:: images/sigmoid_activation.png
-   :alt: **Neuron activation function :math:`\sigma(s)`.** The neuron
-   requires an input as large as the threshold :math:`\sigma_l` before
-   responding, and saturates at the ceiling :math:`\sigma_u`. The output
-   activation values are limited to [0..1]. This activation function is
-   an efficient approximation of the logistic (sigmoid) function.
-   :name: fig:sigmoidactivation
-
+   :align: center
+   :alt: alternate text 
+   
    **Neuron activation function :math:`\sigma(s)`.** The neuron requires
    an input as large as the threshold :math:`\sigma_l` before
    responding, and saturates at the ceiling :math:`\sigma_u`. The output
