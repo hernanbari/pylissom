@@ -204,7 +204,7 @@ lateral excitation should be comparable to the activity correlations in
 the input. Lateral inhibitory connections extend in a larger radius, and
 also include connections from the neuron itself and from its neighbors.
 The range of lateral inhibition may vary as long as it is greater than
-the excitatory radius (Fig. `1.4 <#fig:v1neurons>`__). This overall
+the excitatory radius. This overall
 center–surround pattern is crucial for self-organization, and
 approximates the lateral interactions that take place at high contrasts
 in the cortex.
